@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import api from '@/services/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -64,9 +65,9 @@ export function AuthProvider({ children }) {
         throw new Error("No Google token received");
       }
 
-      // Hit our new Node Express backend Auth endpoint
-      const res = await axios.post(`${API_URL}/auth/google`, {
-        token: credentialResponse.credential, // the encoded ID token
+      // Hit our new Node Express backend Auth endpoint using the centralized API service
+      const res = await api.post('/auth/google', {
+        credential: credentialResponse.credential, // the encoded ID token
       });
 
       // Backend returns the populated user + JWT

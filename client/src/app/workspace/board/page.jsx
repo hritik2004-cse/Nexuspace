@@ -5,9 +5,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { FiClock, FiUser, FiPlus, FiTrash2, FiEdit2, FiX } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import api from '@/services/api';
 
 const initialBoardState = {
   columns: {
@@ -23,7 +21,7 @@ export default function KanbanBoard() {
   const [boardData, setBoardData] = useState(initialBoardState);
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -35,7 +33,7 @@ export default function KanbanBoard() {
   const [editTaskDesc, setEditTaskDesc] = useState('');
   const [editTaskDueDate, setEditTaskDueDate] = useState('');
 
-  const boardId = 'main_workspace'; // Mock workspace ID for now
+  const boardId = '660d2b4f9e31d4b68c34f2a1'; // Standardized to an ObjectId string for testing or dynamic logic
 
   useEffect(() => {
     setMounted(true);
@@ -45,8 +43,8 @@ export default function KanbanBoard() {
   useEffect(() => {
     if (!socket || !mounted) return;
 
-    // Join the board room
-    socket.emit('join_channel', boardId);
+    // Join the workspace room (sync with backend workspaceSocket.js)
+    socket.emit('join_workspace', boardId);
 
     const handleBoardUpdate = (data) => {
       if (data.action === 'create') {
@@ -62,7 +60,7 @@ export default function KanbanBoard() {
 
     return () => {
       socket.off('receive_board_update', handleBoardUpdate);
-      socket.emit('leave_channel', boardId);
+      socket.emit('leave_workspace', boardId);
     };
   }, [socket, mounted]);
 
@@ -90,10 +88,7 @@ export default function KanbanBoard() {
 
   const fetchTasks = async () => {
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      const res = await axios.get(`${API_URL}/tasks/workspace/${boardId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(`/tasks/${boardId}`);
       setTasks(res.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -105,20 +100,15 @@ export default function KanbanBoard() {
     if (!newTaskTitle.trim()) return;
 
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      const res = await axios.post(`${API_URL}/tasks`, {
+      const res = await api.post('/tasks', {
         title: newTaskTitle,
         description: newTaskDesc,
         status: 'todo',
-        assignee: user?.username || user?.name || 'Unassigned',
+        assignee: user?._id || user?.id, // Send the ACTUAL ObjectId/ID string
         dueDate: newTaskDueDate || 'No limit',
         boardId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       
-      // State is updated via socket, but we can do an optimistic append too.
-      // setTasks(prev => [res.data, ...prev]);
       setIsModalOpen(false);
       setNewTaskTitle('');
       setNewTaskDesc('');
@@ -130,11 +120,7 @@ export default function KanbanBoard() {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      await axios.delete(`${API_URL}/tasks/${taskId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // setTasks(prev => prev.filter(t => t._id !== taskId)); // Managed by socket
+      await api.delete(`/tasks/${taskId}`);
     } catch (error) {
       console.error("Error deleting task:", error);
     }
@@ -142,12 +128,11 @@ export default function KanbanBoard() {
 
   const handleEditSubmit = async (taskId) => {
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      await axios.put(`${API_URL}/tasks/${taskId}`, {
+      await api.put(`/tasks/${taskId}`, {
         title: editTaskTitle,
         description: editTaskDesc,
         dueDate: editTaskDueDate
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       setEditingTaskId(null);
     } catch (error) {
       console.error("Error updating task:", error);
