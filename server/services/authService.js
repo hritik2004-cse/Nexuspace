@@ -10,6 +10,22 @@ const generateToken = (id) => {
   });
 };
 
+const generateUniqueUsername = async (baseName) => {
+  let username = baseName.toLowerCase().replace(/\s+/g, '_');
+  let exists = await User.findOne({ username });
+  
+  if (!exists) return username;
+
+  // If exists, append random characters
+  while (exists) {
+    const suffix = Math.random().toString(36).substring(2, 6);
+    username = `${baseName.toLowerCase().replace(/\s+/g, '_')}_${suffix}`;
+    exists = await User.findOne({ username });
+  }
+  
+  return username;
+};
+
 const googleLoginService = async (credential) => {
   const ticket = await client.verifyIdToken({
     idToken: credential,
@@ -22,9 +38,11 @@ const googleLoginService = async (credential) => {
   let user = await User.findOne({ email });
 
   if (!user) {
+    const username = await generateUniqueUsername(name);
     user = await User.create({
       googleId: sub,
       name,
+      username,
       email,
       avatar: picture,
       provider: 'google',
@@ -36,6 +54,7 @@ const googleLoginService = async (credential) => {
   return {
     _id: user._id,
     name: user.name,
+    username: user.username,
     email: user.email,
     avatar: user.avatar,
     role: user.role,

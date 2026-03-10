@@ -26,6 +26,16 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
 
   const commonReactions = ['👍', '❤️', '😂', '🎉'];
 
+  if (message.isSystem) {
+    return (
+      <div className="flex justify-center w-full mb-6">
+        <div className="bg-slate-800/40 border border-slate-700/50 text-slate-400 text-xs font-medium px-4 py-1.5 rounded-full backdrop-blur-sm shadow-sm">
+          {message.content}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}

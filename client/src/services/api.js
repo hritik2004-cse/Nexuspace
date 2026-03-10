@@ -39,11 +39,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const isAuthRoute = error.config?.url?.includes('/auth');
+
+    if (error.response && error.response.status === 401 && !isAuthRoute) {
       // Auto-logout the user if the token is invalid or expired
-      localStorage.removeItem('nexuspace_user');
-      // In Next.js App Router, using window.location inside a utility is a way to force redirect outside of a component
       if (typeof window !== 'undefined') {
+        localStorage.removeItem('nexuspace_user');
+        localStorage.removeItem('nexuspace_token');
         window.location.href = '/login';
       }
     }

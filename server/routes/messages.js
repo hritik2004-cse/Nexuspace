@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getMessages, createMessage, reactToMessage, togglePinMessage } = require('../controllers/messageController');
-const { protect, admin } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/:channelId', protect, getMessages);
 router.post('/', protect, createMessage);

@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows nulls for old users while enforcing uniqueness for new ones
+  },
   password: {
     type: String,
     // Not required because Google OAuth users won't have a password
