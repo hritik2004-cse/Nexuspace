@@ -16,7 +16,7 @@ validateEnv();
 const app = express();
 const server = http.createServer(app);
 
-// 3. Connect to MongoDB
+// 3. Connect to MongoDB (Don't await to unblock server startup)
 connectDB();
 
 // 4. Global Middleware

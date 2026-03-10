@@ -16,9 +16,7 @@ export const metadata = {
   description: "A professional real-time collaboration platform for teams, featuring workspaces, tasks, and chat.",
 };
 
-import { AuthProvider } from '@/context/AuthContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Providers } from '@/components/Providers';
 
 export default function RootLayout({ children }) {
   return (
@@ -26,13 +24,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'development_mock_id'}>
-          <AuthProvider>
-            <ProtectedRoute>
-              {children}
-            </ProtectedRoute>
-          </AuthProvider>
-        </GoogleOAuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
