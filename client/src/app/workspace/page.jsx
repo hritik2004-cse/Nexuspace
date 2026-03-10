@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import axios from 'axios';
+import api from '@/services/api';
 import ChatWindow from '@/components/ChatWindow';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
@@ -13,32 +13,27 @@ export default function WorkspacePage() {
   const searchParams = useSearchParams();
   const currentChannel = searchParams.get('channel') || 'general';
   
-  const currentUser = user?.username || user?.name || "User"; 
+  // Prioritize Name for Google Users as requested
+  const currentUser = user?.name || user?.username || "User"; 
   
   const [messages, setMessages] = useState([]);
   const [channelId, setChannelId] = useState(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   // Fetch Channel and Messages
   useEffect(() => {
     const fetchChannelData = async () => {
       try {
-        const token = localStorage.getItem('nexuspace_token');
-        if (!token) return;
-
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        
-        // 1. Get or Create Channel by Name
-        const channelRes = await axios.post(`${API_URL}/channels/findOrCreate`, { name: currentChannel }, config);
+        // 1. Get or Create Channel by Name (Using central api service)
+        const channelRes = await api.post('/channels/findOrCreate', { name: currentChannel });
         setChannelId(channelRes.data._id);
 
         // 2. Fetch Messages for this Channel
-        const msgRes = await axios.get(`${API_URL}/messages/${channelRes.data._id}`, config);
+        const msgRes = await api.get(`/messages/${channelRes.data._id}`);
         // Map backend sender object to string format matching the frontend for now
         const parsedMessages = msgRes.data.map(m => ({
           ...m,
           id: m._id,
-          sender: m.sender?.username || m.sender?.name || 'Unknown',
+          sender: m.sender?.name || m.sender?.username || 'Unknown',
           senderDetails: m.sender
         }));
         
@@ -48,8 +43,10 @@ export default function WorkspacePage() {
       }
     };
 
-    fetchChannelData();
-  }, [currentChannel]);
+    if (user) {
+      fetchChannelData();
+    }
+  }, [currentChannel, user]);
 
   // Handle Real-time Socket Events
   useEffect(() => {
@@ -102,9 +99,6 @@ export default function WorkspacePage() {
     if (!channelId) return;
 
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
       const payload = {
         content,
         channelId,
@@ -112,12 +106,12 @@ export default function WorkspacePage() {
       };
 
       // The backend posts it to DB, then socket broadcasts it to others
-      const res = await axios.post(`${API_URL}/messages`, payload, config);
+      const res = await api.post('/messages', payload);
       
       const formatted = {
         ...res.data,
         id: res.data._id,
-        sender: res.data.sender?.username || res.data.sender?.name || 'Unknown',
+        sender: res.data.sender?.name || res.data.sender?.username || 'Unknown',
         senderDetails: res.data.sender
       };
 
@@ -138,10 +132,7 @@ export default function WorkspacePage() {
 
   const handleReactToMessage = async (id, emoji) => {
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      const res = await axios.put(`${API_URL}/messages/${id}/react`, { emoji }, config);
+      const res = await api.put(`/messages/${id}/react`, { emoji });
       
       // Update locally
       setMessages((prev) => prev.map(m => {
@@ -166,10 +157,7 @@ export default function WorkspacePage() {
 
   const handlePinMessage = async (id) => {
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      const res = await axios.put(`${API_URL}/messages/${id}/pin`, {}, config);
+      const res = await api.put(`/messages/${id}/pin`, {});
       
       // Update locally
       setMessages((prev) => prev.map(m => {

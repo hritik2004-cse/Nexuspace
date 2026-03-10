@@ -13,14 +13,19 @@ const api = axios.create({
 // Add a request interceptor to attach the auth token to every request
 api.interceptors.request.use(
   (config) => {
-    // We check localStorage for the user object or a specific token
-    const storedUser = localStorage.getItem('nexuspace_user');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      // Assuming your backend expects a Bearer token.
-      // In a real app, you might store just the token as 'nexuspace_token'
-      if (user.token) {
-        config.headers.Authorization = `Bearer ${user.token}`;
+    // Check for the standalone token first
+    const token = localStorage.getItem('nexuspace_token');
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Fallback for older sessions stored inside the user object
+      const storedUser = localStorage.getItem('nexuspace_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        if (user.token) {
+          config.headers.Authorization = `Bearer ${user.token}`;
+        }
       }
     }
     return config;
