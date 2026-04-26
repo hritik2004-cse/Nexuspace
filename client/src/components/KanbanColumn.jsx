@@ -1,12 +1,12 @@
 "use client";
 
-import { Droppable } from 'react-beautiful-dnd';
+import { Droppable } from '@hello-pangea/dnd';
 import TaskCard from './TaskCard';
 import { FiPlus } from 'react-icons/fi';
 
 export default function KanbanColumn({ column, tasks }) {
   return (
-    <div className="flex flex-col w-80 flex-shrink-0 bg-slate-900/50 rounded-xl border border-slate-800 h-full max-h-full">
+    <div className="flex flex-col w-80 shrink-0 bg-slate-900/50 rounded-xl border border-slate-800 h-full max-h-full">
       {/* Column Header */}
       <div className="p-4 border-b border-slate-800 flex justify-between items-center group">
         <h3 className="font-bold text-sm text-slate-200 tracking-wide flex items-center gap-2">

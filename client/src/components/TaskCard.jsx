@@ -1,7 +1,7 @@
 "use client";
 
 import { FiMoreHorizontal, FiCalendar, FiClock } from 'react-icons/fi';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 
 export default function TaskCard({ task, index }) {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   FiClock,
   FiUser,
@@ -73,7 +73,7 @@ export default function KanbanBoard() {
     };
   }, [socket, mounted]);
 
-  // Rebuild the react-beautiful-dnd board structure anytime `tasks` change
+  // Rebuild the drag-and-drop board structure anytime `tasks` change
   useEffect(() => {
     const newBoard = {
       ...initialBoardState,
