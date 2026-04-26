@@ -1,96 +1,115 @@
-# Nexuspace | Modern Collaboration Platform 🚀
+# Nexuspace
 
-Nexuspace is a professional, enterprise-tier collaboration platform designed for teams to manage workspaces, track tasks in real-time, and communicate seamlessly. Built with a robust **Layered Architecture (SaaS-level)**, it ensures scalability, security, and high performance.
+Nexuspace is a full-stack collaboration platform with workspaces, kanban tasks, channels, and real-time updates.
 
-## ✨ Key Features
+## Stack
 
-### 🏢 Workspace Management
-- **Create & Personalize**: Establish dedicated workspaces for different projects or teams.
-- **Member Invites**: Invite collaborators via email to join specific workspaces.
-- **Role-Based Access**: Secure admin controls vs. member permissions.
+- Frontend: Next.js (App Router), React, Tailwind CSS
+- Backend: Node.js, Express, Socket.IO
+- Database: MongoDB Atlas (Mongoose)
+- Auth: Google OAuth credential flow + JWT
 
-### 📋 Kanban Task Board
-- **Real-Time Updates**: Tasks update instantly across all connected clients using Socket.IO.
-- **Drag & Drop**: Seamlessly move tasks between "To Do", "Doing", and "Done" statuses.
-- **Task Details**: Inline editing for titles, descriptions, and due dates.
-
-### 💬 Real-Time Communication
-- **Instant Messaging**: High-performance chat within workspace channels.
-- **Persistent Storage**: All messages are stored securely in MongoDB Atlas.
-- **Dynamic UI**: Modern, responsive interface built with Next.js and Tailwind CSS.
-
-### 🛡️ Secure Authentication
-- **Google OAuth 2.0**: One-click secure login integration.
-- **JWT Authorization**: All private routes are protected by JSON Web Token middleware.
-- **Secure Passwords**: Local accounts (optional extension) are hashed using Bcrypt.
-
-## 🏗️ Technical Architecture
-
-The project follows a **Route -> Controller -> Service -> Model** layered pattern:
-
-- **Frontend**: Next.js (App Router), Tailwind CSS, Context API, Socket.io-client.
-- **Backend**: Node.js, Express.js.
-- **Database**: MongoDB Atlas (Mongoose ODM).
-- **Architecture**: Decoupled service layer for logic, centralized error handling, and environment validation.
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v18+)
-- MongoDB Atlas Account
-- Google Cloud Console Project (for OAuth)
-- Firebase Project (for storage/analytics)
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/hritik2004-cse/Nexuspace.git
-   cd nexuspace
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   # Install root dependencies (concurrently)
-   npm install
-
-   # Install client dependencies
-   cd client && npm install
-
-   # Install server dependencies
-   cd ../server && npm install
-   ```
-
-3. **Environment Setup**:
-   Create a `.env` file in the `server/` directory and a `.env.local` file in the `client/` directory based on the provided configuration guides.
-
-4. **Run Development Mode**:
-   From the root directory, run:
-   ```bash
-   npm run dev
-   ```
-   The client will start on `http://localhost:3000` and the server on `http://localhost:5000`.
-
-## 📂 Project Structure
+## Monorepo Structure
 
 ```text
 nexuspace/
-├── client/           # Next.js Frontend
-│   ├── src/app/      # App Router & Pages
-│   ├── src/components/ # UI Components (Tailwind)
-│   └── src/context/  # Authentication & Socket Contexts
-├── server/           # Node.js/Express Backend
-│   ├── config/       # DB & Env Validations
-│   ├── controllers/  # Request/Response Handlers
-│   ├── services/     # Business Logic
-│   ├── models/       # Mongoose Schemas
-│   ├── routes/       # API Route Definitions
-│   └── sockets/      # Socket.IO Event Handlers
-└── package.json      # Concurrently script manager
+  client/    Next.js frontend
+  server/    Express + Socket.IO backend
+  package.json  Root scripts for local development
 ```
 
-## 📄 License
-This project is licensed under the ISC License.
+## Local Development
 
----
-Built with ❤️ by [hritik2004-cse](https://github.com/hritik2004-cse)
+### Prerequisites
+
+- Node.js 18+
+- MongoDB Atlas connection string
+- Google OAuth client id
+
+### Install
+
+```bash
+npm install
+cd client && npm install
+cd ../server && npm install
+```
+
+### Environment Variables
+
+Set frontend variables in `client/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+Set backend variables in `server/.env`:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+PORT=5000
+CLIENT_URL=http://localhost:3000
+```
+
+### Run
+
+From repo root:
+
+```bash
+npm run dev
+```
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+
+## API Overview
+
+Base backend URL: `/api`
+
+- Auth: `/auth/google`, `/auth/login`, `/auth/register`
+- Workspaces: `/workspaces`
+- Tasks: `/tasks`
+- Channels: `/channels/findOrCreate`
+- Messages: `/messages`
+
+## Deployment
+
+Recommended production split:
+
+- Frontend on Vercel (root directory: `client`)
+- Backend on Render (root directory: `server`)
+
+### Frontend Env (Vercel)
+
+```env
+NEXT_PUBLIC_API_URL=https://nexuspace-backend.onrender.com/api
+NEXT_PUBLIC_SOCKET_URL=https://nexuspace-backend.onrender.com
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+### Backend Env (Render)
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+CLIENT_URL=https://project-nexuspace.vercel.app
+```
+
+If you need multiple origins for backend CORS, set:
+
+```env
+CLIENT_URLS=http://localhost:3000,https://project-nexuspace.vercel.app
+```
+
+## Notes
+
+- Do not commit `.env` or `.env.local` files.
+- Keep secrets only in deployment platform environment settings.
+
+## License
+
+ISC

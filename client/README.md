@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Nexuspace Frontend
 
-## Getting Started
+Next.js frontend for Nexuspace.
 
-First, run the development server:
+## Requirements
+
+- Node.js 18+
+
+## Setup
+
+```bash
+npm install
+```
+
+Create `client/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+## Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at http://localhost:3000
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Production (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+- Set project root directory to `client`
+- Add these environment variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+NEXT_PUBLIC_API_URL=https://nexuspace-backend.onrender.com/api
+NEXT_PUBLIC_SOCKET_URL=https://nexuspace-backend.onrender.com
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Frontend expects backend endpoints under `/api`
+- Frontend expects Socket.IO server at backend base URL
