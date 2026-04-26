@@ -1,7 +1,12 @@
 import axios from "axios";
 
 // The base URL for the backend API, usually set in environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://nexuspace-backend.onrender.com/api"
+    : "http://localhost:5000/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
 
 const isLikelyJwt = (token) =>
   typeof token === "string" && token.split(".").length === 3;
