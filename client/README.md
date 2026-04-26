@@ -1,52 +1,22 @@
-# Nexuspace Frontend
+# Nexuspace Client | Next.js 14 Engine
 
-Next.js frontend for Nexuspace.
+This is the highly optimized Single Page Application logic driving Nexuspace. Rendered heavily through Next.js 14 and structured strictly with `framer-motion` rendering layers to ensure native 60fps animations.
 
-## Requirements
+## 🎨 Design Philosophy
 
-- Node.js 18+
+Nexuspace explicitly targets a "Vercel / Linear" UI aesthetic. We prioritize:
+- **Spatial Storytelling:** Deep integration of `Position: Sticky` CSS loops combined with `useMotionValueEvent` and `useScroll` framer physics to create interactive narratives without polluting vertical layouts.
+- **Micro-Interactions:** Subtle DOM feedback (ghosting outlines, fast `0.2s` interpolations, tracking cursors) over huge neon gradients.
+- **SSR Fallbacks:** Implementing `next/dynamic` rendering over heavy animated abstractions like `<LivePreview />` ensuring initial hydration operates at breakneck TTFB (Time-to-First-Byte).
 
-## Setup
+## 📂 Component Ecosystem (`/src`)
 
-```bash
-npm install
-```
+- `/app/`: Master Next.js 14 routing systems, `globals.css` base layers stripped of OS-level scrollbars, and core layout injection.
+- `/components/landing/`: High-end SaaS marketing structures (`StickyScroll.jsx`, `HowItWorks.jsx`, `ComparisonTable.jsx`) isolated entirely from main application logic to block DOM bloat.
+- `/components/`: Live Dashboard abstractions like `ChatWindow.jsx` and `KanbanBoard.jsx`.
+- `/context/`: Heavy React Providers securely tracking Workspace data contexts mapping variables deep into nested tree routes.
 
-Create `client/.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-## Run
-
-```bash
-npm run dev
-```
-
-App runs at http://localhost:3000
-
-## Build
-
-```bash
-npm run build
-npm run start
-```
-
-## Production (Vercel)
-
-- Set project root directory to `client`
-- Add these environment variables:
-
-```env
-NEXT_PUBLIC_API_URL=https://nexuspace-backend.onrender.com/api
-NEXT_PUBLIC_SOCKET_URL=https://nexuspace-backend.onrender.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-## Notes
-
-- Frontend expects backend endpoints under `/api`
-- Frontend expects Socket.IO server at backend base URL
+---
+### Script Definitions
+- `npm run dev`: Fires dev compiler locally.
+- `npm run build`: Maps static traces for Vercel/Node deployment edges.

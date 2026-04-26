@@ -47,6 +47,23 @@ const createMessage = async (req, res) => {
     // Broadcast via socket io attached to req
     req.io.to(channelId).emit('receive_message', populatedMessage);
 
+    // Advanced Backend Mention Notifier logic
+    if (content) {
+      const mentions = content.match(/@(\w+)/g);
+      if (mentions) {
+        const usernames = mentions.map(m => m.substring(1));
+        const User = require('../models/User');
+        const targetUsers = await User.find({ username: { $in: usernames } });
+        
+        targetUsers.forEach(target => {
+           // Do not notify self
+           if (target._id.toString() !== req.user._id.toString()) {
+             req.io.to(target._id.toString()).emit('receive_notification', `${req.user.name} mentioned you in a channel!`);
+           }
+        });
+      }
+    }
+
     res.status(201).json(populatedMessage);
   } catch (error) {
     console.error(error);

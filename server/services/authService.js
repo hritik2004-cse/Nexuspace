@@ -47,6 +47,70 @@ const googleLoginService = async (credential) => {
       avatar: picture,
       provider: 'google',
     });
+
+    const Workspace = require('../models/Workspace');
+    await Workspace.create({
+      name: 'Google Sandbox',
+      owner: user._id,
+      members: [user._id]
+    });
+  }
+
+  const token = generateToken(user._id);
+
+  return {
+    _id: user._id,
+    name: user.name,
+    username: user.username,
+    email: user.email,
+    avatar: user.avatar,
+    role: user.role,
+    token,
+  };
+};
+
+const registerLocalService = async ({ name, email, password }) => {
+  let user = await User.findOne({ email });
+
+  if (user) {
+    throw new Error('User already exists');
+  }
+
+  const username = await generateUniqueUsername(name);
+
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    username,
+    provider: 'local',
+  });
+
+  const Workspace = require('../models/Workspace');
+  await Workspace.create({
+    name: 'My Sandbox',
+    owner: newUser._id,
+    members: [newUser._id]
+  });
+
+  const token = generateToken(newUser._id);
+
+  return {
+    _id: newUser._id,
+    name: newUser.name,
+    username: newUser.username,
+    email: newUser.email,
+    avatar: newUser.avatar,
+    role: newUser.role,
+    token,
+  };
+};
+
+const loginLocalService = async ({ email, password }) => {
+  const user = await User.findOne({ email });
+
+  if (!user || !(await user.matchPassword(password))) {
+    throw new Error('Invalid email or password');
   }
 
   const token = generateToken(user._id);
@@ -64,5 +128,7 @@ const googleLoginService = async (credential) => {
 
 module.exports = {
   googleLoginService,
+  registerLocalService,
+  loginLocalService,
   generateToken
 };

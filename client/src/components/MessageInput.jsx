@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { FiSend, FiPaperclip, FiSmile, FiX, FiFile } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
 
-export default function MessageInput({ onSendMessage }) {
+export default function MessageInput({ onSendMessage, socket, channelId, currentUser }) {
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
   const [attachment, setAttachment] = useState(null);
   const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   // Mocked channel members for mentions
   const members = ['gaurav', 'lavkesh', 'ash', 'hritik'];
@@ -21,12 +22,20 @@ export default function MessageInput({ onSendMessage }) {
       setText('');
       setAttachment(null);
       setShowEmoji(false);
+      
+      if (socket && channelId) {
+        socket.emit('stop_typing', { channelId });
+      }
     }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("File size exceeds 2MB limit. Please attach a smaller file.");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => setAttachment({ name: file.name, url: reader.result, type: file.type });
       reader.readAsDataURL(file);
@@ -49,6 +58,15 @@ export default function MessageInput({ onSendMessage }) {
     const val = e.target.value;
     setText(val);
     
+    if (socket && channelId) {
+      socket.emit('typing', { channelId, username: currentUser });
+      
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('stop_typing', { channelId });
+      }, 2000);
+    }
+
     // Naive mention detection
     if (val.endsWith('@')) {
       setShowMentions(true);

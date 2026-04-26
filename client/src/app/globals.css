@@ -51,10 +51,11 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar Styling for a Modern Look */
+/* Native Scrollbar Removal UX standard */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 0px;
+  height: 0px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
@@ -62,12 +63,11 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.2); /* Indigo-500 with low opacity */
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5); /* Indigo-500 stronger on hover */
+  background: transparent;
 }
 
 /* Base selection color */

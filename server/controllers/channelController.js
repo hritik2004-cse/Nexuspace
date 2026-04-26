@@ -6,26 +6,33 @@ const Workspace = require('../models/Workspace');
 // @access  Private
 const findOrCreateChannel = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, workspaceId } = req.body;
     
-    // For simplicity without a full Workspace selector UI, we map to a default global workspace
-    let globalWorkspace = await Workspace.findOne({ name: 'Nexuspace GlobalHQ' });
-    if (!globalWorkspace) {
-      globalWorkspace = await Workspace.create({
-        name: 'Nexuspace GlobalHQ',
-        owner: req.user._id,
-        members: [req.user._id]
-      });
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'Workspace ID is strictly required to join channels.' });
     }
 
-    let channel = await Channel.findOne({ name, workspaceId: globalWorkspace._id });
+    let workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found.' });
+    }
+
+    let channel = await Channel.findOne({ name, workspaceId: workspace._id });
     if (!channel) {
-      channel = await Channel.create({
-        name,
-        workspaceId: globalWorkspace._id,
-        creator: req.user._id,
-        members: [req.user._id]
-      });
+      try {
+        channel = await Channel.create({
+          name,
+          workspaceId: workspace._id,
+          creator: req.user._id,
+          members: [req.user._id]
+        });
+      } catch (err) {
+        if (err.code === 11000) {
+          channel = await Channel.findOne({ name, workspaceId: workspace._id });
+        } else {
+          throw err;
+        }
+      }
     }
 
     res.status(200).json(channel);
@@ -41,8 +48,42 @@ const findOrCreateChannel = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: error.message, stack: error.stack });
+  }
+};
+
+const getWorkspaceChannels = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const channels = await Channel.find({ workspaceId }).sort({ createdAt: 1 });
+    res.status(200).json(channels);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-module.exports = { findOrCreateChannel };
+const deleteChannel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const channel = await Channel.findById(id);
+
+    if (!channel) {
+      return res.status(404).json({ message: 'Channel not found' });
+    }
+
+    // Auth check
+    const workspace = await Workspace.findById(channel.workspaceId);
+    if (!workspace || workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'Not authorized to delete channels in this workspace' });
+    }
+
+    await Channel.deleteOne({ _id: id });
+    res.status(200).json({ message: 'Channel deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+module.exports = { findOrCreateChannel, getWorkspaceChannels, deleteChannel };

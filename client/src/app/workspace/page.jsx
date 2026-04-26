@@ -6,10 +6,12 @@ import api from '@/services/api';
 import ChatWindow from '@/components/ChatWindow';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 export default function WorkspacePage() {
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
+  const { activeWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
   const currentChannel = searchParams.get('channel') || 'general';
   
@@ -18,13 +20,29 @@ export default function WorkspacePage() {
   
   const [messages, setMessages] = useState([]);
   const [channelId, setChannelId] = useState(null);
+  
+  // Real-time auxiliary states
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [notification, setNotification] = useState(null);
+
+  // Authenticate Socket connection
+  useEffect(() => {
+    if (socket && user?._id) {
+      socket.emit('register_user', user._id);
+    }
+  }, [socket, user]);
 
   // Fetch Channel and Messages
   useEffect(() => {
     const fetchChannelData = async () => {
+      if (!activeWorkspace) return;
+
       try {
-        // 1. Get or Create Channel by Name (Using central api service)
-        const channelRes = await api.post('/channels/findOrCreate', { name: currentChannel });
+        // 1. Get or Create Channel by Name bounded to Active Workspace
+        const channelRes = await api.post('/channels/findOrCreate', { 
+          name: currentChannel,
+          workspaceId: activeWorkspace._id
+        });
         setChannelId(channelRes.data._id);
 
         // 2. Fetch Messages for this Channel
@@ -43,10 +61,10 @@ export default function WorkspacePage() {
       }
     };
 
-    if (user) {
+    if (user && activeWorkspace) {
       fetchChannelData();
     }
-  }, [currentChannel, user]);
+  }, [currentChannel, user, activeWorkspace]);
 
   // Handle Real-time Socket Events
   useEffect(() => {
@@ -83,15 +101,35 @@ export default function WorkspacePage() {
       }));
     };
 
+    const handleDisplayTyping = (typingUser) => {
+      setTypingUsers(prev => new Set(prev).add(typingUser));
+    };
+
+    const handleHideTyping = () => {
+      // Simplistic clearing for demo
+      setTypingUsers(new Set());
+    };
+
+    const handleNotification = (msg) => {
+      setNotification(msg);
+      setTimeout(() => setNotification(null), 4000);
+    };
+
     socket.on('receive_message', handleNewMessage);
     socket.on('reaction_updated', handleReaction);
     socket.on('message_pinned', handlePinState);
+    socket.on('display_typing', handleDisplayTyping);
+    socket.on('hide_typing', handleHideTyping);
+    socket.on('receive_notification', handleNotification);
 
     return () => {
       socket.emit('leave_channel', channelId);
       socket.off('receive_message', handleNewMessage);
       socket.off('reaction_updated', handleReaction);
       socket.off('message_pinned', handlePinState);
+      socket.off('display_typing', handleDisplayTyping);
+      socket.off('hide_typing', handleHideTyping);
+      socket.off('receive_notification', handleNotification);
     };
   }, [socket, channelId]);
 
@@ -185,14 +223,33 @@ export default function WorkspacePage() {
   const channelMessages = messages;
 
   return (
-    <ChatWindow 
-      messages={channelMessages} 
-      onSendMessage={handleSendMessage} 
-      onDeleteMessage={handleDeleteMessage}
-      onEditMessage={handleEditMessage}
-      onReactToMessage={handleReactToMessage}
-      onPinMessage={handlePinMessage}
-      currentUser={currentUser} 
-    />
+    <div className="relative w-full h-full flex flex-col">
+      {/* Toast Notification overlay */}
+      {notification && (
+        <div className="absolute top-4 right-4 z-50 bg-indigo-600/90 backdrop-blur-md text-white px-4 py-3 rounded-lg shadow-2xl animate-in slide-in-from-top-2 fade-in duration-300 flex items-center gap-3">
+          <span className="text-xl">🔔</span>
+          <p className="text-sm font-semibold">{notification}</p>
+        </div>
+      )}
+      
+      {/* Typing Indicator Top Banner */}
+      {typingUsers.size > 0 && (
+         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-slate-800/80 backdrop-blur-md text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg animate-pulse">
+           {Array.from(typingUsers)[0]} is typing...
+         </div>
+      )}
+
+      <ChatWindow 
+        messages={channelMessages} 
+        onSendMessage={handleSendMessage} 
+        onDeleteMessage={handleDeleteMessage}
+        onEditMessage={handleEditMessage}
+        onReactToMessage={handleReactToMessage}
+        onPinMessage={handlePinMessage}
+        currentUser={currentUser} 
+        channelId={channelId}
+        socket={socket}
+      />
+    </div>
   );
 }

@@ -15,25 +15,101 @@ import {
   DialogFooter
 } from "@/components/ui/dialog"
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import api from '@/services/api';
+import { useEffect } from 'react';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const { user, joinChannel } = useAuth();
+  const { user } = useAuth();
+  const { activeWorkspace, workspaces, switchWorkspace, createWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
   const router = useRouter();
+  
   const currentChannel = searchParams.get('channel') || 'general';
+  
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleCreateChannel = (e) => {
+  const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  
+  // Real Channel mapping
+  const [channels, setChannels] = useState([]);
+  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  
+  const handleCreateWorkspace = async (e) => {
     e.preventDefault();
-    if (newChannelName.trim()) {
+    if (newWorkspaceName.trim()) {
+      await createWorkspace(newWorkspaceName);
+      setNewWorkspaceName('');
+      setIsWorkspaceModalOpen(false);
+    }
+  };
+
+  const handleInviteUser = async (e) => {
+    e.preventDefault();
+    if (inviteEmail.trim() && activeWorkspace) {
+      try {
+        await api.post(`/workspaces/${activeWorkspace._id}/members`, { memberEmail: inviteEmail });
+        setInviteEmail('');
+        setIsInviteModalOpen(false);
+        // Toast notification could go here
+      } catch (err) {
+        console.error("Invite failed", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchChannels = async () => {
+      if (activeWorkspace) {
+        try {
+          const res = await api.get(`/channels/${activeWorkspace._id}`);
+          setChannels(res.data);
+        } catch (err) {
+          console.error("Failed to fetch real channels", err);
+        }
+      }
+    };
+    fetchChannels();
+  }, [activeWorkspace]);
+
+  const handleCreateChannel = async (e) => {
+    e.preventDefault();
+    if (newChannelName.trim() && activeWorkspace) {
       const formattedName = newChannelName.toLowerCase().replace(/\s+/g, '-');
-      joinChannel(formattedName);
-      setNewChannelName('');
-      setIsDialogOpen(false);
-      router.push(`/workspace?channel=${formattedName}`);
+      try {
+        const res = await api.post('/channels/findOrCreate', { 
+          name: formattedName, 
+          workspaceId: activeWorkspace._id 
+        });
+        
+        // Prevent duplicate local appending
+        if (!channels.find(c => c._id === res.data._id)) {
+          setChannels([...channels, res.data]);
+        }
+        
+        setNewChannelName('');
+        setIsDialogOpen(false);
+        router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${formattedName}`);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleDeleteChannel = async (channelId, e) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/channels/${channelId}`);
+      setChannels(prev => prev.filter(c => c._id !== channelId));
+      if (currentChannel === channels.find(c => c._id === channelId)?.name) {
+        router.push(`/workspace?workspace=${activeWorkspace._id}&channel=general`);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -47,11 +123,91 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         />
       )}
       <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-slate-950 flex flex-col h-full border-r border-slate-800 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        {/* Workspace Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 cursor-pointer hover:bg-slate-900 transition-colors">
-        <h1 className="font-bold text-lg text-white font-sans tracking-tight">Nexuspace</h1>
-        <FiChevronDown className="text-slate-400" />
-      </div>
+        {/* Workspace Header Dropdown */}
+        <div className="relative">
+          <div 
+            onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+            className="h-16 flex items-center justify-between px-4 border-b border-slate-800 cursor-pointer hover:bg-slate-900 transition-colors"
+          >
+            <h1 className="font-bold text-lg text-white font-sans tracking-tight truncate max-w-[200px]">
+              {activeWorkspace ? activeWorkspace.name : 'Nexuspace'}
+            </h1>
+            <FiChevronDown className="text-slate-400 shrink-0" />
+          </div>
+
+          {/* Dropdown Menu */}
+          {isWorkspaceDropdownOpen && (
+            <div className="absolute top-full left-0 w-full bg-slate-900 border-b border-r border-slate-800 shadow-2xl z-50">
+              <div className="p-2 space-y-1">
+                <div className="px-2 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Your Workspaces</div>
+                {workspaces.map(w => (
+                  <button 
+                    key={w._id}
+                    onClick={() => { switchWorkspace(w._id); setIsWorkspaceDropdownOpen(false); }}
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeWorkspace?._id === w._id ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    {w.name}
+                  </button>
+                ))}
+                
+                <div className="pt-2 mt-2 border-t border-slate-700/50">
+                  <Dialog open={isWorkspaceModalOpen} onOpenChange={setIsWorkspaceModalOpen}>
+                    <DialogTrigger asChild>
+                      <button className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 hover:bg-slate-800 transition-colors flex items-center">
+                        <FiPlus className="mr-2" /> Create Workspace
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Create New Workspace</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateWorkspace} className="space-y-4 pt-4">
+                        <input
+                          autoFocus
+                          value={newWorkspaceName}
+                          onChange={(e) => setNewWorkspaceName(e.target.value)}
+                          placeholder="My Awesome Team"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <DialogFooter>
+                          <button type="submit" disabled={!newWorkspaceName} className="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 disabled:opacity-50 font-semibold w-full">Create</button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+
+                  {activeWorkspace && activeWorkspace.owner === user?._id && (
+                    <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
+                      <DialogTrigger asChild>
+                        <button className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 hover:bg-slate-800 transition-colors flex items-center">
+                          <FiPlus className="mr-2" /> Invite Member
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
+                        <DialogHeader>
+                          <DialogTitle>Invite Member to {activeWorkspace.name}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleInviteUser} className="space-y-4 pt-4">
+                          <input
+                            autoFocus
+                            type="email"
+                            value={inviteEmail}
+                            onChange={(e) => setInviteEmail(e.target.value)}
+                            placeholder="colleague@example.com"
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
+                          />
+                          <DialogFooter>
+                            <button type="submit" disabled={!inviteEmail} className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-500 disabled:opacity-50 font-semibold w-full">Send Invite</button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
@@ -115,17 +271,20 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             </Dialog>
           </div>
           <div className="mt-2 space-y-0.5">
-            {(user?.channels || ['general']).map((channel, idx) => (
-              <div key={idx} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channel ? 'bg-indigo-600/10' : 'hover:bg-slate-900'} transition-colors`}>
-                <a
-                  href={`/workspace?channel=${channel}`}
-                  className={`flex items-center flex-1 px-4 py-2 text-sm font-medium transition-colors ${currentChannel === channel ? 'text-indigo-400' : 'text-slate-300 hover:text-slate-100'}`}
+            {channels.map((channelObj) => (
+              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-indigo-600/10' : 'hover:bg-slate-900'} transition-colors`}>
+                <button
+                  onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
+                  className={`flex items-center flex-1 px-4 py-2 text-sm font-medium transition-colors ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-300 hover:text-slate-100'}`}
                 >
-                  <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channel ? 'text-indigo-400' : 'text-slate-500'}`} />
-                  {channel}
-                </a>
-                {user?.role === 'Admin' && channel !== 'general' && (
-                  <button className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 mr-1">
+                  <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-500'}`} />
+                  {channelObj.name}
+                </button>
+                {activeWorkspace?.owner === user?._id && channelObj.name !== 'general' && (
+                  <button 
+                    onClick={(e) => handleDeleteChannel(channelObj._id, e)}
+                    className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 mr-1"
+                  >
                     <FiTrash2 className="w-3.5 h-3.5" />
                   </button>
                 )}

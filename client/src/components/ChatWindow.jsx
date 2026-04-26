@@ -6,7 +6,7 @@ import MessageInput from './MessageInput';
 import { useSocket } from '@/context/SocketContext';
 import { FiBookmark } from 'react-icons/fi';
 
-export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, onEditMessage, onReactToMessage, onPinMessage, currentUser }) {
+export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, onEditMessage, onReactToMessage, onPinMessage, currentUser, socket, channelId }) {
   const bottomRef = useRef(null);
 
   // Auto-scroll to bottom on new message
@@ -65,7 +65,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
 
       {/* Message Input fixed at bottom of container */}
       <div className="mt-auto z-10">
-        <MessageInput onSendMessage={onSendMessage} />
+        <MessageInput onSendMessage={onSendMessage} socket={socket} channelId={channelId} currentUser={currentUser} />
       </div>
     </div>
   );

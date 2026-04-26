@@ -25,55 +25,55 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    // Mock API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password) {
-          const username = email.split("@")[0];
-          const mockUser = {
-            id: 1,
-            name: username,
-            username,
-            email,
-            channels: ["general"],
-            isOnline: true,
-          };
-          localStorage.removeItem("nexuspace_token");
-          setUser(mockUser);
-          localStorage.setItem("nexuspace_user", JSON.stringify(mockUser));
-          resolve(mockUser);
-          router.push("/workspace");
-        } else {
-          reject(new Error("Invalid credentials"));
-        }
-      }, 500);
-    });
+    try {
+      const res = await api.post(API_ENDPOINTS.auth.login, { email, password });
+      const { token, ...userData } = res.data;
+
+      if (!isLikelyJwt(token)) {
+        throw new Error(res.data?.message || "Login failed. Please try again.");
+      }
+
+      localStorage.removeItem("nexuspace_user");
+      localStorage.removeItem("nexuspace_token");
+      setUser(userData);
+      localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", token);
+      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
+
+      router.push("/workspace");
+      return userData;
+    } catch (error) {
+      console.error("Login Error:", error);
+      throw new Error(
+        error.response?.data?.message || "Invalid credentials. Please try again."
+      );
+    }
   };
 
   const register = async (name, email, password) => {
-    // Mock API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (name && email && password) {
-          const username = name.toLowerCase().replace(/\s+/g, "");
-          const mockUser = {
-            id: Date.now(),
-            name,
-            username,
-            email,
-            channels: ["general"],
-            isOnline: true,
-          };
-          localStorage.removeItem("nexuspace_token");
-          setUser(mockUser);
-          localStorage.setItem("nexuspace_user", JSON.stringify(mockUser));
-          resolve(mockUser);
-          router.push("/workspace");
-        } else {
-          reject(new Error("Invalid details"));
-        }
-      }, 500);
-    });
+    try {
+      const res = await api.post(API_ENDPOINTS.auth.register, { name, email, password });
+      const { token, ...userData } = res.data;
+
+      if (!isLikelyJwt(token)) {
+        throw new Error(res.data?.message || "Registration failed. Please try again.");
+      }
+
+      localStorage.removeItem("nexuspace_user");
+      localStorage.removeItem("nexuspace_token");
+      setUser(userData);
+      localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", token);
+      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
+
+      router.push("/workspace");
+      return userData;
+    } catch (error) {
+      console.error("Registration Error:", error);
+      throw new Error(
+        error.response?.data?.message || "Registration failed. Please check your details."
+      );
+    }
   };
 
   const loginWithGoogle = async (credentialResponse) => {
@@ -101,6 +101,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       localStorage.setItem("nexuspace_token", token);
+      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
 
       router.replace("/workspace");
       return userData;
@@ -136,6 +137,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     localStorage.removeItem("nexuspace_user");
     localStorage.removeItem("nexuspace_token");
+    document.cookie = "nexuspace_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
 

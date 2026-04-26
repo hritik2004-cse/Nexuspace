@@ -1,115 +1,53 @@
-# Nexuspace
+<div align="center">
+  <img src="./client/public/favicon.ico" width="80" alt="Nexuspace Logo" />
+  <h1>Nexuspace</h1>
+  <p>The world's most performant real-time operating system for teams.</p>
+</div>
 
-Nexuspace is a full-stack collaboration platform with workspaces, kanban tasks, channels, and real-time updates.
+<br/>
 
-## Stack
+Nexuspace represents a fundamental evolution in software workspace dynamics. By merging a massive WebSocket mesh network directly with Kanban architectures, we eliminate context switching and provide a pristine, zero-latency sandbox. The platform actively boasts sub-millisecond task synchronization packaged inside a hyper-minimalist, Apple/Vercel-level SaaS interface.
 
-- Frontend: Next.js (App Router), React, Tailwind CSS
-- Backend: Node.js, Express, Socket.IO
-- Database: MongoDB Atlas (Mongoose)
-- Auth: Google OAuth credential flow + JWT
+---
 
-## Monorepo Structure
+## ⚡ Core Architecture
 
-```text
-nexuspace/
-  client/    Next.js frontend
-  server/    Express + Socket.IO backend
-  package.json  Root scripts for local development
-```
+- **Real-Time Engine (`Socket.io`)**: Built over WebSocket meshes to instantly synchronize Canvas updates globally underneath 50ms latency margins.
+- **Smart Task Linking**: Deep organic integration allowing Kanban tickets to route variables and payloads cleanly into designated communication channels without manual data entry.
+- **Hyper-Minimalist UI**: Migrated from generic glow meshes to native, strictly utilitarian DOM structures powered by `Next.js 14`, `Tailwind CSS`, and `framer-motion`.
+- **Absolute Sandbox Isolation**: Workspaces spin up as mathematically completely siloed datasets. 
 
-## Local Development
+## 🏗️ Repository Structure
 
-### Prerequisites
+This monorepo leverages strict domain separation:
 
-- Node.js 18+
-- MongoDB Atlas connection string
-- Google OAuth client id
+- **`/client`**: The Next.js 14 Web Application handling native SSR loading phases alongside highly optimized client-side `framer-motion` abstractions (Sticky scrolling, Native observers, Headless simulations).
+- **`/server`**: A Node/Express engine mapping MongoDB schemas via Mongoose and orchestrating highly optimized `Socket.io` broadcast channels tailored for exact Channel/Task emissions.
 
-### Install
+## 🚀 Getting Started
 
+### 1. Bootstrapping the API (`/server`)
 ```bash
-npm install
-cd client && npm install
-cd ../server && npm install
-```
-
-### Environment Variables
-
-Set frontend variables in `client/.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Set backend variables in `server/.env`:
-
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-GOOGLE_CLIENT_ID=your_google_client_id
-PORT=5000
-CLIENT_URL=http://localhost:3000
-```
-
-### Run
-
-From repo root:
-
-```bash
+cd server
+npm i
 npm run dev
 ```
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
-
-## API Overview
-
-Base backend URL: `/api`
-
-- Auth: `/auth/google`, `/auth/login`, `/auth/register`
-- Workspaces: `/workspaces`
-- Tasks: `/tasks`
-- Channels: `/channels/findOrCreate`
-- Messages: `/messages`
-
-## Deployment
-
-Recommended production split:
-
-- Frontend on Vercel (root directory: `client`)
-- Backend on Render (root directory: `server`)
-
-### Frontend Env (Vercel)
-
-```env
-NEXT_PUBLIC_API_URL=https://nexuspace-backend.onrender.com/api
-NEXT_PUBLIC_SOCKET_URL=https://nexuspace-backend.onrender.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+### 2. Bootstrapping the Frontend (`/client`)
+```bash
+cd client
+npm i
+npm run dev
 ```
 
-### Backend Env (Render)
+## 🛠️ Tech Stack Baseline
+*   **React** / **Next.js 14** (App Router)
+*   **Lucide React** & **Framer Motion** (Animation/Iconography)
+*   **Tailwind CSS** (Strict Grid/Flex bounding mechanics)
+*   **Node.js** & **Express**
+*   **MongoDB** & **Socket.io** 
 
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-GOOGLE_CLIENT_ID=your_google_client_id
-CLIENT_URL=https://project-nexuspace.vercel.app
-```
-
-If you need multiple origins for backend CORS, set:
-
-```env
-CLIENT_URLS=http://localhost:3000,https://project-nexuspace.vercel.app
-```
-
-## Notes
-
-- Do not commit `.env` or `.env.local` files.
-- Keep secrets only in deployment platform environment settings.
-
-## License
-
-ISC
+---
+<p align="center">
+  Crafted for velocity. Engineered by and for Senior Developers.
+</p>

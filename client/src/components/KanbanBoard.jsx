@@ -4,52 +4,78 @@ import { useState, useEffect } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
 
-// Mock initial data
-const initialData = {
-  tasks: {
-    "task-1": {
-      id: "task-1",
-      title: "Design Database Schema",
-      assignee: "Lavkesh",
-      tags: [{ name: "Backend", color: "indigo" }],
-      date: "Oct 24",
-    },
-    "task-2": {
-      id: "task-2",
-      title: "Implement Kanban UI",
-      assignee: "Ash",
-      tags: [{ name: "Frontend", color: "purple" }],
-      date: "Oct 25",
-    },
-    "task-3": {
-      id: "task-3",
-      title: "Setup Socket.io Server",
-      assignee: "Lavkesh",
-      tags: [{ name: "Sockets", color: "blue" }],
-      date: "Oct 26",
-    },
-  },
-  columns: {
-    "col-1": { id: "col-1", title: "To Do", taskIds: ["task-3"] },
-    "col-2": {
-      id: "col-2",
-      title: "In Progress",
-      taskIds: ["task-1", "task-2"],
-    },
-    "col-3": { id: "col-3", title: "Review", taskIds: [] },
-    "col-4": { id: "col-4", title: "Done", taskIds: [] },
-  },
-  columnOrder: ["col-1", "col-2", "col-3", "col-4"],
+import api from "@/services/api";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { useSocket } from "@/context/SocketContext";
+
+const STATUS_COLUMNS = {
+  "todo": { id: "todo", title: "To Do" },
+  "doing": { id: "doing", title: "In Progress" },
+  "done": { id: "done", title: "Done" },
 };
+const COLUMN_ORDER = ["todo", "doing", "done"];
 
 export default function KanbanBoard() {
-  const [data, setData] = useState(initialData);
+  const { activeWorkspace } = useWorkspace();
+  const { socket } = useSocket();
+  const [tasks, setTasks] = useState({});
+  const [columns, setColumns] = useState({
+    todo: { id: "todo", title: "To Do", taskIds: [] },
+    doing: { id: "doing", title: "In Progress", taskIds: [] },
+    done: { id: "done", title: "Done", taskIds: [] }
+  });
   const [isBrowser, setIsBrowser] = useState(false);
 
-  // Fix for React beautiful dnd + Next.js SSR mismatch
   useEffect(() => {
     setIsBrowser(true);
   }, []);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!activeWorkspace) return;
+      try {
+        const res = await api.get(`/tasks/${activeWorkspace._id}`);
+        // Restructure response into DnD readable maps
+        const taskMap = {};
+        const colMap = {
+          todo: { id: "todo", title: "To Do", taskIds: [] },
+          doing: { id: "doing", title: "In Progress", taskIds: [] },
+          done: { id: "done", title: "Done", taskIds: [] }
+        };
+        
+        res.data.forEach(task => {
+           taskMap[task._id] = {
+             id: task._id,
+             title: task.title,
+             description: task.description,
+             status: task.status,
+             // Map standard labels for ui
+             date: task.dueDate || "",
+             assignee: task.assignee?.name || "Unassigned"
+           };
+           if (colMap[task.status]) {
+             colMap[task.status].taskIds.push(task._id);
+           } else {
+             colMap['todo'].taskIds.push(task._id);
+           }
+        });
+
+        setTasks(taskMap);
+        setColumns(colMap);
+      } catch (err) {
+        console.error("Failed to fetch Kanbans", err);
+      }
+    };
+    fetchTasks();
+  }, [activeWorkspace]);
+
+  const updateTaskStatusBackend = async (taskId, newStatus) => {
+    try {
+      await api.put(`/tasks/${taskId}`, { status: newStatus });
+    } catch(err) {
+      console.error(err);
+    }
+  };
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -61,40 +87,33 @@ export default function KanbanBoard() {
     )
       return;
 
-    const startColumn = data.columns[source.droppableId];
-    const finishColumn = data.columns[destination.droppableId];
+    const startColumn = columns[source.droppableId];
+    const finishColumn = columns[destination.droppableId];
 
-    // Moving within the same column
     if (startColumn === finishColumn) {
       const newTaskIds = Array.from(startColumn.taskIds);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
 
-      const newColumn = { ...startColumn, taskIds: newTaskIds };
-      setData({
-        ...data,
-        columns: { ...data.columns, [newColumn.id]: newColumn },
+      setColumns({
+        ...columns,
+        [startColumn.id]: { ...startColumn, taskIds: newTaskIds },
       });
       return;
     }
 
-    // Moving between columns
     const startTaskIds = Array.from(startColumn.taskIds);
     startTaskIds.splice(source.index, 1);
-    const newStart = { ...startColumn, taskIds: startTaskIds };
-
     const finishTaskIds = Array.from(finishColumn.taskIds);
     finishTaskIds.splice(destination.index, 0, draggableId);
-    const newFinish = { ...finishColumn, taskIds: finishTaskIds };
 
-    setData({
-      ...data,
-      columns: {
-        ...data.columns,
-        [newStart.id]: newStart,
-        [newFinish.id]: newFinish,
-      },
+    setColumns({
+      ...columns,
+      [startColumn.id]: { ...startColumn, taskIds: startTaskIds },
+      [finishColumn.id]: { ...finishColumn, taskIds: finishTaskIds }
     });
+
+    updateTaskStatusBackend(draggableId, finishColumn.id);
   };
 
   if (!isBrowser)
@@ -115,11 +134,11 @@ export default function KanbanBoard() {
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-6 h-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          {data.columnOrder.map((columnId) => {
-            const column = data.columns[columnId];
-            const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
+          {COLUMN_ORDER.map((columnId) => {
+            const column = columns[columnId];
+            const colTasks = column.taskIds.map((taskId) => tasks[taskId]).filter(Boolean);
             return (
-              <KanbanColumn key={column.id} column={column} tasks={tasks} />
+              <KanbanColumn key={column.id} column={column} tasks={colTasks} />
             );
           })}
         </div>

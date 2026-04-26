@@ -49,7 +49,7 @@ export default function TaskCard({ task, index }) {
             </div>
             {task.assignee && (
               <div
-                className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-[10px] shadow outline outline-2 outline-slate-800"
+                className="w-6 h-6 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-[10px] shadow outline-2 outline-slate-800"
                 title={task.assignee}
               >
                 {task.assignee.charAt(0).toUpperCase()}
