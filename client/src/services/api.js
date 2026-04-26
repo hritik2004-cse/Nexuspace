@@ -6,7 +6,19 @@ const DEFAULT_API_URL =
     ? "https://nexuspace-backend.onrender.com/api"
     : "http://localhost:5000/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+const getApiUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!envUrl) return DEFAULT_API_URL;
+
+  if (process.env.NODE_ENV === "production" && envUrl.includes("localhost")) {
+    return DEFAULT_API_URL;
+  }
+
+  return envUrl;
+};
+
+const API_URL = getApiUrl();
 
 const isLikelyJwt = (token) =>
   typeof token === "string" && token.split(".").length === 3;

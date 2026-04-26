@@ -6,7 +6,19 @@ const DEFAULT_SOCKET_URL =
     ? "https://nexuspace-backend.onrender.com"
     : "http://localhost:5000";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || DEFAULT_SOCKET_URL;
+const getSocketUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+
+  if (!envUrl) return DEFAULT_SOCKET_URL;
+
+  if (process.env.NODE_ENV === "production" && envUrl.includes("localhost")) {
+    return DEFAULT_SOCKET_URL;
+  }
+
+  return envUrl;
+};
+
+const SOCKET_URL = getSocketUrl();
 
 export const socket = io(SOCKET_URL, {
   autoConnect: false, // Wait until user is authenticated/workspace is loaded
