@@ -161,6 +161,18 @@ export default function LoginPage() {
               text="continue_with"
             />
           </div>
+
+          <p className="text-center text-xs text-slate-500 mt-3 leading-relaxed">
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="text-indigo-400 hover:text-indigo-300">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
 
         <div className="text-center text-sm text-slate-400 mt-6">
