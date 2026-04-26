@@ -1,12 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
 // The base URL for the backend API, usually set in environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+const isLikelyJwt = (token) =>
+  typeof token === "string" && token.split(".").length === 3;
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -14,17 +17,23 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Check for the standalone token first
-    const token = localStorage.getItem('nexuspace_token');
-    
-    if (token) {
+    const token = localStorage.getItem("nexuspace_token");
+
+    if (isLikelyJwt(token)) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
+      if (token) {
+        localStorage.removeItem("nexuspace_token");
+      }
+
       // Fallback for older sessions stored inside the user object
-      const storedUser = localStorage.getItem('nexuspace_user');
+      const storedUser = localStorage.getItem("nexuspace_user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
-        if (user.token) {
+        if (isLikelyJwt(user.token)) {
           config.headers.Authorization = `Bearer ${user.token}`;
+        } else if (user.token) {
+          localStorage.removeItem("nexuspace_user");
         }
       }
     }
@@ -32,25 +41,25 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add a response interceptor to handle common errors (like 401 Unauthorized)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isAuthRoute = error.config?.url?.includes('/auth');
+    const isAuthRoute = error.config?.url?.includes("/auth");
 
     if (error.response && error.response.status === 401 && !isAuthRoute) {
       // Auto-logout the user if the token is invalid or expired
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('nexuspace_user');
-        localStorage.removeItem('nexuspace_token');
-        window.location.href = '/login';
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("nexuspace_user");
+        localStorage.removeItem("nexuspace_token");
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

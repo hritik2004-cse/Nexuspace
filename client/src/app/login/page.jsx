@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
-import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
-import { GoogleLogin } from '@react-oauth/google';
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       await loginWithGoogle(credentialResponse);
     } catch (err) {
@@ -26,13 +26,13 @@ export default function LoginPage() {
   };
 
   const handleGoogleError = () => {
-    setError('Google login popup was closed or failed.');
+    setError("Google login popup was closed or failed.");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
     try {
       await login(email, password);
     } catch (err) {
@@ -50,7 +50,7 @@ export default function LoginPage() {
 
       <div className="max-w-md w-full space-y-8 bg-slate-900/50 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
         <div>
-          <h2 className="mt-2 text-center text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
+          <h2 className="mt-2 text-center text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-purple-400 tracking-tight">
             Nexuspace
           </h2>
           <p className="mt-4 text-center text-sm text-slate-400">
@@ -60,7 +60,9 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div className="relative group">
-              <label htmlFor="email-address" className="sr-only">Email address</label>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
               <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
               <input
                 id="email-address"
@@ -74,7 +76,9 @@ export default function LoginPage() {
               />
             </div>
             <div className="relative group">
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
               <input
                 id="password"
@@ -97,19 +101,29 @@ export default function LoginPage() {
                 type="checkbox"
                 className="h-4 w-4 text-indigo-500 focus:ring-indigo-500/50 border-slate-700 rounded bg-slate-950"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-400">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-slate-400"
+              >
                 Remember me
               </label>
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+              <a
+                href="#"
+                className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
                 Forgot password?
               </a>
             </div>
           </div>
 
-          {error && <div className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20">{error}</div>}
+          {error && (
+            <div className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20">
+              {error}
+            </div>
+          )}
 
           <div>
             <button
@@ -118,18 +132,23 @@ export default function LoginPage() {
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <FiArrowRight className="h-5 w-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" aria-hidden="true" />
+                <FiArrowRight
+                  className="h-5 w-5 text-indigo-400 group-hover:text-indigo-300 transition-colors"
+                  aria-hidden="true"
+                />
               </span>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-900/50 text-slate-400">Or continue with</span>
+              <span className="px-2 bg-slate-900/50 text-slate-400">
+                Or continue with
+              </span>
             </div>
           </div>
 
@@ -137,17 +156,19 @@ export default function LoginPage() {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              useOneTap
               theme="filled_black"
               shape="rectangular"
               text="continue_with"
             />
           </div>
         </form>
-        
+
         <div className="text-center text-sm text-slate-400 mt-6">
-          Don't have an account?{' '}
-          <Link href="/register" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+          Don't have an account?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+          >
             Create an account
           </Link>
         </div>

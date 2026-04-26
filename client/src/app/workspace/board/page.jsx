@@ -1,19 +1,26 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FiClock, FiUser, FiPlus, FiTrash2, FiEdit2, FiX } from 'react-icons/fi';
-import { useAuth } from '@/context/AuthContext';
-import { useSocket } from '@/context/SocketContext';
-import api from '@/services/api';
+import { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  FiClock,
+  FiUser,
+  FiPlus,
+  FiTrash2,
+  FiEdit2,
+  FiX,
+} from "react-icons/fi";
+import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
+import { taskApi } from "@/services/endpoints";
 
 const initialBoardState = {
   columns: {
-    'todo': { id: 'todo', title: 'To Do', taskIds: [] },
-    'doing': { id: 'doing', title: 'In Progress', taskIds: [] },
-    'done': { id: 'done', title: 'Done', taskIds: [] },
+    todo: { id: "todo", title: "To Do", taskIds: [] },
+    doing: { id: "doing", title: "In Progress", taskIds: [] },
+    done: { id: "done", title: "Done", taskIds: [] },
   },
-  columnOrder: ['todo', 'doing', 'done'],
+  columnOrder: ["todo", "doing", "done"],
 };
 
 export default function KanbanBoard() {
@@ -24,16 +31,16 @@ export default function KanbanBoard() {
   const { socket } = useSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskDesc, setNewTaskDesc] = useState('');
-  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDesc, setNewTaskDesc] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
 
   const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editTaskTitle, setEditTaskTitle] = useState('');
-  const [editTaskDesc, setEditTaskDesc] = useState('');
-  const [editTaskDueDate, setEditTaskDueDate] = useState('');
+  const [editTaskTitle, setEditTaskTitle] = useState("");
+  const [editTaskDesc, setEditTaskDesc] = useState("");
+  const [editTaskDueDate, setEditTaskDueDate] = useState("");
 
-  const boardId = '660d2b4f9e31d4b68c34f2a1'; // Standardized to an ObjectId string for testing or dynamic logic
+  const boardId = "660d2b4f9e31d4b68c34f2a1"; // Standardized to an ObjectId string for testing or dynamic logic
 
   useEffect(() => {
     setMounted(true);
@@ -44,23 +51,25 @@ export default function KanbanBoard() {
     if (!socket || !mounted) return;
 
     // Join the workspace room (sync with backend workspaceSocket.js)
-    socket.emit('join_workspace', boardId);
+    socket.emit("join_workspace", boardId);
 
     const handleBoardUpdate = (data) => {
-      if (data.action === 'create') {
-        setTasks(prev => [data.task, ...prev]);
-      } else if (data.action === 'update') {
-        setTasks(prev => prev.map(t => t._id === data.task._id ? data.task : t));
-      } else if (data.action === 'delete') {
-        setTasks(prev => prev.filter(t => t._id !== data.taskId));
+      if (data.action === "create") {
+        setTasks((prev) => [data.task, ...prev]);
+      } else if (data.action === "update") {
+        setTasks((prev) =>
+          prev.map((t) => (t._id === data.task._id ? data.task : t)),
+        );
+      } else if (data.action === "delete") {
+        setTasks((prev) => prev.filter((t) => t._id !== data.taskId));
       }
     };
 
-    socket.on('receive_board_update', handleBoardUpdate);
+    socket.on("receive_board_update", handleBoardUpdate);
 
     return () => {
-      socket.off('receive_board_update', handleBoardUpdate);
-      socket.emit('leave_workspace', boardId);
+      socket.off("receive_board_update", handleBoardUpdate);
+      socket.emit("leave_workspace", boardId);
     };
   }, [socket, mounted]);
 
@@ -69,17 +78,17 @@ export default function KanbanBoard() {
     const newBoard = {
       ...initialBoardState,
       columns: {
-        'todo': { id: 'todo', title: 'To Do', taskIds: [] },
-        'doing': { id: 'doing', title: 'In Progress', taskIds: [] },
-        'done': { id: 'done', title: 'Done', taskIds: [] },
-      }
+        todo: { id: "todo", title: "To Do", taskIds: [] },
+        doing: { id: "doing", title: "In Progress", taskIds: [] },
+        done: { id: "done", title: "Done", taskIds: [] },
+      },
     };
 
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (newBoard.columns[task.status]) {
         newBoard.columns[task.status].taskIds.push(task._id);
       } else {
-        newBoard.columns['todo'].taskIds.push(task._id); // fallback
+        newBoard.columns["todo"].taskIds.push(task._id); // fallback
       }
     });
 
@@ -88,10 +97,10 @@ export default function KanbanBoard() {
 
   const fetchTasks = async () => {
     try {
-      const res = await api.get(`/tasks/${boardId}`);
+      const res = await taskApi.getByBoard(boardId);
       setTasks(res.data);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error("Error fetching tasks:", error);
     }
   };
 
@@ -100,27 +109,29 @@ export default function KanbanBoard() {
     if (!newTaskTitle.trim()) return;
 
     try {
-      const res = await api.post('/tasks', {
+      const res = await taskApi.create({
         title: newTaskTitle,
         description: newTaskDesc,
-        status: 'todo',
+        status: "todo",
         assignee: user?._id || user?.id, // Send the ACTUAL ObjectId/ID string
-        dueDate: newTaskDueDate || 'No limit',
-        boardId
+        dueDate: newTaskDueDate || "No limit",
+        boardId,
       });
-      
+
+      setTasks((prev) => [res.data, ...prev]);
       setIsModalOpen(false);
-      setNewTaskTitle('');
-      setNewTaskDesc('');
-      setNewTaskDueDate('');
+      setNewTaskTitle("");
+      setNewTaskDesc("");
+      setNewTaskDueDate("");
     } catch (error) {
-      console.error('Error creating task:', error);
+      console.error("Error creating task:", error);
     }
   };
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await api.delete(`/tasks/${taskId}`);
+      await taskApi.remove(taskId);
+      setTasks((prev) => prev.filter((task) => task._id !== taskId));
     } catch (error) {
       console.error("Error deleting task:", error);
     }
@@ -128,11 +139,14 @@ export default function KanbanBoard() {
 
   const handleEditSubmit = async (taskId) => {
     try {
-      await api.put(`/tasks/${taskId}`, {
+      const res = await taskApi.update(taskId, {
         title: editTaskTitle,
         description: editTaskDesc,
-        dueDate: editTaskDueDate
+        dueDate: editTaskDueDate,
       });
+      setTasks((prev) =>
+        prev.map((task) => (task._id === taskId ? res.data : task)),
+      );
       setEditingTaskId(null);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -143,14 +157,18 @@ export default function KanbanBoard() {
     setEditingTaskId(task._id);
     setEditTaskTitle(task.title);
     setEditTaskDesc(task.description);
-    setEditTaskDueDate(task.dueDate || '');
+    setEditTaskDueDate(task.dueDate || "");
   };
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return;
 
     const startColumn = boardData.columns[source.droppableId];
     const finishColumn = boardData.columns[destination.droppableId];
@@ -189,10 +207,7 @@ export default function KanbanBoard() {
 
     // Fire API update to server
     try {
-      const token = localStorage.getItem('nexuspace_token');
-      await axios.put(`${API_URL}/tasks/${draggableId}`, { status: destination.droppableId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await taskApi.update(draggableId, { status: destination.droppableId });
     } catch (error) {
       console.error("Error updating task status:", error);
       // Revert state on failure
@@ -200,7 +215,8 @@ export default function KanbanBoard() {
     }
   };
 
-  if (!mounted) return <div className="p-8 text-slate-400">Loading board...</div>;
+  if (!mounted)
+    return <div className="p-8 text-slate-400">Loading board...</div>;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 absolute inset-0">
@@ -208,7 +224,10 @@ export default function KanbanBoard() {
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
           Project Tasks
         </h1>
-        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+        >
           <FiPlus /> New Task
         </button>
       </div>
@@ -219,55 +238,81 @@ export default function KanbanBoard() {
             {boardData.columnOrder.map((columnId) => {
               const column = boardData.columns[columnId];
               // map to actual task objects
-              const colTasks = column.taskIds.map(taskId => tasks.find(t => t._id === taskId)).filter(Boolean);
+              const colTasks = column.taskIds
+                .map((taskId) => tasks.find((t) => t._id === taskId))
+                .filter(Boolean);
 
               return (
                 <div key={column.id} className="w-80 flex flex-col shrink-0">
                   <div className="flex items-center justify-between mb-4 px-1">
                     <h3 className="font-semibold text-slate-200 flex items-center gap-2 uppercase tracking-wide text-xs">
                       {column.title}
-                      <span className="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-bold">{colTasks.length}</span>
+                      <span className="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-bold">
+                        {colTasks.length}
+                      </span>
                     </h3>
                   </div>
-                  
+
                   <Droppable droppableId={column.id} isDropDisabled={false}>
                     {(provided, snapshot) => (
                       <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className={`flex-1 min-h-[150px] p-3 rounded-xl transition-colors shadow-inner ${snapshot.isDraggingOver ? 'bg-slate-800/80 ring-2 ring-indigo-500/50' : 'bg-slate-950 border border-slate-800/50'}`}
+                        className={`flex-1 min-h-37.5 p-3 rounded-xl transition-colors shadow-inner ${snapshot.isDraggingOver ? "bg-slate-800/80 ring-2 ring-indigo-500/50" : "bg-slate-950 border border-slate-800/50"}`}
                       >
                         {colTasks.map((task, index) => (
-                          <Draggable key={task._id} draggableId={task._id} index={index} isDragDisabled={false}>
+                          <Draggable
+                            key={task._id}
+                            draggableId={task._id}
+                            index={index}
+                            isDragDisabled={false}
+                          >
                             {(provided, snapshot) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`p-4 mb-3 rounded-xl shadow-md border transition-all group ${snapshot.isDragging ? 'bg-indigo-900/40 border-indigo-500 shadow-xl opacity-90 scale-105 z-50' : 'bg-slate-900 border-slate-700/50 hover:border-slate-600'}`}
+                                className={`p-4 mb-3 rounded-xl shadow-md border transition-all group ${snapshot.isDragging ? "bg-indigo-900/40 border-indigo-500 shadow-xl opacity-90 scale-105 z-50" : "bg-slate-900 border-slate-700/50 hover:border-slate-600"}`}
                               >
                                 <div className="flex justify-between items-start gap-2 mb-1">
                                   {editingTaskId === task._id ? (
-                                    <input 
+                                    <input
                                       value={editTaskTitle}
-                                      onChange={(e) => setEditTaskTitle(e.target.value)}
+                                      onChange={(e) =>
+                                        setEditTaskTitle(e.target.value)
+                                      }
                                       className="w-full text-sm font-semibold bg-slate-950/50 border border-slate-700/50 text-slate-100 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                                       autoFocus
                                     />
                                   ) : (
-                                    <h4 className="text-sm font-semibold text-slate-100">{task.title}</h4>
+                                    <h4 className="text-sm font-semibold text-slate-100">
+                                      {task.title}
+                                    </h4>
                                   )}
                                   <div className="flex gap-1">
                                     {editingTaskId === task._id ? (
                                       <>
-                                        <button onClick={() => setEditingTaskId(null)} className="text-slate-400 hover:text-white p-0.5"><FiX className="w-4 h-4" /></button>
+                                        <button
+                                          onClick={() => setEditingTaskId(null)}
+                                          className="text-slate-400 hover:text-white p-0.5"
+                                        >
+                                          <FiX className="w-4 h-4" />
+                                        </button>
                                       </>
                                     ) : (
                                       <>
-                                        <button onClick={() => startEdit(task)} className="text-slate-500 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
+                                        <button
+                                          onClick={() => startEdit(task)}
+                                          className="text-slate-500 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                                        >
                                           <FiEdit2 className="w-3.5 h-3.5" />
                                         </button>
-                                        <button onClick={() => handleDeleteTask(task._id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
+                                        <button
+                                          onClick={() =>
+                                            handleDeleteTask(task._id)
+                                          }
+                                          className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                                        >
                                           <FiTrash2 className="w-3.5 h-3.5" />
                                         </button>
                                       </>
@@ -275,37 +320,54 @@ export default function KanbanBoard() {
                                   </div>
                                 </div>
                                 {editingTaskId === task._id ? (
-                                  <textarea 
+                                  <textarea
                                     value={editTaskDesc}
-                                    onChange={(e) => setEditTaskDesc(e.target.value)}
+                                    onChange={(e) =>
+                                      setEditTaskDesc(e.target.value)
+                                    }
                                     className="w-full text-xs bg-slate-950/50 border border-slate-700/50 text-slate-300 rounded px-2 py-1 mt-1 mb-2 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none"
                                     rows={2}
                                   />
                                 ) : (
-                                  <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">{task.description}</p>
+                                  <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">
+                                    {task.description}
+                                  </p>
                                 )}
-                                
+
                                 <div className="flex items-center justify-between pt-3 border-t border-slate-800/60 mt-2">
                                   {editingTaskId === task._id ? (
                                     <>
-                                      <input 
+                                      <input
                                         value={editTaskDueDate}
-                                        onChange={(e) => setEditTaskDueDate(e.target.value)}
+                                        onChange={(e) =>
+                                          setEditTaskDueDate(e.target.value)
+                                        }
                                         placeholder="Due Date"
                                         className="w-20 text-[10px] bg-slate-950/50 border border-slate-700/50 text-slate-300 rounded px-1.5 py-0.5 focus:outline-none"
                                       />
-                                      <button onClick={() => handleEditSubmit(task._id)} className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded">Save</button>
+                                      <button
+                                        onClick={() =>
+                                          handleEditSubmit(task._id)
+                                        }
+                                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded"
+                                      >
+                                        Save
+                                      </button>
                                     </>
                                   ) : (
                                     <>
-                                      <div className={`flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded bg-slate-800/60 ${task.dueDate?.toLowerCase() === 'today' || task.dueDate?.toLowerCase() === 'asap' ? 'text-rose-400' : 'text-slate-400'}`}>
+                                      <div
+                                        className={`flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded bg-slate-800/60 ${task.dueDate?.toLowerCase() === "today" || task.dueDate?.toLowerCase() === "asap" ? "text-rose-400" : "text-slate-400"}`}
+                                      >
                                         <FiClock className="w-3.5 h-3.5" />
                                         <span>{task.dueDate}</span>
                                       </div>
                                       <div className="flex items-center gap-1.5 bg-indigo-500/10 px-2.5 py-1 rounded text-xs text-indigo-300 border border-indigo-500/20">
                                         <FiUser className="w-3.5 h-3.5" />
                                         <span className="font-medium tracking-wide">
-                                          {typeof task.assignee === 'object' ? task.assignee.username : task.assignee}
+                                          {typeof task.assignee === "object"
+                                            ? task.assignee.username
+                                            : task.assignee}
                                         </span>
                                       </div>
                                     </>
@@ -329,10 +391,13 @@ export default function KanbanBoard() {
       {/* Task Creation Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div
+            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center p-5 border-b border-slate-800">
               <h2 className="text-lg font-bold text-white">Create New Task</h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-slate-400 hover:text-white transition-colors p-1"
               >
@@ -341,9 +406,11 @@ export default function KanbanBoard() {
             </div>
             <form onSubmit={handleCreateTask} className="p-5 space-y-4 text-sm">
               <div>
-                <label className="block font-medium text-slate-400 mb-1">Task Title <span className="text-red-400">*</span></label>
-                <input 
-                  type="text" 
+                <label className="block font-medium text-slate-400 mb-1">
+                  Task Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="E.g. Fix login UI"
@@ -353,8 +420,10 @@ export default function KanbanBoard() {
                 />
               </div>
               <div>
-                <label className="block font-medium text-slate-400 mb-1">Description</label>
-                <textarea 
+                <label className="block font-medium text-slate-400 mb-1">
+                  Description
+                </label>
+                <textarea
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
                   placeholder="Task details and scope..."
@@ -363,21 +432,31 @@ export default function KanbanBoard() {
                 />
               </div>
               <div>
-                <label className="block font-medium text-slate-400 mb-1">Due Date</label>
-                <input 
-                  type="text" 
+                <label className="block font-medium text-slate-400 mb-1">
+                  Due Date
+                </label>
+                <input
+                  type="text"
                   value={newTaskDueDate}
                   onChange={(e) => setNewTaskDueDate(e.target.value)}
                   placeholder="E.g. Oct 24 or ASAP"
                   className="w-full bg-slate-950/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 />
               </div>
-              
+
               <div className="pt-3 flex justify-end gap-3 text-sm">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-medium text-slate-300 hover:text-white transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 font-medium text-slate-300 hover:text-white transition-colors"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={!newTaskTitle.trim()} className="px-5 py-2 font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 transition-colors shadow-lg shadow-indigo-600/20">
+                <button
+                  type="submit"
+                  disabled={!newTaskTitle.trim()}
+                  className="px-5 py-2 font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 transition-colors shadow-lg shadow-indigo-600/20"
+                >
                   Save Task
                 </button>
               </div>

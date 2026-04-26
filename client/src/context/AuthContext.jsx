@@ -1,11 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import api from '@/services/api';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/services/api";
+import { API_ENDPOINTS } from "@/services/endpoints";
 
 const AuthContext = createContext();
 
@@ -16,7 +14,7 @@ export function AuthProvider({ children }) {
 
   // Mock checking local storage for a session
   useEffect(() => {
-    const storedUser = localStorage.getItem('nexuspace_user');
+    const storedUser = localStorage.getItem("nexuspace_user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -28,14 +26,22 @@ export function AuthProvider({ children }) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (email && password) {
-          const username = email.split('@')[0];
-          const mockUser = { id: 1, name: username, username, email, channels: ['general'], isOnline: true };
+          const username = email.split("@")[0];
+          const mockUser = {
+            id: 1,
+            name: username,
+            username,
+            email,
+            channels: ["general"],
+            isOnline: true,
+          };
+          localStorage.removeItem("nexuspace_token");
           setUser(mockUser);
-          localStorage.setItem('nexuspace_user', JSON.stringify(mockUser));
+          localStorage.setItem("nexuspace_user", JSON.stringify(mockUser));
           resolve(mockUser);
-          router.push('/workspace');
+          router.push("/workspace");
         } else {
-          reject(new Error('Invalid credentials'));
+          reject(new Error("Invalid credentials"));
         }
       }, 500);
     });
@@ -46,14 +52,22 @@ export function AuthProvider({ children }) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (name && email && password) {
-          const username = name.toLowerCase().replace(/\s+/g, '');
-          const mockUser = { id: Date.now(), name, username, email, channels: ['general'], isOnline: true };
+          const username = name.toLowerCase().replace(/\s+/g, "");
+          const mockUser = {
+            id: Date.now(),
+            name,
+            username,
+            email,
+            channels: ["general"],
+            isOnline: true,
+          };
+          localStorage.removeItem("nexuspace_token");
           setUser(mockUser);
-          localStorage.setItem('nexuspace_user', JSON.stringify(mockUser));
+          localStorage.setItem("nexuspace_user", JSON.stringify(mockUser));
           resolve(mockUser);
-          router.push('/workspace');
+          router.push("/workspace");
         } else {
-          reject(new Error('Invalid details'));
+          reject(new Error("Invalid details"));
         }
       }, 500);
     });
@@ -66,22 +80,27 @@ export function AuthProvider({ children }) {
       }
 
       // Hit our new Node Express backend Auth endpoint using the centralized API service
-      const res = await api.post('/auth/google', {
+      const res = await api.post(API_ENDPOINTS.auth.google, {
         credential: credentialResponse.credential, // the encoded ID token
       });
 
       // Backend returns the populated user + JWT
       const { token, ...userData } = res.data;
 
+      localStorage.removeItem("nexuspace_user");
+      localStorage.removeItem("nexuspace_token");
       setUser(userData);
-      localStorage.setItem('nexuspace_user', JSON.stringify(userData));
-      localStorage.setItem('nexuspace_token', token);
-      
-      router.push('/workspace');
+      localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", token);
+
+      router.push("/workspace");
       return userData;
     } catch (error) {
-      console.error('Google Auth Error:', error);
-      throw new Error(error.response?.data?.message || 'Authentication with Nexuspace Server failed');
+      console.error("Google Auth Error:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Authentication with Nexuspace Server failed",
+      );
     }
   };
 
@@ -89,14 +108,14 @@ export function AuthProvider({ children }) {
     if (user) {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
-      localStorage.setItem('nexuspace_user', JSON.stringify(updatedUser));
+      localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
     }
   };
 
   const joinChannel = (channelName) => {
     if (user) {
       // Prevent duplicates
-      const currentChannels = user.channels || ['general'];
+      const currentChannels = user.channels || ["general"];
       if (!currentChannels.includes(channelName)) {
         const updatedChannels = [...currentChannels, channelName];
         updateProfile({ channels: updatedChannels });
@@ -106,13 +125,24 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('nexuspace_user');
-    localStorage.removeItem('nexuspace_token');
-    router.push('/login');
+    localStorage.removeItem("nexuspace_user");
+    localStorage.removeItem("nexuspace_token");
+    router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateProfile, joinChannel }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        loginWithGoogle,
+        register,
+        logout,
+        updateProfile,
+        joinChannel,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
