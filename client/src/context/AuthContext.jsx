@@ -7,6 +7,9 @@ import { API_ENDPOINTS } from "@/services/endpoints";
 
 const AuthContext = createContext();
 
+const isLikelyJwt = (token) =>
+  typeof token === "string" && token.split(".").length === 3;
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -87,13 +90,19 @@ export function AuthProvider({ children }) {
       // Backend returns the populated user + JWT
       const { token, ...userData } = res.data;
 
+      if (!isLikelyJwt(token)) {
+        throw new Error(
+          res.data?.message || "Google login failed. Please try again.",
+        );
+      }
+
       localStorage.removeItem("nexuspace_user");
       localStorage.removeItem("nexuspace_token");
       setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       localStorage.setItem("nexuspace_token", token);
 
-      router.push("/workspace");
+      router.replace("/workspace");
       return userData;
     } catch (error) {
       console.error("Google Auth Error:", error);

@@ -1,23 +1,45 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { DragDropContext } from '@hello-pangea/dnd';
-import KanbanColumn from './KanbanColumn';
+import { useState, useEffect } from "react";
+import { DragDropContext } from "@hello-pangea/dnd";
+import KanbanColumn from "./KanbanColumn";
 
 // Mock initial data
 const initialData = {
   tasks: {
-    'task-1': { id: 'task-1', title: 'Design Database Schema', assignee: 'Lavkesh', tags: [{ name: 'Backend', color: 'indigo' }], date: 'Oct 24' },
-    'task-2': { id: 'task-2', title: 'Implement Kanban UI', assignee: 'Ash', tags: [{ name: 'Frontend', color: 'purple' }], date: 'Oct 25' },
-    'task-3': { id: 'task-3', title: 'Setup Socket.io Server', assignee: 'Lavkesh', tags: [{ name: 'Sockets', color: 'blue' }], date: 'Oct 26' },
+    "task-1": {
+      id: "task-1",
+      title: "Design Database Schema",
+      assignee: "Lavkesh",
+      tags: [{ name: "Backend", color: "indigo" }],
+      date: "Oct 24",
+    },
+    "task-2": {
+      id: "task-2",
+      title: "Implement Kanban UI",
+      assignee: "Ash",
+      tags: [{ name: "Frontend", color: "purple" }],
+      date: "Oct 25",
+    },
+    "task-3": {
+      id: "task-3",
+      title: "Setup Socket.io Server",
+      assignee: "Lavkesh",
+      tags: [{ name: "Sockets", color: "blue" }],
+      date: "Oct 26",
+    },
   },
   columns: {
-    'col-1': { id: 'col-1', title: 'To Do', taskIds: ['task-3'] },
-    'col-2': { id: 'col-2', title: 'In Progress', taskIds: ['task-1', 'task-2'] },
-    'col-3': { id: 'col-3', title: 'Review', taskIds: [] },
-    'col-4': { id: 'col-4', title: 'Done', taskIds: [] },
+    "col-1": { id: "col-1", title: "To Do", taskIds: ["task-3"] },
+    "col-2": {
+      id: "col-2",
+      title: "In Progress",
+      taskIds: ["task-1", "task-2"],
+    },
+    "col-3": { id: "col-3", title: "Review", taskIds: [] },
+    "col-4": { id: "col-4", title: "Done", taskIds: [] },
   },
-  columnOrder: ['col-1', 'col-2', 'col-3', 'col-4'],
+  columnOrder: ["col-1", "col-2", "col-3", "col-4"],
 };
 
 export default function KanbanBoard() {
@@ -33,7 +55,11 @@ export default function KanbanBoard() {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return;
 
     const startColumn = data.columns[source.droppableId];
     const finishColumn = data.columns[destination.droppableId];
@@ -45,7 +71,10 @@ export default function KanbanBoard() {
       newTaskIds.splice(destination.index, 0, draggableId);
 
       const newColumn = { ...startColumn, taskIds: newTaskIds };
-      setData({ ...data, columns: { ...data.columns, [newColumn.id]: newColumn } });
+      setData({
+        ...data,
+        columns: { ...data.columns, [newColumn.id]: newColumn },
+      });
       return;
     }
 
@@ -68,23 +97,30 @@ export default function KanbanBoard() {
     });
   };
 
-  if (!isBrowser) return <div className="p-8 text-slate-400">Loading Board...</div>;
+  if (!isBrowser)
+    return <div className="p-8 text-slate-400">Loading Board...</div>;
 
   return (
     <div className="h-full flex flex-col pt-6 pb-2 px-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold font-sans text-white tracking-tight">Sprint Planning</h2>
-          <p className="text-sm text-slate-400 mt-1">Manage tasks and workflow across the team.</p>
+          <h2 className="text-2xl font-bold font-sans text-white tracking-tight">
+            Sprint Planning
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Manage tasks and workflow across the team.
+          </p>
         </div>
       </div>
-      
+
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-6 h-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {data.columnOrder.map((columnId) => {
             const column = data.columns[columnId];
             const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
-            return <KanbanColumn key={column.id} column={column} tasks={tasks} />;
+            return (
+              <KanbanColumn key={column.id} column={column} tasks={tasks} />
+            );
           })}
         </div>
       </DragDropContext>

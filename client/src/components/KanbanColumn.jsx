@@ -1,8 +1,8 @@
 "use client";
 
-import { Droppable } from '@hello-pangea/dnd';
-import TaskCard from './TaskCard';
-import { FiPlus } from 'react-icons/fi';
+import { Droppable } from "@hello-pangea/dnd";
+import TaskCard from "./TaskCard";
+import { FiPlus } from "react-icons/fi";
 
 export default function KanbanColumn({ column, tasks }) {
   return (
@@ -27,7 +27,7 @@ export default function KanbanColumn({ column, tasks }) {
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`flex-1 overflow-y-auto p-3 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent ${
-              snapshot.isDraggingOver ? 'bg-slate-800/20' : ''
+              snapshot.isDraggingOver ? "bg-slate-800/20" : ""
             } transition-colors`}
           >
             {tasks.map((task, index) => (
