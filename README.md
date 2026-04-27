@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./client/public/favicon.ico" width="80" alt="Nexuspace Logo" />
+  <img src="./client/public/web-app-manifest-512x512.png" width="80" alt="Nexuspace Logo" />
   <h1>Nexuspace</h1>
   <p>The world's most performant real-time operating system for teams.</p>
 </div>
