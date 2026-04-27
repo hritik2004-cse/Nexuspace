@@ -77,6 +77,7 @@ const loginUser = asyncHandler(async (req, res) => {
     setAuthCookies(res, tokens, sessionId);
     res.status(200).json(user);
   } catch (error) {
+    console.error(`[Login Failure] RequestId: ${req.requestId} - Error: ${error.message}`);
     res.status(401);
     throw new Error(error.message);
   }
