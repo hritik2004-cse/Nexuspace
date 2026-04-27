@@ -7,6 +7,7 @@ import KanbanColumn from "./KanbanColumn";
 import api from "@/services/api";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useSocket } from "@/context/SocketContext";
+import { toast } from "react-toastify";
 
 const STATUS_COLUMNS = {
   "todo": { id: "todo", title: "To Do" },
@@ -73,7 +74,7 @@ export default function KanbanBoard() {
     try {
       await api.put(`/tasks/${taskId}`, { status: newStatus });
     } catch(err) {
-      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to update task status");
     }
   };
 

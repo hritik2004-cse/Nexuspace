@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import { taskApi } from "@/services/endpoints";
+import { toast } from "react-toastify";
 
 const initialBoardState = {
   columns: {
@@ -130,7 +131,7 @@ export default function KanbanBoard() {
       setNewTaskDesc("");
       setNewTaskDueDate("");
     } catch (error) {
-      console.error("Error creating task:", error);
+      toast.error(error.response?.data?.message || "Error creating task");
     }
   };
 
@@ -139,7 +140,7 @@ export default function KanbanBoard() {
       await taskApi.remove(taskId);
       setTasks((prev) => prev.filter((task) => task._id !== taskId));
     } catch (error) {
-      console.error("Error deleting task:", error);
+      toast.error(error.response?.data?.message || "Error deleting task");
     }
   };
 
@@ -155,7 +156,7 @@ export default function KanbanBoard() {
       );
       setEditingTaskId(null);
     } catch (error) {
-      console.error("Error updating task:", error);
+      toast.error(error.response?.data?.message || "Error updating task");
     }
   };
 

@@ -8,6 +8,7 @@ import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import PinModal from '@/components/PinModal';
+import { toast } from 'react-toastify';
 
 export default function WorkspacePage() {
   const { socket, isConnected } = useSocket();
@@ -27,6 +28,7 @@ export default function WorkspacePage() {
   const [notification, setNotification] = useState(null);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [lockedChannel, setLockedChannel] = useState(null);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   // Authenticate Socket connection
   useEffect(() => {
@@ -78,12 +80,13 @@ export default function WorkspacePage() {
 
   // Handle Real-time Socket Events
   useEffect(() => {
-    if (!socket || !channelId) return;
+    if (!socket || !channelId || !isConnected) return;
     
     // Join the current room using the actual Mongo ID
     socket.emit('join_channel', channelId);
 
     const handleNewMessage = (newMessage) => {
+      console.log("[Socket] Received new message via WebSocket:", newMessage);
       const formatted = {
         ...newMessage,
         id: newMessage._id,
@@ -137,6 +140,8 @@ export default function WorkspacePage() {
     socket.on('hide_typing', handleHideTyping);
     socket.on('receive_notification', handleNotification);
     
+    socket.on('channel_online_count', (count) => setOnlineCount(count));
+    
     // Active Eviction handling
     socket.on('session_expired', (data) => {
       setMessages([]);
@@ -156,7 +161,7 @@ export default function WorkspacePage() {
       socket.off('hide_typing', handleHideTyping);
       socket.off('receive_notification', handleNotification);
     };
-  }, [socket, channelId]);
+  }, [socket, channelId, isConnected]);
 
   const handleSendMessage = async (content, attachment = null) => {
     if (!channelId) return;
@@ -186,7 +191,7 @@ export default function WorkspacePage() {
         return [...prev, formatted];
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      toast.error(error.response?.data?.message || "Error sending message");
     }
   };
 
@@ -219,7 +224,7 @@ export default function WorkspacePage() {
          });
       }
     } catch (error) {
-      console.error("Error reacting to message:", error);
+      toast.error(error.response?.data?.message || "Error reacting to message");
     }
   };
 
@@ -244,7 +249,7 @@ export default function WorkspacePage() {
          });
       }
     } catch (error) {
-      console.error("Error pinning message:", error);
+      toast.error(error.response?.data?.message || "Error pinning message");
     }
   };
 
@@ -276,9 +281,11 @@ export default function WorkspacePage() {
         onEditMessage={handleEditMessage}
         onReactToMessage={handleReactToMessage}
         onPinMessage={handlePinMessage}
-        currentUser={currentUser} 
+        currentUser={user} 
         channelId={channelId}
+        channelName={currentChannel}
         socket={socket}
+        onlineCount={onlineCount}
       />
       
       <PinModal 

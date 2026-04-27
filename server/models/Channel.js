@@ -19,6 +19,10 @@ const channelSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  members: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   pinHash: {
     type: String,
     default: null

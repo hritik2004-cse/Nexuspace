@@ -3,6 +3,7 @@
 import { FiSearch, FiHelpCircle, FiInbox, FiUserPlus, FiCheck, FiMenu } from 'react-icons/fi';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import {
   Dialog,
   DialogContent,
@@ -15,12 +16,15 @@ import {
 export default function Navbar({ onMenuClick }) {
   const searchParams = useSearchParams();
   const currentChannel = searchParams.get('channel') || 'general';
+  const { activeWorkspace } = useWorkspace();
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const handleCopyInvite = () => {
-    const inviteUrl = `${window.location.origin}/invite?channel=${currentChannel}`;
+    // Generate a direct link to the current workspace and channel
+    const workspaceParam = activeWorkspace ? `workspace=${activeWorkspace._id}&` : '';
+    const inviteUrl = `${window.location.origin}/workspace?${workspaceParam}channel=${currentChannel}`;
     navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

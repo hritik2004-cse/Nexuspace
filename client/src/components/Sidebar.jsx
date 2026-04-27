@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2, FiLock } from 'react-icons/fi';
+import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2, FiLock, FiLogOut } from 'react-icons/fi';
 import ProfileModal from './ProfileModal';
+import InboxModal from './InboxModal';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
 import {
   Dialog,
@@ -18,9 +20,11 @@ import {
 
 import api from '@/services/api';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { useSocket } from '@/context/SocketContext';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const { activeWorkspace, workspaces, switchWorkspace, createWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -28,6 +32,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const currentChannel = searchParams.get('channel') || 'general';
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [newChannelName, setNewChannelName] = useState('');
   const [isPrivateChannel, setIsPrivateChannel] = useState(false);
   const [channelPin, setChannelPin] = useState('');
@@ -57,9 +63,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         await api.post(`/workspaces/${activeWorkspace._id}/members`, { memberEmail: inviteEmail });
         setInviteEmail('');
         setIsInviteModalOpen(false);
-        // Toast notification could go here
+        toast.success("Invitation sent successfully!");
       } catch (err) {
-        console.error("Invite failed", err);
+        toast.error(err.response?.data?.message || "Failed to invite user");
       }
     }
   };
@@ -75,8 +81,30 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         }
       }
     };
+    
+    const fetchNotificationsCount = async () => {
+      if (user) {
+        try {
+          const res = await api.get('/notifications');
+          setUnreadCount(res.data.filter(n => !n.isRead).length);
+        } catch (err) {
+          console.error("Failed to fetch notifications", err);
+        }
+      }
+    };
+
     fetchChannels();
-  }, [activeWorkspace]);
+    fetchNotificationsCount();
+  }, [activeWorkspace, user, isInboxOpen]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewNotification = () => {
+      setUnreadCount(prev => prev + 1);
+    };
+    socket.on('receive_notification', handleNewNotification);
+    return () => socket.off('receive_notification', handleNewNotification);
+  }, [socket]);
 
   const handleCreateChannel = async (e) => {
     e.preventDefault();
@@ -105,8 +133,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         setChannelPin('');
         setIsDialogOpen(false);
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${formattedName}`);
+        toast.success(`Channel #${formattedName} created!`);
       } catch (err) {
-        console.error(err);
+        toast.error(err.response?.data?.message || "Failed to create channel");
       }
     }
   };
@@ -119,8 +148,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       if (currentChannel === channels.find(c => c._id === channelId)?.name) {
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=general`);
       }
+      toast.success("Channel deleted");
     } catch (err) {
-      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete channel");
+    }
+  };
+
+  const handleLeaveChannel = async (channelId, e) => {
+    e.stopPropagation();
+    try {
+      await api.post(`/channels/${channelId}/leave`);
+      setChannels(prev => prev.filter(c => c._id !== channelId));
+      if (currentChannel === channels.find(c => c._id === channelId)?.name) {
+        router.push(`/workspace?workspace=${activeWorkspace._id}&channel=general`);
+      }
+      toast.success("Left channel");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to leave channel");
     }
   };
 
@@ -317,14 +361,26 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-500'}`} />
                   {channelObj.name}
                 </button>
-                {activeWorkspace?.owner === user?._id && channelObj.name !== 'general' && (
-                  <button 
-                    onClick={(e) => handleDeleteChannel(channelObj._id, e)}
-                    className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 mr-1"
-                  >
-                    <FiTrash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                  {channelObj.name !== 'general' && (
+                    <button 
+                      onClick={(e) => handleLeaveChannel(channelObj._id, e)}
+                      className="text-slate-500 hover:text-orange-400 p-1"
+                      title="Leave Channel"
+                    >
+                      <FiLogOut className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {(activeWorkspace?.owner === user?._id || channelObj.creator === user?._id) && channelObj.name !== 'general' && (
+                    <button 
+                      onClick={(e) => handleDeleteChannel(channelObj._id, e)}
+                      className="text-slate-500 hover:text-red-400 p-1 ml-1"
+                      title="Delete Channel"
+                    >
+                      <FiTrash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -356,8 +412,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <p className="text-xs text-slate-400">@{user?.username || 'ash'}</p>
           </div>
         </div>
-      <div className="flex gap-2 relative z-10">
-          <button onClick={(e) => e.stopPropagation()} className="text-slate-400 hover:text-white transition-colors p-1"><FiBell className="w-4 h-4" /></button>
+        <div className="flex gap-2 relative z-10">
+          <button onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1 relative">
+            <FiBell className="w-4 h-4" />
+            {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>}
+          </button>
           <button onClick={(e) => { e.stopPropagation(); setIsProfileOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1"><FiSettings className="w-4 h-4" /></button>
         </div>
       </div>
@@ -366,6 +425,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <AnimatePresence>
         {isProfileOpen && (
           <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+        )}
+        {isInboxOpen && (
+          <InboxModal isOpen={isInboxOpen} onClose={() => { setIsInboxOpen(false); setUnreadCount(0); }} />
         )}
       </AnimatePresence>
     </>

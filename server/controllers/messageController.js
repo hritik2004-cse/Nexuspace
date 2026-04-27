@@ -11,7 +11,7 @@ const getMessages = async (req, res) => {
     
     // Convert reactions Map back to a clean object for React
     const formattedMessages = messages.map(msg => {
-      const msgObj = msg.toObject();
+      const msgObj = msg.toObject({ flattenMaps: true });
       const reactionsFormatted = {};
       if (msgObj.reactions) {
         for (const [emoji, users] of Object.entries(msgObj.reactions)) {
@@ -45,7 +45,9 @@ const createMessage = async (req, res) => {
     const populatedMessage = await message.populate('sender', 'name avatar role username');
     
     // Broadcast via socket io attached to req
-    req.io.to(channelId).emit('receive_message', populatedMessage);
+    const room = String(channelId).trim();
+    console.log(`[Socket] Broadcasting message to channel room: "${room}"`);
+    req.io.to(room).emit('receive_message', populatedMessage);
 
     // Advanced Backend Mention Notifier logic
     if (content) {
@@ -53,14 +55,27 @@ const createMessage = async (req, res) => {
       if (mentions) {
         const usernames = mentions.map(m => m.substring(1));
         const User = require('../models/User');
+        const Notification = require('../models/Notification');
         const targetUsers = await User.find({ username: { $in: usernames } });
         
-        targetUsers.forEach(target => {
-           // Do not notify self
+        for (const target of targetUsers) {
            if (target._id.toString() !== req.user._id.toString()) {
+             // Create notification document
+             await Notification.create({
+               recipient: target._id,
+               type: 'mention',
+               entityId: message._id,
+               idempotencyKey: `mention_${message._id}_${target._id}`,
+               content: `${req.user.name} mentioned you in #${channelId}`,
+               senderDetails: {
+                 name: req.user.name,
+                 avatar: req.user.avatar
+               }
+             });
+
              req.io.to(target._id.toString()).emit('receive_notification', `${req.user.name} mentioned you in a channel!`);
            }
-        });
+        }
       }
     }
 

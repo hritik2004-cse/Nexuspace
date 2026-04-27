@@ -31,8 +31,15 @@ const addMember = asyncHandler(async (req, res) => {
   res.status(200).json(workspace);
 });
 
+const joinWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+  const workspace = await workspaceService.joinWorkspaceService(workspaceId, req.user._id);
+  res.status(200).json(workspace);
+});
+
 module.exports = {
   createWorkspace,
   getWorkspaces,
-  addMember
+  addMember,
+  joinWorkspace
 };

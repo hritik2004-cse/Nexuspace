@@ -50,10 +50,11 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
             <img 
               src={isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)} 
               alt="Avatar" 
-              className="w-9 h-9 rounded-full object-cover shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform"
+              referrerPolicy="no-referrer"
+              className="w-9 h-9 rounded-full object-cover shadow outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform"
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform">
               {message.sender.charAt(0).toUpperCase()}
             </div>
           )}
@@ -129,12 +130,14 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                   <div role="button" tabIndex={0} className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-700 rounded transition-colors tooltip-trigger cursor-pointer">
                     <FiSmile className="w-4 h-4" />
                   </div>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 opacity-0 group-hover/react:opacity-100 scale-95 group-hover/react:scale-100 transition-all bg-slate-800 border border-slate-700 rounded-full shadow-xl p-1 flex gap-1 pointer-events-none group-hover/react:pointer-events-auto z-20">
-                    {commonReactions.map(emoji => (
-                      <div role="button" tabIndex={0} key={emoji} onClick={() => onReact(emoji)} className="hover:bg-slate-700 rounded-full p-1 text-lg leading-none transition-transform hover:scale-110 cursor-pointer">
-                        {emoji}
-                      </div>
-                    ))}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 opacity-0 group-hover/react:opacity-100 scale-95 group-hover/react:scale-100 transition-all pointer-events-none group-hover/react:pointer-events-auto z-20">
+                    <div className="bg-slate-800 border border-slate-700 rounded-full shadow-xl p-1 flex gap-1 relative before:content-[''] before:absolute before:-top-2 before:left-0 before:w-full before:h-2">
+                      {commonReactions.map(emoji => (
+                        <div role="button" tabIndex={0} key={emoji} onClick={() => onReact(emoji)} className="hover:bg-slate-700 rounded-full p-1 text-lg leading-none transition-transform hover:scale-110 cursor-pointer">
+                          {emoji}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 {isOwnMessage && (
@@ -159,10 +162,10 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           {/* Reactions Display */}
           {message.reactions && Object.keys(message.reactions).length > 0 && (
             <div className={`flex gap-1 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-              {Object.entries(message.reactions).map(([reaction, count]) => (
+              {Object.entries(message.reactions).map(([reaction, users]) => (
                 <div key={reaction} className="bg-slate-800/80 border border-slate-700/50 rounded-full px-2 py-0.5 text-[11px] flex items-center gap-1 cursor-pointer hover:bg-slate-700 transition-colors" onClick={() => onReact(reaction)}>
                   <span>{reaction}</span>
-                  <span className="text-slate-400 font-medium">{count}</span>
+                  <span className="text-slate-400 font-medium">{users.length}</span>
                 </div>
               ))}
             </div>

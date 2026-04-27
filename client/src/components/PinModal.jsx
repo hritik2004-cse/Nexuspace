@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FiLock, FiAlertCircle } from 'react-icons/fi';
 import api from '@/services/api';
+import { toast } from 'react-toastify';
 
 export default function PinModal({ isOpen, channelId, channelName, onSuccess, onCancel }) {
   const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -15,7 +15,6 @@ export default function PinModal({ isOpen, channelId, channelName, onSuccess, on
     if (!pin || pin.length < 4) return;
     
     setIsLoading(true);
-    setError('');
     
     try {
       const res = await api.post(`/channels/${channelId}/verify-pin`, { pin });
@@ -23,11 +22,11 @@ export default function PinModal({ isOpen, channelId, channelName, onSuccess, on
       onSuccess(res.data.expires_in);
     } catch (err) {
       if (err.response?.status === 429) {
-        setError(err.response.data.message || 'Locked out. Please try again later.');
+        toast.error(err.response.data.message || 'Locked out. Please try again later.');
       } else if (err.response?.status === 401) {
-        setError(err.response.data.message || 'Incorrect PIN.');
+        toast.error(err.response.data.message || 'Incorrect PIN.');
       } else {
-        setError('Error verifying PIN.');
+        toast.error('Error verifying PIN.');
       }
     } finally {
       setIsLoading(false);
@@ -72,22 +71,6 @@ export default function PinModal({ isOpen, channelId, channelName, onSuccess, on
               autoFocus
             />
           </div>
-
-          <AnimatePresence>
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }} 
-                animate={{ opacity: 1, height: 'auto' }} 
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm py-2.5 px-4 rounded-xl flex items-start gap-2">
-                  <FiAlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <p>{error}</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div className="flex gap-3 pt-2">
             <button 

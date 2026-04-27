@@ -61,11 +61,26 @@ const checkPermission = (requiredPermission) => {
 
 const Channel = require('../models/Channel');
 const Workspace = require('../models/Workspace');
+const Message = require('../models/Message');
 const redis = require('../config/redis');
 
 // Verify access to private channels
 const verifyChannelAccess = asyncHandler(async (req, res, next) => {
-  const channelId = req.params.channelId || req.params.id || req.body.channelId;
+  let channelId = req.params.channelId || req.body.channelId;
+  
+  if (!channelId && req.params.id) {
+    if (req.originalUrl.includes('/messages/')) {
+       const message = await Message.findById(req.params.id);
+       if (!message) {
+         res.status(404);
+         throw new Error('Message not found');
+       }
+       channelId = message.channelId;
+    } else {
+       channelId = req.params.id;
+    }
+  }
+
   if (!channelId) {
     return next(); // Skip if no channelId in route
   }

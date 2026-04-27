@@ -7,7 +7,14 @@ const csrfProtection = (req, res, next) => {
   }
 
   // Bypass auth initialization routes
-  const exemptRoutes = ['/api/auth/login', '/api/auth/register', '/api/auth/google', '/api/auth/refresh'];
+  const exemptRoutes = [
+    '/api/auth/login', 
+    '/api/auth/register', 
+    '/api/auth/google', 
+    '/api/auth/refresh',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password'
+  ];
   if (exemptRoutes.includes(req.originalUrl)) {
     return next();
   }

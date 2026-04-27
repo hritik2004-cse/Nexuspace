@@ -22,6 +22,7 @@ const SOCKET_URL = getSocketUrl();
 
 export const socket = io(SOCKET_URL, {
   autoConnect: false, // Wait until user is authenticated/workspace is loaded
+  withCredentials: true,
 });
 
 export const connectSocket = () => {

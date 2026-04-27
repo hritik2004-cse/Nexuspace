@@ -32,7 +32,8 @@ const findOrCreateChannel = async (req, res) => {
           workspaceId: workspace._id,
           creator: req.user._id,
           isPrivate: isPrivateChannel,
-          pinHash
+          pinHash,
+          members: [req.user._id]
         });
       } catch (err) {
         if (err.code === 11000) {
@@ -41,6 +42,14 @@ const findOrCreateChannel = async (req, res) => {
           throw err;
         }
       }
+    }
+
+    if (channel && (!channel.members || !channel.members.some(m => m && m.toString() === req.user._id.toString()))) {
+      channel = await Channel.findByIdAndUpdate(
+        channel._id,
+        { $addToSet: { members: req.user._id } },
+        { new: true }
+      );
     }
 
     res.status(200).json(channel);
@@ -63,8 +72,17 @@ const findOrCreateChannel = async (req, res) => {
 const getWorkspaceChannels = async (req, res) => {
   try {
     const { workspaceId } = req.params;
+    // Find all channels for workspace, but we will return them all for now so they show in sidebar.
+    // Wait, the user wants them removed when they leave. We should only return ones they are a member of, PLUS the 'general' channel which is mandatory.
     const channels = await Channel.find({ workspaceId }).sort({ createdAt: 1 });
-    res.status(200).json(channels);
+    
+    const filteredChannels = channels.filter(c => 
+      c.name === 'general' || 
+      (c.members && c.members.some(m => m && m.toString() === req.user._id.toString())) || 
+      (c.creator && c.creator.toString() === req.user._id.toString())
+    );
+
+    res.status(200).json(filteredChannels);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
@@ -82,8 +100,8 @@ const deleteChannel = async (req, res) => {
 
     // Auth check
     const workspace = await Workspace.findById(channel.workspaceId);
-    if (!workspace || workspace.owner.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized to delete channels in this workspace' });
+    if (!workspace || (workspace.owner.toString() !== req.user._id.toString() && channel.creator.toString() !== req.user._id.toString())) {
+      return res.status(401).json({ message: 'Not authorized to delete this channel' });
     }
 
     await Channel.deleteOne({ _id: id });
@@ -94,4 +112,22 @@ const deleteChannel = async (req, res) => {
   }
 };
 
-module.exports = { findOrCreateChannel, getWorkspaceChannels, deleteChannel };
+const leaveChannel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const channel = await Channel.findById(id);
+    
+    if (!channel) return res.status(404).json({ message: 'Channel not found' });
+    if (channel.name === 'general') return res.status(400).json({ message: 'Cannot leave the general channel' });
+
+    channel.members = channel.members.filter(m => m.toString() !== req.user._id.toString());
+    await channel.save();
+
+    res.status(200).json({ message: 'Left channel successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+module.exports = { findOrCreateChannel, getWorkspaceChannels, deleteChannel, leaveChannel };

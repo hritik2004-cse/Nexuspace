@@ -60,7 +60,9 @@ const workspaceSocket = (io) => {
       socket.join(workspaceId);
     });
 
-    socket.on('join_channel', async (channelId) => {
+    socket.on('join_channel', async (rawChannelId) => {
+      const channelId = String(rawChannelId).trim();
+      console.log(`[Socket] User ${user.username || user.name} joining channel: "${channelId}"`);
       try {
         const channel = await Channel.findById(channelId);
         if (!channel) return socket.emit('channel_error', { message: 'Channel not found' });
@@ -74,13 +76,44 @@ const workspaceSocket = (io) => {
           }
         }
         socket.join(channelId);
+        
+        // Broadcast updated online count
+        const roomSize = io.sockets.adapter.rooms.get(channelId)?.size || 0;
+        io.to(channelId).emit('channel_online_count', roomSize);
       } catch (err) {
         console.error(err);
       }
     });
 
-    socket.on('leave_channel', (channelId) => {
+
+
+    socket.on('leave_channel', (rawChannelId) => {
+      const channelId = String(rawChannelId).trim();
       socket.leave(channelId);
+      
+      const roomSize = io.sockets.adapter.rooms.get(channelId)?.size || 0;
+      io.to(channelId).emit('channel_online_count', roomSize);
+    });
+
+    socket.on('update_reaction', (data) => {
+      const { messageId, reactions, channelId } = data;
+      // Broadcast to everyone in the channel except the sender
+      socket.to(String(channelId).trim()).emit('reaction_updated', { messageId, reactions });
+    });
+
+    socket.on('pin_message', (data) => {
+      const { messageId, isPinned, channelId } = data;
+      // Broadcast to everyone in the channel except the sender
+      socket.to(String(channelId).trim()).emit('message_pinned', { messageId, isPinned });
+    });
+
+    socket.on('disconnecting', () => {
+      for (const room of socket.rooms) {
+        if (room !== socket.id) {
+          const roomSize = (io.sockets.adapter.rooms.get(room)?.size || 1) - 1;
+          socket.to(room).emit('channel_online_count', roomSize);
+        }
+      }
     });
 
     socket.on('disconnect', () => {

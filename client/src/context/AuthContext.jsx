@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { API_ENDPOINTS } from "@/services/endpoints";
+import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
@@ -27,8 +28,9 @@ export function AuthProvider({ children }) {
         setUser(null);
         localStorage.removeItem("nexuspace_user");
         localStorage.removeItem("nexuspace_token");
-        // Destroy legacy cookie just in case
+        // Destroy legacy cookies and proxy tokens
         document.cookie = "nexuspace_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "csrf_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         
         // Explicitly redirect if on a protected route
         if (window.location.pathname.startsWith('/workspace')) {
@@ -117,8 +119,9 @@ export function AuthProvider({ children }) {
         const updatedUser = res.data;
         setUser(updatedUser);
         localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
+        toast.success("Profile updated successfully!");
       } catch (err) {
-        console.error("Profile update failed:", err);
+        toast.error("Profile update failed. Reverting changes.");
         const fallbackUser = { ...user, ...updates };
         setUser(fallbackUser);
         localStorage.setItem("nexuspace_user", JSON.stringify(fallbackUser));
@@ -146,6 +149,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     localStorage.removeItem("nexuspace_user");
     localStorage.removeItem("nexuspace_token");
+    document.cookie = "csrf_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
 

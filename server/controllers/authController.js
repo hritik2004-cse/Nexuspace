@@ -196,6 +196,86 @@ const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const bcrypt = require('bcryptjs');
+const sendEmail = require('../utils/sendEmail');
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const User = require('../models/User');
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    // Prevent email enumeration
+    return res.status(200).json({ success: true, message: 'If an account exists, a reset code was sent.' });
+  }
+
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const salt = await bcrypt.genSalt(10);
+  const hashedCode = await bcrypt.hash(resetCode, salt);
+
+  user.resetPasswordToken = hashedCode;
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+  await user.save();
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Nexuspace Password Reset Code',
+      message: `Your password reset code is: ${resetCode}\nIt expires in 10 minutes.`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #4f46e5;">Password Reset</h2>
+          <p>You requested a password reset. Your 6-digit code is:</p>
+          <h1 style="background: #f1f5f9; padding: 15px; text-align: center; letter-spacing: 5px; color: #1e293b; border-radius: 8px;">${resetCode}</h1>
+          <p>This code expires in 10 minutes.</p>
+        </div>
+      `,
+    });
+    res.status(200).json({ success: true, message: 'Email sent' });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    console.error(err);
+    res.status(500);
+    throw new Error('Email could not be sent');
+  }
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  const User = require('../models/User');
+
+  if (!email || !code || !newPassword) {
+    res.status(400);
+    throw new Error('Please provide email, code, and new password');
+  }
+
+  const user = await User.findOne({
+    email,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user || !user.resetPasswordToken) {
+    res.status(400);
+    throw new Error('Invalid or expired code');
+  }
+
+  const isMatch = await bcrypt.compare(code, user.resetPasswordToken);
+  if (!isMatch) {
+    res.status(400);
+    throw new Error('Invalid code');
+  }
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  user.sessionVersion += 1; // Revoke all sessions
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Password updated successfully' });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -204,5 +284,7 @@ module.exports = {
   logoutUser,
   logoutAll,
   getMe,
-  updateProfile
+  updateProfile,
+  forgotPassword,
+  resetPassword
 };

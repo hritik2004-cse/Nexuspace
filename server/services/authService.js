@@ -166,13 +166,35 @@ const generateUniqueUsername = async (baseName) => {
 };
 
 const googleLoginService = async (credential, sessionId, ip, userAgent) => {
-  const ticket = await client.verifyIdToken({
-    idToken: credential,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
+  let sub, email, name, picture;
 
-  const payload = ticket.getPayload();
-  const { sub, email, name, picture } = payload;
+  try {
+    // Try verifying as ID token first (for legacy compatibility)
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    sub = payload.sub;
+    email = payload.email;
+    name = payload.name;
+    picture = payload.picture;
+  } catch (err) {
+    // If it fails, assume it's an access token from useGoogleLogin implicit flow
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${credential}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to verify Google access token');
+    }
+    
+    const data = await response.json();
+    sub = data.sub;
+    email = data.email;
+    name = data.name;
+    picture = data.picture;
+  }
 
   let user = await User.findOne({ email });
 

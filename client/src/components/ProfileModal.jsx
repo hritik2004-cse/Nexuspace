@@ -109,7 +109,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   </span>
                 </div>
                 {profileData.bio && <p className="text-slate-400 mt-4 text-sm leading-relaxed max-w-sm mx-auto">{profileData.bio}</p>}
-                {profileData.email && <p className="text-slate-500 text-sm mt-4 flex items-center justify-center gap-2 bg-white/5 py-2 px-4 rounded-xl inline-flex"><FiMail className="w-4 h-4"/> {profileData.email}</p>}
+                {profileData.email && <p className="text-slate-500 text-sm mt-4 items-center justify-center gap-2 bg-white/5 py-2 px-4 rounded-xl inline-flex"><FiMail className="w-4 h-4"/> {profileData.email}</p>}
               </div>
             ) : (
               <>

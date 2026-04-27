@@ -1,52 +1,144 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
-import { GoogleLogin } from "@react-oauth/google";
+import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
+import { useGoogleLogin } from "@react-oauth/google";
+import { motion, AnimatePresence } from "framer-motion";
+import api from "@/services/api";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
+  
+  // Login State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  // Forgot Password State
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotCode, setForgotCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("nexuspace_remember_email");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(t => t - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleGoogleSuccess = async (tokenResponse) => {
     setLoading(true);
     setError("");
     try {
-      await loginWithGoogle(credentialResponse);
+      await loginWithGoogle({ credential: tokenResponse.access_token });
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleError = () => {
-    setError("Google login popup was closed or failed.");
-  };
+  const loginWithGoogleFlow = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => {
+      setError("Google login popup was closed or failed.");
+      toast.error("Google login popup was closed or failed.");
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
+    if (rememberMe) {
+      localStorage.setItem("nexuspace_remember_email", email);
+    } else {
+      localStorage.removeItem("nexuspace_remember_email");
+    }
+
     try {
       await login(email, password);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      await api.post("/auth/forgot-password", { email: forgotEmail });
+      toast.success("If an account exists, a reset code was sent.");
+      setResendTimer(60);
+      setForgotStep(2);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      await api.post("/auth/reset-password", { email: forgotEmail, code: forgotCode, newPassword });
+      toast.success("Password reset successfully!");
+      setForgotStep(3);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const getPasswordStrength = (pass) => {
+    let strength = 0;
+    if (pass.length > 7) strength += 25;
+    if (pass.match(/[A-Z]/)) strength += 25;
+    if (pass.match(/[0-9]/)) strength += 25;
+    if (pass.match(/[^a-zA-Z0-9]/)) strength += 25;
+    return strength;
+  };
+  const strength = getPasswordStrength(newPassword);
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-100 relative overflow-hidden">
-      {/* Background glowing orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+      {/* Animated Background Framer Motion */}
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"
+      />
 
       <div className="max-w-md w-full space-y-8 bg-slate-900/50 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
         <div>
@@ -57,13 +149,12 @@ export default function LoginPage() {
             Sign in to access your workspaces.
           </p>
         </div>
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div className="relative group">
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
+              <label htmlFor="email-address" className="sr-only">Email address</label>
+              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5 z-10" />
               <input
                 id="email-address"
                 name="email"
@@ -76,20 +167,25 @@ export default function LoginPage() {
               />
             </div>
             <div className="relative group">
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
+              <label htmlFor="password" className="sr-only">Password</label>
+              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors w-5 h-5 z-10" />
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-lg relative block w-full px-10 py-3 bg-slate-950/50 border border-slate-700/50 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
                 placeholder="Password"
               />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition-colors z-10 cursor-pointer"
+              >
+                {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
@@ -97,100 +193,166 @@ export default function LoginPage() {
             <div className="flex items-center">
               <input
                 id="remember-me"
-                name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-indigo-500 focus:ring-indigo-500/50 border-slate-700 rounded bg-slate-950"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-indigo-500 focus:ring-indigo-500/50 border-slate-700 rounded bg-slate-950 cursor-pointer"
               />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-slate-400"
-              >
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-400 cursor-pointer">
                 Remember me
               </label>
             </div>
 
             <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+              <button
+                type="button"
+                onClick={() => setForgotOpen(true)}
+                className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
               >
                 Forgot password?
-              </a>
+              </button>
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20">
-              {error}
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 transition-all disabled:opacity-70 cursor-pointer shadow-lg shadow-indigo-600/20"
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <FiArrowRight
-                  className="h-5 w-5 text-indigo-400 group-hover:text-indigo-300 transition-colors"
-                  aria-hidden="true"
-                />
-              </span>
               {loading ? "Signing in..." : "Sign in"}
+              {!loading && (
+                <FiArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300 group-hover:translate-x-1 transition-transform" />
+              )}
             </button>
           </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700"></div>
+              <div className="w-full border-t border-slate-700/50"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-900/50 text-slate-400">
-                Or continue with
-              </span>
+              <span className="px-2 bg-slate-900 text-slate-400">Or continue with</span>
             </div>
           </div>
 
-          <div className="flex justify-center mt-4">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="filled_black"
-              shape="rectangular"
-              text="continue_with"
-            />
+          <div>
+            <button
+              type="button"
+              onClick={() => loginWithGoogleFlow()}
+              className="group relative w-full flex justify-center py-3 px-4 border border-slate-700/50 text-sm font-bold rounded-lg text-white bg-slate-800 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 focus:ring-offset-slate-900 transition-all cursor-pointer shadow-lg"
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Google
+            </button>
           </div>
 
           <p className="text-center text-xs text-slate-500 mt-3 leading-relaxed">
             By continuing, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="text-indigo-400 hover:text-indigo-300"
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              className="text-indigo-400 hover:text-indigo-300"
-            >
-              Privacy Policy
-            </Link>
-            .
+            <Link href="/terms" className="text-indigo-400 hover:text-indigo-300">Terms of Service</Link> and{" "}
+            <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300">Privacy Policy</Link>.
           </p>
         </form>
 
         <div className="text-center text-sm text-slate-400 mt-6">
           Don't have an account?{" "}
-          <Link
-            href="/register"
-            className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-          >
+          <Link href="/register" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
             Create an account
           </Link>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {forgotOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-md w-full shadow-2xl relative"
+            >
+              <button 
+                onClick={() => { setForgotOpen(false); setForgotStep(1); }}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white cursor-pointer"
+              >✕</button>
+
+              {forgotStep === 1 && (
+                <form onSubmit={handleForgotPassword} className="space-y-6">
+                  <h3 className="text-2xl font-bold text-white">Reset Password</h3>
+                  <p className="text-slate-400 text-sm">Enter your email and we'll send you a 6-digit reset code.</p>
+                  
+                  <input type="email" required value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="Email address" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  
+                  <button type="submit" disabled={forgotLoading} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-500 transition-colors disabled:opacity-50">
+                    {forgotLoading ? "Sending..." : "Send Code"}
+                  </button>
+                </form>
+              )}
+
+              {forgotStep === 2 && (
+                <form onSubmit={handleResetPassword} className="space-y-5">
+                  <h3 className="text-2xl font-bold text-white">Enter Code</h3>
+                  <p className="text-slate-400 text-sm">We sent a code to {forgotEmail}</p>
+
+                  <input type="text" required maxLength={6} value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, ''))} placeholder="6-digit code" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 outline-none text-center text-2xl tracking-[0.5em] font-mono" />
+                  
+                  <div className="relative">
+                    <input type={showPassword ? "text" : "password"} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 outline-none pr-10" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+
+                  {/* Strength Indicator */}
+                  {newPassword && (
+                    <div className="flex gap-1 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden mt-2">
+                      <div className={`h-full transition-all ${strength > 0 ? 'bg-rose-500 w-1/4' : 'w-0'} ${strength >= 50 && 'bg-amber-500 w-2/4'} ${strength >= 75 && 'bg-emerald-400 w-3/4'} ${strength === 100 && 'bg-emerald-500 w-full'}`}></div>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={forgotLoading || newPassword.length < 8 || forgotCode.length < 6} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-500 transition-colors disabled:opacity-50">
+                    {forgotLoading ? "Resetting..." : "Reset Password"}
+                  </button>
+
+                  <div className="text-center">
+                    <button type="button" disabled={resendTimer > 0} onClick={handleForgotPassword} className="text-sm text-slate-400 hover:text-white disabled:opacity-50 transition-colors">
+                      {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive a code? Resend"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {forgotStep === 3 && (
+                <div className="text-center space-y-6 py-4">
+                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-400">
+                    <FiCheckCircle className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Password Reset!</h3>
+                  <p className="text-slate-400">Your password has been successfully updated. You can now sign in with your new password.</p>
+                  <button onClick={() => { setForgotOpen(false); setForgotStep(1); }} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-500 transition-colors">
+                    Back to Login
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

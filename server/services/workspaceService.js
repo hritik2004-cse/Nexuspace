@@ -41,8 +41,20 @@ const addMemberService = async (workspaceId, memberEmail, ownerId) => {
   return workspace;
 };
 
+const joinWorkspaceService = async (workspaceId, userId) => {
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) throw new Error('Workspace not found');
+  
+  if (!workspace.members.includes(userId)) {
+    workspace.members.push(userId);
+    await workspace.save();
+  }
+  return workspace;
+};
+
 module.exports = {
   createWorkspaceService,
   getWorkspacesService,
-  addMemberService
+  addMemberService,
+  joinWorkspaceService
 };

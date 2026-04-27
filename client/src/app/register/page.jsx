@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { FiUser, FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -11,16 +12,14 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       await register(name, email, password);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -86,8 +85,6 @@ export default function RegisterPage() {
               />
             </div>
           </div>
-
-          {error && <div className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20">{error}</div>}
 
           <div>
             <button

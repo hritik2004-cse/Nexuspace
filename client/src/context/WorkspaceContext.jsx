@@ -26,15 +26,30 @@ export function WorkspaceProvider({ children }) {
         const res = await api.get('/workspaces');
         setWorkspaces(res.data);
 
-        if (res.data.length > 0) {
-          // If a workspace ID is in the URL and valid, select it.
+        if (workspaceParam) {
           const urlMatch = res.data.find(w => w._id === workspaceParam);
           if (urlMatch) {
             setActiveWorkspace(urlMatch);
+            localStorage.setItem('lastActiveWorkspaceId', urlMatch._id);
           } else {
-            // Default to the first joined workspace
-            setActiveWorkspace(res.data[0]);
+            // Attempt to join the workspace if they clicked an invite link
+            try {
+              const joinRes = await api.post(`/workspaces/${workspaceParam}/join`);
+              setWorkspaces([...res.data, joinRes.data]);
+              setActiveWorkspace(joinRes.data);
+              localStorage.setItem('lastActiveWorkspaceId', joinRes.data._id);
+            } catch (err) {
+              const fallback = res.data[0] || null;
+              setActiveWorkspace(fallback);
+              if (fallback) localStorage.setItem('lastActiveWorkspaceId', fallback._id);
+            }
           }
+        } else if (res.data.length > 0) {
+          const lastId = localStorage.getItem('lastActiveWorkspaceId');
+          const lastMatch = res.data.find(w => w._id === lastId);
+          const selected = lastMatch || res.data[0];
+          setActiveWorkspace(selected);
+          localStorage.setItem('lastActiveWorkspaceId', selected._id);
         }
       } catch (error) {
         console.error("Error fetching workspaces:", error);
@@ -61,6 +76,7 @@ export function WorkspaceProvider({ children }) {
     const match = workspaces.find(w => w._id === id);
     if (match) {
       setActiveWorkspace(match);
+      localStorage.setItem('lastActiveWorkspaceId', match._id);
       router.push(`/workspace?workspace=${id}`);
     }
   };

@@ -15,6 +15,14 @@ const notificationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  content: {
+    type: String,
+    required: true,
+  },
+  senderDetails: {
+    name: String,
+    avatar: String
+  },
   isRead: {
     type: Boolean,
     default: false,

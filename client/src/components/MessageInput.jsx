@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import { FiSend, FiPaperclip, FiSmile, FiX, FiFile } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
 
-export default function MessageInput({ onSendMessage, socket, channelId, currentUser }) {
+import { toast } from 'react-toastify';
+
+export default function MessageInput({ onSendMessage, socket, channelId, channelName, currentUser }) {
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
@@ -33,7 +35,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, current
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("File size exceeds 2MB limit. Please attach a smaller file.");
+        toast.error("File size exceeds 2MB limit. Please attach a smaller file.");
         return;
       }
       const reader = new FileReader();
@@ -59,7 +61,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, current
     setText(val);
     
     if (socket && channelId) {
-      socket.emit('typing', { channelId, username: currentUser });
+      socket.emit('typing', { channelId, username: currentUser?.username || currentUser?.name || 'Unknown' });
       
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
@@ -149,7 +151,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, current
         <textarea
           value={text}
           onChange={handleChange}
-          placeholder="Message #general"
+          placeholder={`Message #${channelName || 'general'}`}
           className="flex-1 bg-transparent text-slate-100 placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none focus:outline-none focus:ring-0 leading-relaxed font-sans w-full"
           rows={1}
           onKeyDown={handleKeyDown}

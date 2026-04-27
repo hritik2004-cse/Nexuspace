@@ -107,7 +107,7 @@ export default function LandingNavbar() {
                         </Link>
                       </div>
                     </div>
-                    <Link href="/platform" className="bg-white/2 border-t border-white/5 p-4 flex justify-between items-center relative z-10 group cursor-pointer hover:bg-white/4 transition-colors block">
+                    <Link href="/platform" className="bg-white/2 border-t border-white/5 p-4 flex justify-between items-center relative z-10 group cursor-pointer hover:bg-white/4 transition-colors">
                       <span className="text-xs font-medium text-slate-400 group-hover:text-white transition-colors">View all platform capabilities</span>
                       <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors group-hover:translate-x-1" />
                     </Link>
