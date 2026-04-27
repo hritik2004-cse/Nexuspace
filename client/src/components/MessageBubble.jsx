@@ -45,7 +45,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
     >
       <div className={`flex max-w-[75%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} gap-3 group`}>
         {/* Avatar */}
-        <div className="flex-shrink-0 mt-1 relative cursor-pointer w-9 h-9" onClick={() => !isOwnMessage && setIsProfileOpen(true)}>
+        <div className="shrink-0 mt-1 relative cursor-pointer w-9 h-9" onClick={() => !isOwnMessage && setIsProfileOpen(true)}>
           { (isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)) ? (
             <img 
               src={isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)} 
@@ -53,7 +53,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
               className="w-9 h-9 rounded-full object-cover shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform"
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform">
               {message.sender.charAt(0).toUpperCase()}
             </div>
           )}
@@ -88,7 +88,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
             <div 
               className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap ${
                 isOwnMessage 
-                  ? 'bg-indigo-600 text-white rounded-tr-sm bg-gradient-to-br from-indigo-500 to-indigo-600 border border-indigo-400/20' 
+                  ? 'bg-indigo-600 text-white rounded-tr-sm bg-linear-to-br from-indigo-500 to-indigo-600 border border-indigo-400/20' 
                   : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700/50'
               }`}
             >

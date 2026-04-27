@@ -27,7 +27,7 @@ export default function PlatformPage() {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-indigo-500/30 group">
+          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-indigo-500/30 group">
             <MessageSquare className="w-10 h-10 text-indigo-400 mb-6 group-hover:scale-110 transition-transform" />
             <h3 className="text-2xl font-bold text-white mb-4">Real-time Chat Engine</h3>
             <p className="text-slate-400 leading-relaxed mb-8">Instant messaging distributed across edge nodes. Create infinite channels, direct messages, and secure client-facing threads without a single millisecond of lag.</p>
@@ -38,7 +38,7 @@ export default function PlatformPage() {
             </ul>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-fuchsia-500/30 group">
+          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-fuchsia-500/30 group">
             <Layout className="w-10 h-10 text-fuchsia-400 mb-6 group-hover:scale-110 transition-transform" />
             <h3 className="text-2xl font-bold text-white mb-4">Predictive Kanban Boards</h3>
             <p className="text-slate-400 leading-relaxed mb-8">Visual project management rendered using optimistic UI. Drag and drop thousands of tasks seamlessly while the backend resolves conflict states automatically.</p>
@@ -49,13 +49,13 @@ export default function PlatformPage() {
             </ul>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-emerald-500/30 group">
+          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-emerald-500/30 group">
             <Zap className="w-10 h-10 text-emerald-400 mb-6 group-hover:scale-110 transition-transform" />
             <h3 className="text-2xl font-bold text-white mb-4">Edge Sync Subsystem</h3>
             <p className="text-slate-400 leading-relaxed mb-8">Your entire workspace shares a singular source of truth. The millisecond a task moves or a letter is typed, our backend propagates the event worldwide.</p>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-rose-500/30 group">
+          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-rose-500/30 group">
             <Shield className="w-10 h-10 text-rose-400 mb-6 group-hover:scale-110 transition-transform" />
             <h3 className="text-2xl font-bold text-white mb-4">Enterprise Security</h3>
             <p className="text-slate-400 leading-relaxed mb-8">Instantly branch off entirely separate Workspaces for private clients or secure internal ops without cross-pollution. Compliant with strict SOC2 standards.</p>

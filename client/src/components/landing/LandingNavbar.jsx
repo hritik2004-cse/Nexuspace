@@ -61,7 +61,7 @@ export default function LandingNavbar() {
                     className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] bg-slate-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden z-50"
                   >
                     <div className="p-6 grid grid-cols-2 gap-6 relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+                      <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
                       
                       <div className="flex flex-col gap-2 relative z-10">
                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Features</h4>
@@ -107,7 +107,7 @@ export default function LandingNavbar() {
                         </Link>
                       </div>
                     </div>
-                    <Link href="/platform" className="bg-white/[0.02] border-t border-white/5 p-4 flex justify-between items-center relative z-10 group cursor-pointer hover:bg-white/[0.04] transition-colors block">
+                    <Link href="/platform" className="bg-white/2 border-t border-white/5 p-4 flex justify-between items-center relative z-10 group cursor-pointer hover:bg-white/4 transition-colors block">
                       <span className="text-xs font-medium text-slate-400 group-hover:text-white transition-colors">View all platform capabilities</span>
                       <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors group-hover:translate-x-1" />
                     </Link>
@@ -177,8 +177,8 @@ export default function LandingNavbar() {
           <div className="flex items-center gap-6">
             <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors hidden sm:block">Log in</Link>
             <Link href="/register">
-              <button className="text-sm font-bold bg-gradient-to-r from-white to-slate-200 text-black px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)] flex items-center gap-2 relative group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+              <button className="text-sm font-bold bg-linear-to-r from-white to-slate-200 text-black px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)] flex items-center gap-2 relative group overflow-hidden">
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                 Start Free <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>

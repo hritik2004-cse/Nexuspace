@@ -81,17 +81,17 @@ function handleWebhook(event) {
           <div className="md:w-1/2 relative">
              <div className="absolute inset-0 bg-orange-500/10 blur-[80px] rounded-full"></div>
              <div className="w-full h-80 rounded-3xl border border-white/10 bg-[#0a0a0f] relative z-10 p-6 flex flex-col gap-4 shadow-2xl">
-               <div className="h-12 w-full border border-white/5 bg-white/[0.02] rounded-xl flex items-center px-4 gap-4">
+               <div className="h-12 w-full border border-white/5 bg-white/2 rounded-xl flex items-center px-4 gap-4">
                  <div className="w-4 h-4 rounded border border-orange-500/50 bg-orange-500/20"></div>
                  <div className="h-2 w-32 bg-white/20 rounded-full"></div>
                  <div className="ml-auto h-6 w-16 bg-white/5 rounded-full"></div>
                </div>
-               <div className="h-12 w-full border border-white/5 bg-white/[0.02] rounded-xl flex items-center px-4 gap-4">
+               <div className="h-12 w-full border border-white/5 bg-white/2 rounded-xl flex items-center px-4 gap-4">
                  <div className="w-4 h-4 rounded border border-white/20"></div>
                  <div className="h-2 w-48 bg-white/20 rounded-full"></div>
                  <div className="ml-auto h-6 w-16 bg-white/5 rounded-full"></div>
                </div>
-               <div className="h-12 w-full border border-white/5 bg-white/[0.02] rounded-xl flex items-center px-4 gap-4">
+               <div className="h-12 w-full border border-white/5 bg-white/2 rounded-xl flex items-center px-4 gap-4">
                  <div className="w-4 h-4 rounded border border-white/20"></div>
                  <div className="h-2 w-24 bg-white/20 rounded-full"></div>
                  <div className="ml-auto h-6 w-16 bg-white/5 rounded-full"></div>

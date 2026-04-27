@@ -20,7 +20,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-white to-slate-500 mb-2"
                >
                  99.9%
                </motion.span>
@@ -35,7 +35,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5, delay: 0.1 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-indigo-400 to-purple-500 mb-2"
                >
                  &lt;50ms
                </motion.span>
@@ -50,7 +50,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5, delay: 0.2 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-cyan-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-emerald-400 to-cyan-500 mb-2"
                >
                  10k+
                </motion.span>

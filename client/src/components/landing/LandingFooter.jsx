@@ -20,7 +20,7 @@ export default function LandingFooter() {
               <span className="text-sm font-semibold text-white">Subscribe to the Changelog</span>
               <form className="flex border border-white/10 rounded-xl overflow-hidden focus-within:border-indigo-500 transition-colors">
                 <input type="email" placeholder="Email address..." className="bg-white/5 w-full px-4 py-3 text-sm text-white focus:outline-none placeholder:text-slate-500" />
-                <button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 hover:from-indigo-500 hover:to-purple-500 transition-colors">
+                <button type="submit" className="bg-linear-to-r from-indigo-600 to-purple-600 px-4 py-3 hover:from-indigo-500 hover:to-purple-500 transition-colors">
                   <ArrowRight className="w-4 h-4 text-white" />
                 </button>
               </form>
@@ -61,7 +61,7 @@ export default function LandingFooter() {
           <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
              © {new Date().getFullYear()} Nexuspace Inc. All rights reserved.
           </div>
-          <div className="flex items-center gap-6 text-slate-400 border border-white/5 py-2 px-6 rounded-full bg-white/[0.01]">
+          <div className="flex items-center gap-6 text-slate-400 border border-white/5 py-2 px-6 rounded-full bg-white/1">
              <div className="flex items-center gap-2 text-xs font-bold"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> All Systems Operational</div>
           </div>
           <div className="flex items-center gap-4">

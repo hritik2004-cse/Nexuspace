@@ -57,7 +57,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   className="w-28 h-28 rounded-full object-cover shadow-2xl ring-4 ring-[#0a0a0f] relative z-10"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-4xl shadow-2xl ring-4 ring-[#0a0a0f] relative z-10">
+                <div className="w-28 h-28 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-4xl shadow-2xl ring-4 ring-[#0a0a0f] relative z-10">
                   {profileData.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
               )}
@@ -121,7 +121,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white/[0.02] border border-white/10 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/[0.04]"
+                  className="w-full bg-white/2 border border-white/10 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/4"
                 />
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   onChange={(e) => setCustomTitle(e.target.value)}
                   maxLength={50}
                   placeholder="e.g. Member, Developer, Designer..."
-                  className="w-full bg-white/[0.02] border border-white/10 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/[0.04]"
+                  className="w-full bg-white/2 border border-white/10 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/4"
                 />
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
-                  className="w-full bg-white/[0.02] border border-white/10 text-white rounded-xl pl-9 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/[0.04]"
+                  className="w-full bg-white/2 border border-white/10 text-white rounded-xl pl-9 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/4"
                 />
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself..."
                 rows={3}
-                className="w-full bg-white/[0.02] border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans resize-none placeholder:text-slate-600 hover:bg-white/[0.04]"
+                className="w-full bg-white/2 border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans resize-none placeholder:text-slate-600 hover:bg-white/4"
               />
             </div>
             
@@ -229,7 +229,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
             onClick={() => setIsViewingImage(false)}
           >
             <button 

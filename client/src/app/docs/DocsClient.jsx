@@ -22,7 +22,7 @@ const CodeBlock = ({ code, language = "bash" }) => {
 
   return (
     <div className="relative mt-4 mb-6 rounded-xl overflow-hidden border border-white/10 bg-[#0a0a0f] group">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/[0.02]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/2">
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-slate-500" />
           <span className="text-xs font-mono text-slate-400">{language}</span>

@@ -66,7 +66,7 @@ export default function ChangelogClient() {
           <p className="text-slate-400 text-xl max-w-2xl">A history of updates, improvements, and fixes to the Nexuspace engine.</p>
         </div>
 
-        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent mb-32">
+        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-white/10 before:to-transparent mb-32">
           {CHANGELOG_DATA.map((item, idx) => {
             const isExpanded = expanded === item.version;
             return (
@@ -74,7 +74,7 @@ export default function ChangelogClient() {
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-slate-950 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
                   <div className={`w-3 h-3 rounded-full ${item.latest ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]' : 'bg-white/20'}`}></div>
                 </div>
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer" onClick={() => setExpanded(isExpanded ? null : item.version)}>
+                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 rounded-2xl border border-white/10 bg-white/2 hover:bg-white/4 transition-colors cursor-pointer" onClick={() => setExpanded(isExpanded ? null : item.version)}>
                   <div className="flex items-center justify-between mb-2">
                     <time className="text-sm font-medium text-slate-400">{item.date}</time>
                     <div className="flex items-center gap-2">

@@ -62,7 +62,7 @@ export default function HowItWorks() {
         >
           {steps.map((step, idx) => (
             <motion.div key={idx} variants={itemVariants} className="flex flex-col items-center text-center group relative z-10">
-              <div className="w-20 h-20 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-center shadow-xl group-hover:-translate-y-2 transition-transform duration-300">
+              <div className="w-20 h-20 rounded-2xl bg-white/2 border border-white/10 flex items-center justify-center shadow-xl group-hover:-translate-y-2 transition-transform duration-300">
                 {step.icon}
               </div>
               <h3 className="text-2xl font-bold text-white mt-8 mb-4">{step.title}</h3>
@@ -77,7 +77,7 @@ export default function HowItWorks() {
                whileInView={{ width: "35%", opacity: 1 }} 
                viewport={{ once: true }}
                transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-               className="h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent relative flex items-center"
+               className="h-px bg-linear-to-r from-transparent via-indigo-500/50 to-transparent relative flex items-center"
              >
                 <ArrowRight className="absolute -right-3 text-indigo-500/50 w-6 h-6" />
              </motion.div>
@@ -86,7 +86,7 @@ export default function HowItWorks() {
                whileInView={{ width: "35%", opacity: 1 }} 
                viewport={{ once: true }}
                transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-               className="h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent relative flex items-center"
+               className="h-px bg-linear-to-r from-transparent via-fuchsia-500/50 to-transparent relative flex items-center"
              >
                 <ArrowRight className="absolute -right-3 text-fuchsia-500/50 w-6 h-6" />
              </motion.div>

@@ -41,7 +41,7 @@ function SpotlightCard({ children, className = "" }) {
       onBlur={handleBlur}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] ${className}`}
+      className={`relative overflow-hidden rounded-3xl border border-white/10 bg-white/2 ${className}`}
     >
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-500"
@@ -89,7 +89,7 @@ export default function Home() {
       <motion.div 
         animate={{ x: cursorPos.x - 300, y: cursorPos.y - 300 }}
         transition={{ type: "tween", ease: "backOut", duration: 0 }}
-        className="fixed top-0 left-0 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-[100px] pointer-events-none z-0 hidden lg:block"
+        className="fixed top-0 left-0 w-[600px] h-[600px] bg-white/2 rounded-full blur-[100px] pointer-events-none z-0 hidden lg:block"
       />
 
       {/* Hyper-Minimal Background Grid */}
@@ -115,7 +115,7 @@ export default function Home() {
             className="text-6xl sm:text-7xl md:text-[8rem] font-black tracking-tighter leading-[0.95] text-center text-white max-w-5xl"
           >
              Synchronize 
-             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-white block px-4">
+             <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-300 to-white block px-4">
                your flow state.
              </span>
           </motion.h1>
@@ -132,12 +132,12 @@ export default function Home() {
             className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link href="/workspace">
-              <button className="group flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-5 rounded-full text-lg lg:text-xl font-bold transition-all shadow-[0_0_50px_-10px_rgba(79,70,229,0.6)] hover:shadow-[0_0_80px_-15px_rgba(79,70,229,0.8)]">
+              <button className="group flex items-center justify-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-5 rounded-full text-lg lg:text-xl font-bold transition-all shadow-[0_0_50px_-10px_rgba(79,70,229,0.6)] hover:shadow-[0_0_80px_-15px_rgba(79,70,229,0.8)]">
                 Start Building Your Workspace in 10 Seconds
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
-            <button className="group flex items-center justify-center gap-2 bg-gradient-to-b from-[#1a1a24] to-[#0a0a0f] border border-white/10 hover:from-white/10 hover:to-white/5 text-white px-10 py-5 rounded-full text-xl font-bold transition-all">
+            <button className="group flex items-center justify-center gap-2 bg-linear-to-b from-[#1a1a24] to-[#0a0a0f] border border-white/10 hover:from-white/10 hover:to-white/5 text-white px-10 py-5 rounded-full text-xl font-bold transition-all">
               Book a Demo
             </button>
           </motion.div>
@@ -146,8 +146,8 @@ export default function Home() {
 
       {/* Infinite Marquee Logos */}
       <div className="relative z-10 w-full overflow-hidden py-10 border-y border-white/5 bg-slate-950/30 backdrop-blur-md">
-        <div className="absolute left-0 w-32 h-full bg-gradient-to-r from-[#030014] to-transparent z-10 top-0"></div>
-        <div className="absolute right-0 w-32 h-full bg-gradient-to-l from-[#030014] to-transparent z-10 top-0"></div>
+        <div className="absolute left-0 w-32 h-full bg-linear-to-r from-[#030014] to-transparent z-10 top-0"></div>
+        <div className="absolute right-0 w-32 h-full bg-linear-to-l from-[#030014] to-transparent z-10 top-0"></div>
         
         <div className="flex gap-20 whitespace-nowrap px-8 w-[200%] animate-[marquee_20s_linear_infinite]">
           {[...INTEGRATION_LOGOS, ...INTEGRATION_LOGOS].map((company, i) => (
@@ -164,7 +164,7 @@ export default function Home() {
           style={{ y: dashboardY, rotateX: dashboardRotateX, scale: dashboardScale }}
           className="mt-24 w-full max-w-6xl px-6 perspective-1000 origin-top"
         >
-          <div className="w-full aspect-[16/9] rounded-2xl border border-white/10 bg-slate-950/80 shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] overflow-hidden backdrop-blur-2xl relative custom-3d-shadow">
+          <div className="w-full aspect-video rounded-2xl border border-white/10 bg-slate-950/80 shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] overflow-hidden backdrop-blur-2xl relative custom-3d-shadow">
             {/* Mock Header */}
             <div className="h-12 border-b border-white/5 flex items-center px-4 gap-3">
               <div className="flex gap-2">
@@ -191,32 +191,32 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-auto flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500"></div>
+                   <div className="w-8 h-8 rounded-full bg-linear-to-tr from-purple-500 to-indigo-500"></div>
                    <div className="w-24 h-3 rounded bg-white/10"></div>
                 </div>
               </div>
               <div className="flex-1 p-8 grid grid-cols-3 gap-6 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-blend-overlay">
                  <div className="flex flex-col gap-4">
                    <div className="w-24 h-4 rounded bg-white/20 mb-2"></div>
-                   <div className="w-full h-24 rounded-lg bg-white/[0.03] border border-white/10 animate-pulse delay-75"></div>
-                   <div className="w-full h-32 rounded-lg bg-white/[0.03] border border-white/10"></div>
+                   <div className="w-full h-24 rounded-lg bg-white/3 border border-white/10 animate-pulse delay-75"></div>
+                   <div className="w-full h-32 rounded-lg bg-white/3 border border-white/10"></div>
                  </div>
                  <div className="flex flex-col gap-4">
                    <div className="w-32 h-4 rounded bg-indigo-400 mb-2 shadow-[0_0_20px_rgba(129,140,248,0.5)]"></div>
                    <div className="w-full h-40 rounded-lg bg-indigo-500/10 border border-indigo-500/20 shadow-lg relative overflow-hidden flex items-center justify-center">
                      <Triangle className="absolute text-indigo-500/20 w-32 h-32 rotate-180 mix-blend-screen" />
                      <Hexagon className="absolute text-purple-500/20 w-24 h-24 rotate-45 mix-blend-screen" />
-                     <motion.div animate={{y: [0, 40, 0]}} transition={{repeat: Infinity, duration: 4}} className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent w-full h-full"></motion.div>
+                     <motion.div animate={{y: [0, 40, 0]}} transition={{repeat: Infinity, duration: 4}} className="absolute inset-0 bg-linear-to-b from-transparent via-white/5 to-transparent w-full h-full"></motion.div>
                    </div>
                  </div>
                  <div className="flex flex-col gap-4">
                    <div className="w-20 h-4 rounded bg-white/20 mb-2"></div>
-                   <div className="w-full h-20 rounded-lg bg-white/[0.03] border border-white/10"></div>
+                   <div className="w-full h-20 rounded-lg bg-white/3 border border-white/10"></div>
                  </div>
               </div>
             </div>
             
-            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-transparent pointer-events-none"></div>
+            <div className="absolute inset-0 bg-linear-to-tr from-indigo-500/10 via-transparent to-transparent pointer-events-none"></div>
           </div>
         </motion.div>
       </div>
@@ -255,7 +255,7 @@ export default function Home() {
                   <div className="w-40 h-12 border border-white/10 rounded-lg flex items-center pl-4 gap-3 bg-white/5 shadow-xl"><div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></div> User Alpha</div>
                   <div className="w-40 h-12 border border-white/10 rounded-lg flex items-center pl-4 gap-3 bg-white/5 shadow-xl"><div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping"></div> User Beta</div>
                 </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent flex-1 relative hidden sm:block">
+                <div className="h-px bg-linear-to-r from-transparent via-indigo-500 to-transparent flex-1 relative hidden sm:block">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-indigo-500 shadow-[0_0_20px_#6366f1] animate-[ping_2s_infinite]"></div>
                 </div>
                 <div className="w-40 h-40 border-4 border-indigo-500/30 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.2)] relative z-10 bg-[#0a0a0f]">
@@ -287,7 +287,7 @@ export default function Home() {
                  <Activity className="text-fuchsia-400 w-8 h-8" />
                </div>
                <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
-                 Uncompromising <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-indigo-400">Data Synchronization</span>
+                 Uncompromising <br /><span className="text-transparent bg-clip-text bg-linear-to-r from-fuchsia-400 to-indigo-400">Data Synchronization</span>
                </h2>
                <p className="text-slate-400 text-xl font-light leading-relaxed mb-10">
                  Our real-time engine pipes millions of WebSockets across geographic zones globally. Whether you are typing a paragraph or dragging a heavy Kanban card, your team perceives it identically sub-millisecond.
@@ -313,7 +313,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Free Tier */}
-          <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.02] flex flex-col items-start hover:border-white/20 transition-colors">
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/2 flex flex-col items-start hover:border-white/20 transition-colors">
             <h3 className="text-2xl font-bold text-white font-sans">Starter</h3>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-5xl font-black text-white">$0</span>
@@ -332,7 +332,7 @@ export default function Home() {
           </div>
 
           {/* Pro Tier */}
-          <div className="p-8 rounded-3xl border border-white/20 bg-white/[0.03] flex flex-col items-start relative shadow-2xl scale-105 z-10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl border border-white/20 bg-white/3 flex flex-col items-start relative shadow-2xl scale-105 z-10 backdrop-blur-md">
             <div className="absolute top-0 right-0 py-1.5 px-4 bg-white/10 text-white text-xs font-bold rounded-bl-xl rounded-tr-3xl uppercase tracking-widest border-b border-l border-white/10">Most Popular</div>
             <h3 className="text-2xl font-bold text-white font-sans">Professional</h3>
             <div className="mt-4 flex items-end gap-1">
@@ -352,7 +352,7 @@ export default function Home() {
           </div>
 
           {/* Enterprise Tier */}
-          <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.02] flex flex-col items-start hover:border-white/20 transition-colors">
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/2 flex flex-col items-start hover:border-white/20 transition-colors">
             <h3 className="text-2xl font-bold text-white font-sans">Enterprise</h3>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-5xl font-black text-white">Custom</span>

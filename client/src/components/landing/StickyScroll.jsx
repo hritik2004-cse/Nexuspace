@@ -74,7 +74,7 @@ export default function StickyScroll() {
 
           {/* Right Imagery Swapper Block */}
           <div className="w-full md:w-[55%] flex items-center justify-center relative">
-             <div className="w-full aspect-square md:aspect-[4/3] rounded-3xl border border-white/10 bg-[#0a0a0f] shadow-2xl overflow-hidden relative group">
+             <div className="w-full aspect-square md:aspect-4/3 rounded-3xl border border-white/10 bg-[#0a0a0f] shadow-2xl overflow-hidden relative group">
                 
                 {/* Scene 1: Chat */}
                 <motion.div 

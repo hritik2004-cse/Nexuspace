@@ -245,7 +245,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800 p-0 overflow-hidden shadow-2xl rounded-2xl">
                 <div className="p-6 border-b border-slate-800 bg-slate-900/50">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold font-sans text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Create Channel</DialogTitle>
+                    <DialogTitle className="text-xl font-bold font-sans text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-purple-400">Create Channel</DialogTitle>
                     <DialogDescription className="text-slate-400 text-sm mt-1.5 leading-relaxed">
                       Channels are where your team communicates. They're best when organized around a topic.
                     </DialogDescription>
@@ -345,7 +345,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 className="w-8 h-8 rounded-full object-cover shadow-lg"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+              <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                 {user?.name?.charAt(0).toUpperCase() || 'A'}
               </div>
             )}

@@ -37,9 +37,9 @@ export default function ComparisonTable() {
         >
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="border-b border-white/10 bg-white/[0.02]">
+              <tr className="border-b border-white/10 bg-white/2">
                 <th className="p-6 text-sm font-semibold text-slate-400 tracking-wide uppercase w-2/5">Feature Matrix</th>
-                <th className="p-6 text-center w-1/5 bg-white/[0.03] border-x border-white/5 relative">
+                <th className="p-6 text-center w-1/5 bg-white/3 border-x border-white/5 relative">
                   <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
                   <div className="inline-flex items-center gap-2 text-indigo-400 font-bold">
                     <Zap className="w-4 h-4 fill-indigo-400" /> Nexuspace
@@ -51,9 +51,9 @@ export default function ComparisonTable() {
             </thead>
             <tbody>
               {features.map((row, idx) => (
-                <tr key={idx} className="border-b border-white/5 hover:bg-white/[0.04] transition-colors duration-200 group">
+                <tr key={idx} className="border-b border-white/5 hover:bg-white/4 transition-colors duration-200 group">
                   <td className="p-6 font-medium text-white transition-colors">{row.name}</td>
-                  <td className="p-6 text-center bg-white/[0.03] border-x border-white/5">
+                  <td className="p-6 text-center bg-white/3 border-x border-white/5">
                     <div className="flex justify-center">
                       {row.nexus ? <Check className="w-6 h-6 text-indigo-400" /> : <X className="w-6 h-6 text-slate-600" />}
                     </div>

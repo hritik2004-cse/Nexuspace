@@ -22,7 +22,7 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
           
           {/* Free Tier */}
-          <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.02] flex flex-col items-start hover:border-white/20 transition-colors">
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/2 flex flex-col items-start hover:border-white/20 transition-colors">
             <h3 className="text-2xl font-bold text-white font-sans">Starter</h3>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-5xl font-black text-white">$0</span>
@@ -41,7 +41,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pro Tier */}
-          <div className="p-8 rounded-3xl border border-white/20 bg-white/[0.03] flex flex-col items-start relative shadow-2xl scale-105 z-10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl border border-white/20 bg-white/3 flex flex-col items-start relative shadow-2xl scale-105 z-10 backdrop-blur-md">
             <div className="absolute top-0 right-0 py-1.5 px-4 bg-white/10 text-white text-xs font-bold rounded-bl-xl rounded-tr-3xl uppercase tracking-widest border-b border-l border-white/10">Most Popular</div>
             <h3 className="text-2xl font-bold text-white font-sans">Professional</h3>
             <div className="mt-4 flex items-end gap-1">
@@ -61,7 +61,7 @@ export default function PricingPage() {
           </div>
 
           {/* Enterprise Tier */}
-          <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.02] flex flex-col items-start hover:border-white/20 transition-colors">
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/2 flex flex-col items-start hover:border-white/20 transition-colors">
             <h3 className="text-2xl font-bold text-white font-sans">Enterprise</h3>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-5xl font-black text-white">Custom</span>
