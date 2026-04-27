@@ -30,7 +30,7 @@ validateEnv();
 // 2. Initialize Express app
 const app = express();
 const server = http.createServer(app);
-app.set("trust proxy", 1); // Respect X-Forwarded-For from proxies
+app.set("trust proxy", true); // Respect X-Forwarded-For from all proxies (Render/Cloudflare)
 
 // 3. Connect to MongoDB (Don't await to unblock server startup)
 connectDB();

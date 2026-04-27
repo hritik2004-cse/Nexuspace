@@ -3,9 +3,9 @@ const authService = require('../services/authService');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.VERCEL;
 const cookieOptions = {
-  secure: isProd,
+  secure: isProd ? true : false,
   sameSite: isProd ? 'none' : 'lax',
 };
 
