@@ -55,7 +55,10 @@ export default function KanbanBoard() {
 
     const handleBoardUpdate = (data) => {
       if (data.action === "create") {
-        setTasks((prev) => [data.task, ...prev]);
+        setTasks((prev) => {
+          if (prev.some((t) => t._id === data.task._id)) return prev;
+          return [data.task, ...prev];
+        });
       } else if (data.action === "update") {
         setTasks((prev) =>
           prev.map((t) => (t._id === data.task._id ? data.task : t)),
@@ -118,7 +121,10 @@ export default function KanbanBoard() {
         boardId,
       });
 
-      setTasks((prev) => [res.data, ...prev]);
+      setTasks((prev) => {
+        if (prev.some((t) => t._id === res.data._id)) return prev;
+        return [res.data, ...prev];
+      });
       setIsModalOpen(false);
       setNewTaskTitle("");
       setNewTaskDesc("");

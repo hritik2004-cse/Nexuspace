@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
-  // Extract token from cookies using standard Edge methodology
-  const token = request.cookies.get('nexuspace_token')?.value;
+  // Extract token from cookies. We use csrf_token as a proxy for session existence 
+  // because refresh_token is path-restricted to /api/auth/refresh and invisible to Next.js routes.
+  const token = request.cookies.get('csrf_token')?.value;
 
   // Paths requiring authentication
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/workspace');

@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       // Not required because Google OAuth users won't have a password
     },
+    bio: {
+      type: String,
+      maxLength: 160,
+      default: "",
+    },
     avatar: {
       type: String,
       default: "",
@@ -37,6 +42,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Admin", "Member"],
       default: "Member",
+    },
+    customTitle: {
+      type: String,
+      maxLength: 50,
+      default: "Member",
+    },
+    sessionVersion: {
+      type: Number,
+      default: 0,
     },
     channels: [
       {

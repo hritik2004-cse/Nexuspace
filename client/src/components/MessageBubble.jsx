@@ -45,10 +45,10 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
     >
       <div className={`flex max-w-[75%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} gap-3 group`}>
         {/* Avatar */}
-        <div className="flex-shrink-0 mt-1 relative cursor-pointer" onClick={() => !isOwnMessage && setIsProfileOpen(true)}>
-          {isOwnMessage && user?.profileImage ? (
+        <div className="flex-shrink-0 mt-1 relative cursor-pointer w-9 h-9" onClick={() => !isOwnMessage && setIsProfileOpen(true)}>
+          { (isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)) ? (
             <img 
-              src={user.profileImage} 
+              src={isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)} 
               alt="Avatar" 
               className="w-9 h-9 rounded-full object-cover shadow outline outline-2 outline-slate-900 cursor-pointer hover:scale-105 transition-transform"
             />
@@ -67,9 +67,9 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           <div className={`flex items-baseline gap-2 mb-1 px-1 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
             <span className="text-sm font-semibold text-slate-200 flex items-center justify-center gap-1.5 hover:underline decoration-slate-500 underline-offset-2">
               {message.sender}
-              {message.senderDetails?.role === 'Admin' && (
-                <span className="bg-indigo-500/20 text-indigo-400 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">Admin</span>
-              )}
+              <span className="bg-indigo-500/20 text-indigo-400 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
+                {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
+              </span>
             </span>
             <span className="text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">{timeString}</span>
           </div>

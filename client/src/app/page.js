@@ -9,6 +9,7 @@ import { TESTIMONIALS, INTEGRATION_LOGOS } from "@/constants/assets";
 
 // --- Lazy Loaded Heavy Landing Components ---
 const LivePreview = dynamic(() => import('@/components/landing/LivePreview'), { ssr: false });
+import MainLayout from "@/components/landing/MainLayout";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ComparisonTable from "@/components/landing/ComparisonTable";
 import StickyScroll from "@/components/landing/StickyScroll";
@@ -57,13 +58,6 @@ function SpotlightCard({ children, className = "" }) {
 // --- Main Landing Page ---
 export default function Home() {
   const containerRef = useRef(null);
-  const [scrolled, setScrolled] = useState(false);
-  
-  useEffect(() => {
-    const handleScroll = () => { setScrolled(window.scrollY > 50); };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Advanced Scroll Transforms wrapped in smooth Springs
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
@@ -88,7 +82,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main ref={containerRef} className="bg-[#030014] font-sans text-slate-100 selection:bg-indigo-500/30 relative">
+    <MainLayout>
+      <div ref={containerRef} className="relative w-full overflow-clip">
       
       {/* Subtle Global Cursor Glow */}
       <motion.div 
@@ -99,37 +94,6 @@ export default function Home() {
 
       {/* Hyper-Minimal Background Grid */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
-
-      {/* Proper Sticky Navbar */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 border-b ${scrolled ? 'bg-slate-950/80 backdrop-blur-xl border-white/10 py-4 shadow-2xl' : 'bg-transparent border-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/favicon.ico" alt="Nexuspace Logo" className="w-8 h-8 rounded-lg object-contain shadow-lg shadow-indigo-500/20" />
-              <span className="text-2xl font-black tracking-tight text-white">Nexuspace</span>
-            </div>
-            
-            {/* Nav Links */}
-            <div className="hidden lg:flex items-center gap-10 text-sm font-semibold text-slate-300">
-              <span className="hover:text-white transition-colors cursor-pointer flex items-center gap-1 group">Platform <ChevronRight className="w-3 h-3 group-hover:rotate-90 transition-transform"/></span>
-              <span className="hover:text-white transition-colors cursor-pointer flex items-center gap-1 group">Solutions <ChevronRight className="w-3 h-3 group-hover:rotate-90 transition-transform"/></span>
-              <span className="hover:text-white transition-colors cursor-pointer">Pricing</span>
-              <span className="hover:text-white transition-colors cursor-pointer">Changelog</span>
-              <span className="hover:text-white transition-colors cursor-pointer">Docs</span>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors hidden sm:block">Log in</Link>
-              <Link href="/register">
-                <button className="text-sm font-bold bg-gradient-to-r from-white to-slate-200 text-black px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)] flex items-center gap-2 relative group overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
-                  Start Free <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Master */}
       <div className="relative z-10 pt-48 pb-10 flex flex-col items-center justify-center min-h-[90vh]">
@@ -437,82 +401,11 @@ export default function Home() {
          </div>
       </div>
 
-      {/* Massive Mega Footer */}
-      <footer className="relative z-10 border-t border-white/10 bg-[#030014] pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-6 auto-rows-auto">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-20">
-            {/* Branding Column */}
-            <div className="col-span-2 md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <img src="/favicon.ico" alt="Nexuspace Logo" className="w-8 h-8 rounded-lg object-contain shadow-lg shadow-indigo-500/20" />
-                <span className="text-2xl font-black tracking-tight text-white">Nexuspace</span>
-              </div>
-              <p className="text-slate-400 text-sm max-w-sm leading-relaxed mb-8">
-                The world's most performant real-time operating system for teams. Engineered to unify communication and process.
-              </p>
-              {/* Newsletter */}
-              <div className="flex flex-col gap-3 max-w-xs">
-                <span className="text-sm font-semibold text-white">Subscribe to the Changelog</span>
-                <form className="flex border border-white/10 rounded-xl overflow-hidden focus-within:border-indigo-500 transition-colors">
-                  <input type="email" placeholder="Email address..." className="bg-white/5 w-full px-4 py-3 text-sm text-white focus:outline-none placeholder:text-slate-500" />
-                  <button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 hover:from-indigo-500 hover:to-purple-500 transition-colors">
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            {/* Links Columns */}
-            <div>
-              <h4 className="font-bold text-white mb-6">Product</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Workspaces</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Kanban Flow</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Real-time Sockets</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Integrations</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Pricing</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-6">Resources</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Documentation</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">API Reference</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Community</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Blog</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-6">Company</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">About Us</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Careers 🚀</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Contact</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Privacy Policy</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-               © {new Date().getFullYear()} Nexuspace Inc. All rights reserved.
-            </div>
-            <div className="flex items-center gap-6 text-slate-400 border border-white/5 py-2 px-6 rounded-full bg-white/[0.01]">
-               <div className="flex items-center gap-2 text-xs font-bold"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> All Systems Operational</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all"><Github className="w-4 h-4" /></a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all"><Twitter className="w-4 h-4" /></a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all"><Linkedin className="w-4 h-4" /></a>
-            </div>
-          </div>
-        </div>
-      </footer>
-
+      </div>
       {/* Global Style overrides for Tailwind arbitrary animations */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
       `}} />
-    </main>
+    </MainLayout>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2 } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2, FiLock } from 'react-icons/fi';
 import ProfileModal from './ProfileModal';
 import { useAuth } from '@/context/AuthContext';
 import { AnimatePresence } from 'framer-motion';
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/dialog"
 
 import api from '@/services/api';
-import { useEffect } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -29,6 +29,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
+  const [isPrivateChannel, setIsPrivateChannel] = useState(false);
+  const [channelPin, setChannelPin] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
@@ -81,10 +83,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     if (newChannelName.trim() && activeWorkspace) {
       const formattedName = newChannelName.toLowerCase().replace(/\s+/g, '-');
       try {
-        const res = await api.post('/channels/findOrCreate', { 
+        const payload = { 
           name: formattedName, 
-          workspaceId: activeWorkspace._id 
-        });
+          workspaceId: activeWorkspace._id,
+        };
+        
+        if (user?.role === 'Admin') {
+          payload.isPrivate = isPrivateChannel;
+          if (isPrivateChannel) payload.pin = channelPin;
+        }
+
+        const res = await api.post('/channels/findOrCreate', payload);
         
         // Prevent duplicate local appending
         if (!channels.find(c => c._id === res.data._id)) {
@@ -92,6 +101,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         }
         
         setNewChannelName('');
+        setIsPrivateChannel(false);
+        setChannelPin('');
         setIsDialogOpen(false);
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${formattedName}`);
       } catch (err) {
@@ -152,10 +163,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 
                 <div className="pt-2 mt-2 border-t border-slate-700/50">
                   <Dialog open={isWorkspaceModalOpen} onOpenChange={setIsWorkspaceModalOpen}>
-                    <DialogTrigger asChild>
-                      <button className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 hover:bg-slate-800 transition-colors flex items-center">
-                        <FiPlus className="mr-2" /> Create Workspace
-                      </button>
+                    <DialogTrigger className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 hover:bg-slate-800 transition-colors flex items-center">
+                      <FiPlus className="mr-2" /> Create Workspace
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
                       <DialogHeader>
@@ -178,10 +187,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                   {activeWorkspace && activeWorkspace.owner === user?._id && (
                     <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
-                      <DialogTrigger asChild>
-                        <button className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 hover:bg-slate-800 transition-colors flex items-center">
-                          <FiPlus className="mr-2" /> Invite Member
-                        </button>
+                      <DialogTrigger className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 hover:bg-slate-800 transition-colors flex items-center">
+                        <FiPlus className="mr-2" /> Invite Member
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
                         <DialogHeader>
@@ -261,8 +268,38 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                       />
                     </div>
                   </div>
+
+                  {user?.role === 'Admin' && (
+                    <div className="space-y-4 pt-2 border-t border-slate-800">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                          <FiLock className="text-amber-400" /> Make Private
+                        </label>
+                        <input
+                          type="checkbox"
+                          checked={isPrivateChannel}
+                          onChange={(e) => setIsPrivateChannel(e.target.checked)}
+                          className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500"
+                        />
+                      </div>
+                      {isPrivateChannel && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Channel PIN</label>
+                          <input
+                            type="password"
+                            value={channelPin}
+                            onChange={(e) => setChannelPin(e.target.value)}
+                            maxLength={6}
+                            className="w-full bg-slate-950/50 border border-amber-500/30 text-amber-100 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all font-sans tracking-widest text-center shadow-inner"
+                            placeholder="••••"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <DialogFooter className="pt-2">
-                    <button type="submit" disabled={!newChannelName.trim()} className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/20 text-sm font-semibold w-full flex justify-center items-center">
+                    <button type="submit" disabled={!newChannelName.trim() || (isPrivateChannel && !channelPin)} className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/20 text-sm font-semibold w-full flex justify-center items-center">
                       Create Channel
                     </button>
                   </DialogFooter>
@@ -301,9 +338,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       >
         <div className="flex items-center gap-3">
           <div className="relative">
-            {user?.profileImage ? (
+            {user?.avatar || user?.profileImage ? (
               <img 
-                src={user.profileImage} 
+                src={user.avatar || user.profileImage} 
                 alt="Profile" 
                 className="w-8 h-8 rounded-full object-cover shadow-lg"
               />
@@ -324,13 +361,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <button onClick={(e) => { e.stopPropagation(); setIsProfileOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1"><FiSettings className="w-4 h-4" /></button>
         </div>
       </div>
+      </aside>
       
       <AnimatePresence>
         {isProfileOpen && (
           <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
         )}
       </AnimatePresence>
-      </aside>
     </>
   );
 }

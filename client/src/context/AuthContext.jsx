@@ -7,38 +7,50 @@ import { API_ENDPOINTS } from "@/services/endpoints";
 
 const AuthContext = createContext();
 
-const isLikelyJwt = (token) =>
-  typeof token === "string" && token.split(".").length === 3;
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Mock checking local storage for a session
+  // Validate session against backend on load
   useEffect(() => {
-    const storedUser = localStorage.getItem("nexuspace_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const res = await api.get('/auth/me');
+        const userData = res.data;
+        setUser(userData);
+        localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      } catch (err) {
+        if (err.response?.status !== 401) {
+          console.error("Session validation failed:", err.message);
+        }
+        setUser(null);
+        localStorage.removeItem("nexuspace_user");
+        localStorage.removeItem("nexuspace_token");
+        // Destroy legacy cookie just in case
+        document.cookie = "nexuspace_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        
+        // Explicitly redirect if on a protected route
+        if (window.location.pathname.startsWith('/workspace')) {
+          window.location.href = '/login';
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.login, { email, password });
-      const { token, ...userData } = res.data;
-
-      if (!isLikelyJwt(token)) {
-        throw new Error(res.data?.message || "Login failed. Please try again.");
-      }
+      const userData = res.data;
 
       localStorage.removeItem("nexuspace_user");
       localStorage.removeItem("nexuspace_token");
       setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", token);
-      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
 
       router.push("/workspace");
       return userData;
@@ -53,18 +65,12 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.register, { name, email, password });
-      const { token, ...userData } = res.data;
-
-      if (!isLikelyJwt(token)) {
-        throw new Error(res.data?.message || "Registration failed. Please try again.");
-      }
+      const userData = res.data;
 
       localStorage.removeItem("nexuspace_user");
       localStorage.removeItem("nexuspace_token");
       setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", token);
-      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
 
       router.push("/workspace");
       return userData;
@@ -82,26 +88,16 @@ export function AuthProvider({ children }) {
         throw new Error("No Google token received");
       }
 
-      // Hit our new Node Express backend Auth endpoint using the centralized API service
       const res = await api.post(API_ENDPOINTS.auth.google, {
-        credential: credentialResponse.credential, // the encoded ID token
+        credential: credentialResponse.credential,
       });
 
-      // Backend returns the populated user + JWT
-      const { token, ...userData } = res.data;
-
-      if (!isLikelyJwt(token)) {
-        throw new Error(
-          res.data?.message || "Google login failed. Please try again.",
-        );
-      }
+      const userData = res.data;
 
       localStorage.removeItem("nexuspace_user");
       localStorage.removeItem("nexuspace_token");
       setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", token);
-      document.cookie = `nexuspace_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
 
       router.replace("/workspace");
       return userData;
@@ -114,17 +110,24 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const updateProfile = (updates) => {
+  const updateProfile = async (updates) => {
     if (user) {
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
+      try {
+        const res = await api.put('/auth/profile', updates);
+        const updatedUser = res.data;
+        setUser(updatedUser);
+        localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
+      } catch (err) {
+        console.error("Profile update failed:", err);
+        const fallbackUser = { ...user, ...updates };
+        setUser(fallbackUser);
+        localStorage.setItem("nexuspace_user", JSON.stringify(fallbackUser));
+      }
     }
   };
 
   const joinChannel = (channelName) => {
     if (user) {
-      // Prevent duplicates
       const currentChannels = user.channels || ["general"];
       if (!currentChannels.includes(channelName)) {
         const updatedChannels = [...currentChannels, channelName];
@@ -133,11 +136,16 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch(err) {
+      console.error("Logout failed silently", err);
+    }
+    
     setUser(null);
     localStorage.removeItem("nexuspace_user");
     localStorage.removeItem("nexuspace_token");
-    document.cookie = "nexuspace_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
 
@@ -154,7 +162,18 @@ export function AuthProvider({ children }) {
         joinChannel,
       }}
     >
-      {children}
+      {/* 
+        Optional: We can render a full-page loading spinner here if `loading` is true.
+        For now, we let children render, and protected routes can use `loading`.
+      */}
+      {loading ? (
+        <div className="flex h-screen items-center justify-center bg-zinc-950 text-white">
+          <div className="flex flex-col items-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+            <p className="mt-4 text-sm text-zinc-400">Authenticating Secure Session...</p>
+          </div>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 }

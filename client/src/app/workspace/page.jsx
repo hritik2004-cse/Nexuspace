@@ -7,6 +7,7 @@ import ChatWindow from '@/components/ChatWindow';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import PinModal from '@/components/PinModal';
 
 export default function WorkspacePage() {
   const { socket, isConnected } = useSocket();
@@ -24,6 +25,8 @@ export default function WorkspacePage() {
   // Real-time auxiliary states
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [notification, setNotification] = useState(null);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [lockedChannel, setLockedChannel] = useState(null);
 
   // Authenticate Socket connection
   useEffect(() => {
@@ -57,7 +60,14 @@ export default function WorkspacePage() {
         
         setMessages(parsedMessages);
       } catch (error) {
-        console.error("Error fetching channel data:", error);
+        if (error.response?.status === 403) {
+          // Channel is private and no active session
+          setMessages([]);
+          setLockedChannel({ id: channelId, name: currentChannel }); // Warning: channelId might not be set yet if findOrCreate returned 403, but findOrCreate shouldn't block, GET /messages blocks. Wait, we set channelId on line 46, so it's fine!
+          setIsPinModalOpen(true);
+        } else {
+          console.error("Error fetching channel data:", error);
+        }
       }
     };
 
@@ -80,7 +90,12 @@ export default function WorkspacePage() {
         sender: newMessage.sender?.username || newMessage.sender?.name || 'Unknown',
         senderDetails: newMessage.sender
       };
-      setMessages((prev) => [...prev, formatted]);
+      setMessages((prev) => {
+        if (prev.some(m => m.id === formatted.id || m._id === formatted.id)) {
+          return prev;
+        }
+        return [...prev, formatted];
+      });
     };
 
     const handleReaction = (data) => {
@@ -121,6 +136,16 @@ export default function WorkspacePage() {
     socket.on('display_typing', handleDisplayTyping);
     socket.on('hide_typing', handleHideTyping);
     socket.on('receive_notification', handleNotification);
+    
+    // Active Eviction handling
+    socket.on('session_expired', (data) => {
+      setMessages([]);
+      setLockedChannel({ id: channelId, name: currentChannel });
+      setIsPinModalOpen(true);
+      if (data?.reason) {
+        setNotification(`Access Revoked: ${data.reason}`);
+      }
+    });
 
     return () => {
       socket.emit('leave_channel', channelId);
@@ -153,8 +178,13 @@ export default function WorkspacePage() {
         senderDetails: res.data.sender
       };
 
-      // Add locally for the sender
-      setMessages((prev) => [...prev, formatted]);
+      // Add locally for the sender if the socket hasn't already added it
+      setMessages((prev) => {
+        if (prev.some(m => m.id === formatted.id || m._id === formatted.id)) {
+          return prev;
+        }
+        return [...prev, formatted];
+      });
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -249,6 +279,23 @@ export default function WorkspacePage() {
         currentUser={currentUser} 
         channelId={channelId}
         socket={socket}
+      />
+      
+      <PinModal 
+        isOpen={isPinModalOpen} 
+        channelId={lockedChannel?.id || channelId} 
+        channelName={lockedChannel?.name || currentChannel} 
+        onSuccess={() => {
+          setIsPinModalOpen(false);
+          // Refetch messages to load the channel
+          const event = new Event('submit'); // Dummy event just to trigger effect if we wanted to, but we can just call fetchChannelData logic
+          window.location.reload(); // Simple approach to re-mount and re-fetch properly
+        }} 
+        onCancel={() => {
+          setIsPinModalOpen(false);
+          // Optionally redirect back to general channel
+          window.location.href = `/workspace?workspace=${activeWorkspace._id}&channel=general`;
+        }}
       />
     </div>
   );

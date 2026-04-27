@@ -20,11 +20,19 @@ const findOrCreateChannel = async (req, res) => {
     let channel = await Channel.findOne({ name, workspaceId: workspace._id });
     if (!channel) {
       try {
+        let pinHash = null;
+        const isPrivateChannel = req.body.isPrivate || false;
+        if (isPrivateChannel && req.body.pin) {
+          const bcrypt = require('bcrypt');
+          pinHash = await bcrypt.hash(req.body.pin, 10);
+        }
+
         channel = await Channel.create({
           name,
           workspaceId: workspace._id,
           creator: req.user._id,
-          members: [req.user._id]
+          isPrivate: isPrivateChannel,
+          pinHash
         });
       } catch (err) {
         if (err.code === 11000) {

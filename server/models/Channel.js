@@ -19,10 +19,14 @@ const channelSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  members: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
+  pinHash: {
+    type: String,
+    default: null
+  },
+  pinUpdatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, { timestamps: true });
 
 // Ensure channel names are unique within a workspace

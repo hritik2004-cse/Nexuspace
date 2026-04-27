@@ -28,17 +28,15 @@ export default function StickyScroll() {
   const [activeCard, setActiveCard] = useState(0);
 
   // Derive active index based on robust scroll observer
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.onChange((latest) => {
-      const cards = content.length;
-      const breakPoint = 1 / cards;
-      let index = Math.floor(latest / breakPoint);
-      if (index >= cards) index = cards - 1;
-      
-      setActiveCard((prev) => (prev === index ? prev : index));
-    });
-    return () => unsubscribe();
-  }, [scrollYProgress]);
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const cards = content.length;
+    const breakPoint = 1 / cards;
+    let index = Math.floor(latest / breakPoint);
+    if (index >= cards) index = cards - 1;
+    if (index < 0) index = 0;
+    
+    setActiveCard(index);
+  });
 
   return (
     <section ref={targetRef} className="relative z-10 w-full h-[300vh] bg-[#030014]">
