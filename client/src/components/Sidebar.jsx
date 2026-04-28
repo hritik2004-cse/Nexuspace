@@ -316,7 +316,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   <div className="space-y-4 pt-4 border-t border-slate-800">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <label className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-500 flex items-center gap-2">
                           <FiLock className="text-amber-400" /> Set Private
                         </label>
                         <p className="text-[10px] text-slate-500 mt-0.5">Requires a 6-digit PIN to join</p>
@@ -343,7 +343,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     )}
                   </div>
 
-                  <DialogFooter className="pt-2">
+                  <DialogFooter className="pt-2 bg-transparent">
                     <button 
                       type="submit" 
                       disabled={!newChannelName.trim() || (isPrivateChannel && channelPin.length !== 6)} 
