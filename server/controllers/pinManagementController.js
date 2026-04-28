@@ -47,9 +47,15 @@ const verifyPin = async (req, res) => {
       return res.status(401).json({ message: `Incorrect PIN. ${MAX_ATTEMPTS - attempts} attempts remaining.` });
     }
 
-    // Success - Issue 30-minute Redis session
+    // Success - Add user to channel members permanently
     await redis.del(attemptsKey);
     await redis.setex(`channel_access:${channelId}:${userId}`, SESSION_TIME, 'true');
+    
+    // Add user to members list if not already there
+    await Channel.findByIdAndUpdate(channelId, {
+      $addToSet: { members: userId }
+    });
+
     await AuditLog.create({ action: 'PIN_VERIFIED', userId, channelId });
 
     res.status(200).json({ message: 'Access granted.', expires_in: SESSION_TIME });

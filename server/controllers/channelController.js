@@ -44,6 +44,26 @@ const findOrCreateChannel = async (req, res) => {
       }
     }
 
+    // Check if channel exists and is private
+    if (channel && channel.isPrivate) {
+      const isMember = channel.members && channel.members.some(m => m && m.toString() === req.user._id.toString());
+      const isAdmin = req.user.role === 'Admin';
+      
+      if (!isMember && !isAdmin) {
+        // If they provided a PIN in this request, try to verify it
+        if (req.body.pin) {
+          const bcrypt = require('bcryptjs');
+          const isMatch = await bcrypt.compare(req.body.pin, channel.pinHash);
+          if (!isMatch) {
+            return res.status(403).json({ message: 'Incorrect PIN for this private channel.', requiresPin: true, channelId: channel._id });
+          }
+          // PIN correct, add to members below
+        } else {
+          return res.status(403).json({ message: 'This channel is private. PIN required to join.', requiresPin: true, channelId: channel._id });
+        }
+      }
+    }
+
     if (channel && (!channel.members || !channel.members.some(m => m && m.toString() === req.user._id.toString()))) {
       channel = await Channel.findByIdAndUpdate(
         channel._id,

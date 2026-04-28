@@ -313,37 +313,42 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     </div>
                   </div>
 
-                  {user?.role === 'Admin' && (
-                    <div className="space-y-4 pt-2 border-t border-slate-800">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                          <FiLock className="text-amber-400" /> Make Private
+                  <div className="space-y-4 pt-4 border-t border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <label className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                          <FiLock className="text-amber-400" /> Set Private
                         </label>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Requires a 6-digit PIN to join</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isPrivateChannel}
+                        onChange={(e) => setIsPrivateChannel(e.target.checked)}
+                        className="w-5 h-5 text-indigo-600 bg-slate-900 border-slate-700 rounded-lg focus:ring-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                    {isPrivateChannel && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Channel PIN</label>
                         <input
-                          type="checkbox"
-                          checked={isPrivateChannel}
-                          onChange={(e) => setIsPrivateChannel(e.target.checked)}
-                          className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500"
+                          type="text"
+                          value={channelPin}
+                          onChange={(e) => setChannelPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          maxLength={6}
+                          className="w-full bg-slate-950/80 border border-amber-500/30 text-amber-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all font-mono tracking-[0.5em] text-center text-xl shadow-inner"
+                          placeholder="000000"
                         />
                       </div>
-                      {isPrivateChannel && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Channel PIN</label>
-                          <input
-                            type="password"
-                            value={channelPin}
-                            onChange={(e) => setChannelPin(e.target.value)}
-                            maxLength={6}
-                            className="w-full bg-slate-950/50 border border-amber-500/30 text-amber-100 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all font-sans tracking-widest text-center shadow-inner"
-                            placeholder="••••"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   <DialogFooter className="pt-2">
-                    <button type="submit" disabled={!newChannelName.trim() || (isPrivateChannel && !channelPin)} className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/20 text-sm font-semibold w-full flex justify-center items-center">
+                    <button 
+                      type="submit" 
+                      disabled={!newChannelName.trim() || (isPrivateChannel && channelPin.length !== 6)} 
+                      className="px-5 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] text-sm font-black uppercase tracking-widest w-full flex justify-center items-center gap-2"
+                    >
                       Create Channel
                     </button>
                   </DialogFooter>
