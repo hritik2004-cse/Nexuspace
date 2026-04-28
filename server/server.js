@@ -22,7 +22,20 @@ const envOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = envOrigins.length > 0 ? envOrigins : defaultOrigins;
+const allowedOrigins = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  
+  if (
+    origin === "http://localhost:3000" ||
+    origin === "https://project-nexuspace.vercel.app" ||
+    origin.endsWith(".vercel.app") || // Allow all Vercel preview environments
+    envOrigins.includes(origin)
+  ) {
+    callback(null, true);
+  } else {
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  }
+};
 
 // 1. Validate Environment Variables
 validateEnv();
