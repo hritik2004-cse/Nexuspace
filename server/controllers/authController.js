@@ -349,6 +349,35 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: 'Password updated successfully' });
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const User = require('../models/User');
+
+  if (!currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Please provide current and new password');
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user || !user.password) {
+    res.status(400);
+    throw new Error('User not found or password not set (Google account?)');
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    res.status(401);
+    throw new Error('Incorrect current password');
+  }
+
+  user.password = newPassword;
+  user.sessionVersion += 1; // Security: Logout other sessions
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Password changed successfully' });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -361,5 +390,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   sendPhoneOtp,
-  verifyPhoneOtp
+  verifyPhoneOtp,
+  changePassword
 };

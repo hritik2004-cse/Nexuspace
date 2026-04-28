@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, googleLogin, updateProfile, refreshToken, logoutUser, logoutAll, getMe, forgotPassword, resetPassword, sendPhoneOtp, verifyPhoneOtp } = require('../controllers/authController');
+const { registerUser, loginUser, googleLogin, updateProfile, refreshToken, logoutUser, logoutAll, getMe, forgotPassword, resetPassword, sendPhoneOtp, verifyPhoneOtp, changePassword } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const rateLimit = require("express-rate-limit");
 
@@ -34,5 +34,6 @@ router.put('/profile', protect, updateProfile);
 // Phone Verification
 router.post('/send-phone-otp', protect, sendPhoneOtp);
 router.post('/verify-phone-otp', protect, verifyPhoneOtp);
+router.put('/change-password', protect, changePassword);
 
 module.exports = router;

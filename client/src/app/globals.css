@@ -141,8 +141,35 @@ body {
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.theme-emerald {
+  --background: #020617;
+  --sidebar: #061a14;
+  --primary: #10b981;
+  --sidebar-primary: #10b981;
+}
+
+.theme-rose {
+  --background: #0c0205;
+  --sidebar: #1a060a;
+  --primary: #f43f5e;
+  --sidebar-primary: #f43f5e;
+}
+
+.theme-amber {
+  --background: #0a0500;
+  --sidebar: #1a0d06;
+  --primary: #f59e0b;
+  --sidebar-primary: #f59e0b;
+}
+
+.theme-aura {
+  --background: #05000a;
+  --sidebar: #0f061a;
+  --primary: #a855f7;
+  --sidebar-primary: #a855f7;
 }
 
 @layer base {

@@ -2,6 +2,7 @@
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 import { ToastContainer } from 'react-toastify';
@@ -13,10 +14,12 @@ export function Providers({ children }) {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
-        <ProtectedRoute>
-          {children}
-        </ProtectedRoute>
-        <ToastContainer theme="dark" position="bottom-right" />
+        <ThemeProvider>
+          <ProtectedRoute>
+            {children}
+          </ProtectedRoute>
+          <ToastContainer theme="dark" position="bottom-right" />
+        </ThemeProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

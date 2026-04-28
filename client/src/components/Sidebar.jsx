@@ -397,7 +397,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       {/* User Footer */}
       <div 
-        onClick={() => setIsProfileOpen(true)}
+        onClick={() => router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`)}
         className="mt-auto px-4 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between cursor-pointer lg:hover:bg-slate-900 transition-colors"
       >
         <div className="flex items-center gap-3">
@@ -425,7 +425,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <FiBell className="w-4 h-4" />
             {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>}
           </button>
-          <button aria-label="Settings" onClick={(e) => { e.stopPropagation(); setIsProfileOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1"><FiSettings className="w-4 h-4" /></button>
+          <button 
+            aria-label="Settings" 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`); 
+            }} 
+            className="text-slate-400 hover:text-white transition-colors p-1"
+          >
+            <FiSettings className="w-4 h-4" />
+          </button>
         </div>
       </div>
       </aside>
