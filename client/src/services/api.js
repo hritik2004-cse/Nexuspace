@@ -2,7 +2,7 @@ import axios from "axios";
 
 const DEFAULT_API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://nexuspace-backend.onrender.com/api"
+    ? "/api"
     : "http://localhost:5000/api";
 
 const getApiUrl = () => {
