@@ -211,7 +211,7 @@ const googleLoginService = async (credential, sessionId, ip, userAgent) => {
 
     const Workspace = require('../models/Workspace');
     await Workspace.create({
-      name: 'Google Sandbox',
+      name: `${user.name}'s Workspace`,
       owner: user._id,
       members: [user._id]
     });
@@ -238,7 +238,7 @@ const registerLocalService = async ({ name, email, password, sessionId, ip, user
 
   const Workspace = require('../models/Workspace');
   await Workspace.create({
-    name: 'My Sandbox',
+    name: `${newUser.name}'s Workspace`,
     owner: newUser._id,
     members: [newUser._id]
   });

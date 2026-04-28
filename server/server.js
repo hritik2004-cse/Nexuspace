@@ -28,11 +28,12 @@ const allowedOrigins = (origin, callback) => {
   if (
     origin === "http://localhost:3000" ||
     origin === "https://project-nexuspace.vercel.app" ||
-    origin.endsWith(".vercel.app") || // Allow all Vercel preview environments
+    origin.includes("vercel.app") || // Allow any Vercel subdomain
     envOrigins.includes(origin)
   ) {
     callback(null, true);
   } else {
+    console.warn(`[CORS] Rejected Origin: ${origin}`);
     callback(new Error(`Not allowed by CORS: ${origin}`));
   }
 };
