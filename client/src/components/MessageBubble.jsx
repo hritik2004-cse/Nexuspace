@@ -16,7 +16,10 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
   useEffect(() => setMounted(true), []);
 
   // Format the time securely only after mounting locally to avoid SSR hydration mismatch
-  const timeString = mounted ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+  const dateToFormat = message.createdAt || message.timestamp;
+  const timeString = mounted && dateToFormat && !isNaN(new Date(dateToFormat).getTime()) 
+    ? new Date(dateToFormat).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    : '';
 
   const handleEditSubmit = () => {
     if (editContent.trim()) {
@@ -123,7 +126,11 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
               </span>
             </span>
-            <span className="text-xs text-slate-500 font-medium opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">{timeString}</span>
+            {timeString && (
+              <span className="text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {timeString}
+              </span>
+            )}
           </div>
           
           {/* Bubble & Actions Wrapper */}
