@@ -261,7 +261,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         {/* Tools Section */}
         <div>
           <div className="px-4 flex items-center justify-between group">
@@ -356,6 +356,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-indigo-600/10' : 'hover:bg-slate-900'} transition-colors`}>
                 <button
                   onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
+                  aria-current={currentChannel === channelObj.name ? "page" : undefined}
                   className={`flex items-center flex-1 px-4 py-2 text-sm font-medium transition-colors ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-300 hover:text-slate-100'}`}
                 >
                   <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-500'}`} />
@@ -365,6 +366,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   {channelObj.name !== 'general' && (
                     <button 
                       onClick={(e) => handleLeaveChannel(channelObj._id, e)}
+                      aria-label="Leave Channel"
                       className="text-slate-500 hover:text-orange-400 p-1"
                       title="Leave Channel"
                     >
@@ -374,6 +376,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   {(activeWorkspace?.owner === user?._id || channelObj.creator === user?._id) && channelObj.name !== 'general' && (
                     <button 
                       onClick={(e) => handleDeleteChannel(channelObj._id, e)}
+                      aria-label="Delete Channel"
                       className="text-slate-500 hover:text-red-400 p-1 ml-1"
                       title="Delete Channel"
                     >
@@ -385,7 +388,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             ))}
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* User Footer */}
       <div 
@@ -413,11 +416,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
         </div>
         <div className="flex gap-2 relative z-10">
-          <button onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1 relative">
+          <button aria-label="Notifications" onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1 relative">
             <FiBell className="w-4 h-4" />
             {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>}
           </button>
-          <button onClick={(e) => { e.stopPropagation(); setIsProfileOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1"><FiSettings className="w-4 h-4" /></button>
+          <button aria-label="Settings" onClick={(e) => { e.stopPropagation(); setIsProfileOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1"><FiSettings className="w-4 h-4" /></button>
         </div>
       </div>
       </aside>

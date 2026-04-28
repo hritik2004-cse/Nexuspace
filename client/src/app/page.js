@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, Layout, MessageSquare, Trello, Zap, ChevronRight, Activity, Globe, Cpu, CheckCircle2, Star, Shield, Command, Github, Twitter, Linkedin, Hexagon, Triangle } from "lucide-react";
@@ -96,7 +97,7 @@ export default function Home() {
       <div className="fixed inset-0 z-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
 
       {/* Hero Master */}
-      <div className="relative z-10 pt-48 pb-10 flex flex-col items-center justify-center min-h-[90vh]">
+      <section aria-labelledby="hero-heading" className="relative z-10 pt-48 pb-10 flex flex-col items-center justify-center min-h-[90vh]">
         <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center">
           
           <motion.div 
@@ -111,6 +112,7 @@ export default function Home() {
           </motion.div>
 
           <motion.h1 
+            id="hero-heading"
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
             className="text-6xl sm:text-7xl md:text-[8rem] font-black tracking-tighter leading-[0.95] text-center text-white max-w-5xl"
           >
@@ -132,34 +134,34 @@ export default function Home() {
             className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link href="/workspace">
-              <button className="group flex items-center justify-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-5 rounded-full text-lg lg:text-xl font-bold transition-all shadow-[0_0_50px_-10px_rgba(79,70,229,0.6)] hover:shadow-[0_0_80px_-15px_rgba(79,70,229,0.8)]">
+              <button aria-label="Start Building Your Workspace" className="group flex items-center justify-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-5 rounded-full text-lg lg:text-xl font-bold transition-all shadow-[0_0_50px_-10px_rgba(79,70,229,0.6)] hover:shadow-[0_0_80px_-15px_rgba(79,70,229,0.8)]">
                 Start Building Your Workspace in 10 Seconds
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </button>
             </Link>
-            <button className="group flex items-center justify-center gap-2 bg-linear-to-b from-[#1a1a24] to-[#0a0a0f] border border-white/10 hover:from-white/10 hover:to-white/5 text-white px-10 py-5 rounded-full text-xl font-bold transition-all">
+            <button aria-label="Book a Demo" className="group flex items-center justify-center gap-2 bg-linear-to-b from-[#1a1a24] to-[#0a0a0f] border border-white/10 hover:from-white/10 hover:to-white/5 text-white px-10 py-5 rounded-full text-xl font-bold transition-all">
               Book a Demo
             </button>
           </motion.div>
         </motion.div>
-      </div>
+      </section>
 
       {/* Infinite Marquee Logos */}
-      <div className="relative z-10 w-full overflow-hidden py-10 border-y border-white/5 bg-slate-950/30 backdrop-blur-md">
+      <section aria-label="Integration Partners" className="relative z-10 w-full overflow-hidden py-10 border-y border-white/5 bg-slate-950/30 backdrop-blur-md">
         <div className="absolute left-0 w-32 h-full bg-linear-to-r from-[#030014] to-transparent z-10 top-0"></div>
         <div className="absolute right-0 w-32 h-full bg-linear-to-l from-[#030014] to-transparent z-10 top-0"></div>
         
         <div className="flex gap-20 whitespace-nowrap px-8 w-[200%] animate-[marquee_20s_linear_infinite]">
           {[...INTEGRATION_LOGOS, ...INTEGRATION_LOGOS].map((company, i) => (
             <div key={i} className="flex items-center gap-3 text-slate-500 opacity-60 font-black text-xl tracking-tighter uppercase grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer">
-              <Command className="w-6 h-6" /> {company}
+              <Command className="w-6 h-6" aria-hidden="true" /> {company}
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* 3D Masterpiece Mockup */}
-      <div className="relative z-10 w-full flex justify-center pb-32">
+      <section aria-label="Dashboard Preview" className="relative z-10 w-full flex justify-center pb-32">
         <motion.div 
           style={{ y: dashboardY, rotateX: dashboardRotateX, scale: dashboardScale }}
           className="mt-24 w-full max-w-6xl px-6 perspective-1000 origin-top"
@@ -219,7 +221,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-linear-to-tr from-indigo-500/10 via-transparent to-transparent pointer-events-none"></div>
           </div>
         </motion.div>
-      </div>
+      </section>
 
       <TrustMetrics />
       
@@ -232,9 +234,9 @@ export default function Home() {
       <ComparisonTable />
 
       {/* Master Grid Spotlight Features */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+      <section aria-labelledby="infrastructure-heading" className="relative z-10 max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white mb-6">Unrivaled Infrastructure.</h2>
+          <h2 id="infrastructure-heading" className="text-4xl md:text-6xl font-black tracking-tight text-white mb-6">Unrivaled Infrastructure.</h2>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">We ripped out the legacy stacks. Nexuspace is built entirely on edge-rendered WebSockets and highly available NoSQL layers.</p>
         </div>
 
@@ -277,36 +279,36 @@ export default function Home() {
              <p className="text-slate-400 leading-relaxed font-medium">View granular user activity. Offline checks, typing events, and active-read states handled efficiently.</p>
           </SpotlightCard>
         </div>
-      </div>
+      </section>
 
       {/* New Major Visual Section */}
-      <div className="relative z-10 w-full py-32 border-y border-white/5 bg-[#030014]/50 backdrop-blur-3xl overflow-hidden mt-32">
+      <section aria-labelledby="sync-heading" className="relative z-10 w-full py-32 border-y border-white/5 bg-[#030014]/50 backdrop-blur-3xl overflow-hidden mt-32">
          <div className="max-w-7xl mx-auto px-6 relative flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2 relative z-10">
                <div className="w-16 h-16 rounded-2xl bg-fuchsia-500/20 flex items-center justify-center mb-8 border border-fuchsia-500/30">
                  <Activity className="text-fuchsia-400 w-8 h-8" />
                </div>
-               <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
+               <h2 id="sync-heading" className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
                  Uncompromising <br /><span className="text-transparent bg-clip-text bg-linear-to-r from-fuchsia-400 to-indigo-400">Data Synchronization</span>
                </h2>
                <p className="text-slate-400 text-xl font-light leading-relaxed mb-10">
                  Our real-time engine pipes millions of WebSockets across geographic zones globally. Whether you are typing a paragraph or dragging a heavy Kanban card, your team perceives it identically sub-millisecond.
                </p>
-               <button className="text-white font-bold tracking-wide hover:text-fuchsia-400 flex items-center gap-2 group transition-colors">
-                 Explore the Infrastructure <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+               <button aria-label="Explore the infrastructure" className="text-white font-bold tracking-wide hover:text-fuchsia-400 flex items-center gap-2 group transition-colors">
+                 Explore the Infrastructure <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" aria-hidden="true" />
                </button>
             </div>
             <div className="md:w-1/2 relative">
                <div className="absolute inset-0 bg-fuchsia-500/10 blur-[100px] rounded-full scale-150"></div>
-               <img src="/realtime_sync.png" alt="Realtime Nodes" className="w-full h-auto rounded-3xl relative z-10 border border-white/10 shadow-[0_0_80px_rgba(192,38,211,0.2)] object-cover mix-blend-screen scale-110" />
+               <Image src="/realtime_sync.png" alt="Illustration of realtime synchronization nodes connected globally" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" className="w-full h-auto rounded-3xl relative z-10 border border-white/10 shadow-[0_0_80px_rgba(192,38,211,0.2)] object-cover mix-blend-screen scale-110" />
             </div>
          </div>
-      </div>
+      </section>
 
       {/* Pricing Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
+      <section aria-labelledby="pricing-heading" className="relative z-10 max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">Pricing built for flow.</h2>
+          <h2 id="pricing-heading" className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">Pricing built for flow.</h2>
           <p className="text-slate-400 text-lg">Predictable scaling for individuals and global enterprises alike.</p>
         </div>
 
@@ -324,11 +326,11 @@ export default function Home() {
             <ul className="space-y-4 mb-8 w-full">
               {['1 Workspace', 'Unlimited Channels', 'Basic Kanban', '1 Week Message History'].map(feat => (
                 <li key={feat} className="flex gap-3 text-slate-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-indigo-400 shrink-0" /> {feat}
+                  <CheckCircle2 className="w-5 h-5 text-indigo-400 shrink-0" aria-hidden="true" /> {feat}
                 </li>
               ))}
             </ul>
-            <button className="w-full py-4 mt-auto rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors">Get Started Free</button>
+            <button aria-label="Get started with starter plan for free" className="w-full py-4 mt-auto rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors">Get Started Free</button>
           </div>
 
           {/* Pro Tier */}
@@ -344,11 +346,11 @@ export default function Home() {
             <ul className="space-y-4 mb-8 w-full">
               {['Unlimited Workspaces', 'Unlimited History', 'Advanced Kanban Analytics', 'Priority WebSocket Lanes', 'Custom Role RBAC'].map(feat => (
                 <li key={feat} className="flex gap-3 text-white font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-indigo-400 shrink-0" /> {feat}
+                  <CheckCircle2 className="w-5 h-5 text-indigo-400 shrink-0" aria-hidden="true" /> {feat}
                 </li>
               ))}
             </ul>
-            <button className="w-full py-4 mt-auto rounded-xl bg-white text-black hover:bg-slate-200 font-bold transition-all shadow-lg hover:scale-[1.02]">Start Pro Trial</button>
+            <button aria-label="Start professional plan trial" className="w-full py-4 mt-auto rounded-xl bg-white text-black hover:bg-slate-200 font-bold transition-all shadow-lg hover:scale-[1.02]">Start Pro Trial</button>
           </div>
 
           {/* Enterprise Tier */}
@@ -362,30 +364,30 @@ export default function Home() {
             <ul className="space-y-4 mb-8 w-full">
               {['Dedicated VPC', 'SSO & SAML', 'Unlimited Everything', '99.99% SLA', '24/7 Phone Support'].map(feat => (
                 <li key={feat} className="flex gap-3 text-slate-300 font-medium">
-                  <Shield className="w-5 h-5 text-indigo-400 shrink-0" /> {feat}
+                  <Shield className="w-5 h-5 text-indigo-400 shrink-0" aria-hidden="true" /> {feat}
                 </li>
               ))}
             </ul>
-            <button className="w-full py-4 mt-auto rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors">Contact Sales</button>
+            <button aria-label="Contact sales for enterprise plan" className="w-full py-4 mt-auto rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors">Contact Sales</button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Social / Testimonial Wall Carousel */}
-      <div className="relative z-10 border-y border-white/5 bg-slate-950/50 backdrop-blur-md py-24 overflow-hidden">
+      <section aria-labelledby="testimonials-heading" className="relative z-10 border-y border-white/5 bg-slate-950/50 backdrop-blur-md py-24 overflow-hidden">
          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">Loved by engineering teams.</h2>
+            <h2 id="testimonials-heading" className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">Loved by engineering teams.</h2>
          </div>
          {/* Marquee Reverse */}
          <div className="flex gap-6 whitespace-nowrap px-8 w-max animate-[marquee_40s_linear_infinite_reverse] items-stretch">
            {[...TESTIMONIALS, ...TESTIMONIALS].map((review, i) => (
              <div key={`${review.id}-${i}`} className="w-96 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm shrink-0 flex flex-col hover:bg-white/10 transition-colors shadow-xl shadow-black/50">
-               <div className="flex items-center gap-1 mb-4">
-                 {[...Array(review.rating)].map((_, s) => <Star key={s} className="w-4 h-4 fill-amber-500 text-amber-500"/>)}
+               <div className="flex items-center gap-1 mb-4" aria-label={`Rating: ${review.rating} out of 5 stars`}>
+                 {[...Array(review.rating)].map((_, s) => <Star key={s} className="w-4 h-4 fill-amber-500 text-amber-500" aria-hidden="true" />)}
                </div>
                <p className="text-lg text-slate-300 font-medium whitespace-normal mb-8 flex-1 italic relative z-10">"{review.quote}"</p>
                <div className="flex items-center gap-4 mt-auto border-t border-white/5 pt-4">
-                 <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] object-cover border border-white/10" />
+                 <Image src={review.avatar} alt={`Avatar of ${review.name}`} width={48} height={48} className="w-12 h-12 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] object-cover border border-white/10" />
                  <div>
                    <h4 className="font-bold text-white text-sm tracking-wide">{review.name}</h4>
                    <p className="text-xs text-slate-400">{review.role}</p>
@@ -394,12 +396,12 @@ export default function Home() {
                
                {/* Decorative Graphic Element relative to box */}
                <div className="absolute right-0 bottom-0 pointer-events-none opacity-[0.03]">
-                  <Hexagon className="w-48 h-48 translate-x-12 translate-y-12" />
+                  <Hexagon className="w-48 h-48 translate-x-12 translate-y-12" aria-hidden="true" />
                </div>
              </div>
            ))}
          </div>
-      </div>
+      </section>
 
       </div>
       {/* Global Style overrides for Tailwind arbitrary animations */}

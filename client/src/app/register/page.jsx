@@ -26,7 +26,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-100 relative overflow-hidden">
+    <main id="main-content" className="min-h-screen bg-slate-950 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-100 relative overflow-hidden">
       {/* Background glowing orbs */}
       <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -52,6 +52,7 @@ export default function RegisterPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
                 className="appearance-none rounded-lg relative block w-full px-10 py-3 bg-slate-950/50 border border-slate-700/50 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 sm:text-sm transition-all"
                 placeholder="Full name"
               />
@@ -66,6 +67,7 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 className="appearance-none rounded-lg relative block w-full px-10 py-3 bg-slate-950/50 border border-slate-700/50 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 sm:text-sm transition-all"
                 placeholder="Email address"
               />
@@ -80,6 +82,7 @@ export default function RegisterPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 className="appearance-none rounded-lg relative block w-full px-10 py-3 bg-slate-950/50 border border-slate-700/50 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 sm:text-sm transition-all"
                 placeholder="Password"
               />
@@ -107,6 +110,6 @@ export default function RegisterPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

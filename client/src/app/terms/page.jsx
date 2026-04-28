@@ -2,6 +2,15 @@ import MainLayout from "@/components/landing/MainLayout";
 
 export const metadata = {
   title: "Terms of Service | Nexuspace",
+  description: "Read the Nexuspace Terms of Service.",
+  alternates: {
+    canonical: "https://project-nexuspace.vercel.app/terms"
+  },
+  openGraph: {
+    title: "Terms of Service | Nexuspace",
+    description: "Read the Nexuspace Terms of Service.",
+    url: "https://project-nexuspace.vercel.app/terms",
+  }
 };
 
 export default function TermsPage() {
@@ -60,3 +69,4 @@ export default function TermsPage() {
     </MainLayout>
   );
 }
+

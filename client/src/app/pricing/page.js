@@ -4,9 +4,13 @@ import { CheckCircle2, Shield } from "lucide-react";
 export const metadata = {
   title: "Pricing | Nexuspace",
   description: "Predictable scaling for individuals and global enterprises alike.",
+  alternates: {
+    canonical: "https://project-nexuspace.vercel.app/pricing"
+  },
   openGraph: {
     title: "Pricing | Nexuspace",
     description: "Predictable scaling for individuals and global enterprises alike.",
+    url: "https://project-nexuspace.vercel.app/pricing",
   }
 };
 
@@ -82,3 +86,4 @@ export default function PricingPage() {
     </MainLayout>
   );
 }
+

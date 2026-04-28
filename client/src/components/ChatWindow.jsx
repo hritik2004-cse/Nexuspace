@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import { useSocket } from '@/context/SocketContext';
@@ -8,11 +8,20 @@ import { FiBookmark } from 'react-icons/fi';
 
 export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, onEditMessage, onReactToMessage, onPinMessage, currentUser, socket, channelId, channelName, onlineCount }) {
   const bottomRef = useRef(null);
+  const [latestAnnouncement, setLatestAnnouncement] = useState('');
 
   // Auto-scroll to bottom on new message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    
+    // Accessibility announcement for new messages
+    if (messages && messages.length > 0) {
+      const latestMsg = messages[messages.length - 1];
+      if (latestMsg.senderDetails?._id !== currentUser?._id) {
+        setLatestAnnouncement(`New message from ${latestMsg.sender}: ${latestMsg.content}`);
+      }
+    }
+  }, [messages, currentUser]);
 
   const pinnedMessages = messages.filter(m => m.isPinned);
 
@@ -30,6 +39,9 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
 
   return (
     <div className="flex flex-col h-full bg-slate-900 absolute inset-0">
+      <div aria-live="polite" className="sr-only">
+        {latestAnnouncement}
+      </div>
       {/* Online Count & Pinned Messages Banner */}
       <div className="bg-slate-800/80 border-b border-slate-700 shadow-sm z-20 sticky top-0 backdrop-blur-md shrink-0 flex flex-col">
         {/* Online Count */}

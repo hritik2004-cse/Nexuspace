@@ -4,9 +4,13 @@ import { Globe, Cpu, Layout, Activity, MessageSquare, Zap, Shield, ArrowRight } 
 export const metadata = {
   title: "Platform | Nexuspace",
   description: "Explore the unrivaled infrastructure and features behind Nexuspace.",
+  alternates: {
+    canonical: "https://project-nexuspace.vercel.app/platform"
+  },
   openGraph: {
     title: "Platform | Nexuspace",
     description: "Explore the unrivaled infrastructure and features behind Nexuspace.",
+    url: "https://project-nexuspace.vercel.app/platform",
   }
 };
 
@@ -72,3 +76,4 @@ export default function PlatformPage() {
     </MainLayout>
   );
 }
+

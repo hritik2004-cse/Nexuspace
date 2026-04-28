@@ -47,7 +47,7 @@ export default function Navbar({ onMenuClick }) {
       {/* Channel Title */}
       <div className="flex items-center gap-3">
         {onMenuClick && (
-          <button className="md:hidden text-slate-400 hover:text-white transition-colors" onClick={onMenuClick}>
+          <button aria-label="Toggle sidebar menu" className="md:hidden text-slate-400 hover:text-white transition-colors" onClick={onMenuClick}>
             <FiMenu className="w-5 h-5" />
           </button>
         )}
@@ -69,6 +69,7 @@ export default function Navbar({ onMenuClick }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+            aria-label="Search"
             className="w-full bg-slate-950/50 border border-slate-700/50 text-sm text-slate-200 rounded-md pl-9 pr-4 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-inner placeholder:text-slate-500"
           />
           
@@ -111,6 +112,7 @@ export default function Navbar({ onMenuClick }) {
       <div className="flex items-center gap-4">
         <button 
           onClick={handleCopyInvite}
+          aria-label="Copy invite link"
           className="flex items-center gap-2 overflow-hidden text-sm font-medium px-3 py-1.5 rounded-md transition-all border border-slate-700 hover:border-indigo-500/50 hover:bg-indigo-500/10 text-slate-300 relative"
         >
           {copied ? (
@@ -125,11 +127,11 @@ export default function Navbar({ onMenuClick }) {
             </>
           )}
         </button>
-        <button className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md">
+        <button aria-label="Open inbox" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md">
           <FiInbox className="w-5 h-5" />
         </button>
         <Dialog>
-          <DialogTrigger className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md cursor-pointer flex items-center justify-center">
+          <DialogTrigger aria-label="Help and shortcuts" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md cursor-pointer flex items-center justify-center">
             <FiHelpCircle className="w-5 h-5" />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800">

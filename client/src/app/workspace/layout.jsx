@@ -1,27 +1,14 @@
-"use client";
+import ClientLayout from './ClientLayout';
 
-import { useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Navbar from '@/components/Navbar';
-import { SocketProvider } from '@/context/SocketContext';
-import { WorkspaceProvider } from '@/context/WorkspaceContext';
+export const metadata = {
+  title: "Workspace | Nexuspace",
+  description: "Manage your real-time tasks, instant messaging, and isolated scopes.",
+  alternates: {
+    canonical: "https://project-nexuspace.vercel.app/workspace"
+  }
+};
 
 export default function WorkspaceLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  return (
-    <SocketProvider>
-      <WorkspaceProvider>
-        <div className="flex h-screen w-full bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
-          <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-          <div className="flex flex-col flex-1 h-full min-w-0">
-            <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
-            <main className="flex-1 overflow-hidden relative">
-              {children}
-            </main>
-          </div>
-        </div>
-      </WorkspaceProvider>
-    </SocketProvider>
-  );
+  return <ClientLayout>{children}</ClientLayout>;
 }
+

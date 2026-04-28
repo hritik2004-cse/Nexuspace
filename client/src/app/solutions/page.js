@@ -4,9 +4,13 @@ import { Code, Briefcase, Users, ArrowRight } from "lucide-react";
 export const metadata = {
   title: "Solutions | Nexuspace",
   description: "Tailored real-time solutions for Engineering, Product, and Agency teams.",
+  alternates: {
+    canonical: "https://project-nexuspace.vercel.app/solutions"
+  },
   openGraph: {
     title: "Solutions | Nexuspace",
     description: "Tailored real-time solutions for Engineering, Product, and Agency teams.",
+    url: "https://project-nexuspace.vercel.app/solutions",
   }
 };
 
@@ -133,3 +137,4 @@ function handleWebhook(event) {
     </MainLayout>
   );
 }
+
