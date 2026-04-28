@@ -177,6 +177,29 @@ export function AuthProvider({ children }) {
         logout,
         updateProfile,
         joinChannel,
+        sendPhoneOtp: async (phoneNumber) => {
+          try {
+            await api.post('/auth/send-phone-otp', { phoneNumber });
+            toast.success("Verification code sent to your phone!");
+            return true;
+          } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to send OTP");
+            return false;
+          }
+        },
+        verifyPhone: async (phoneNumber, otp) => {
+          try {
+            const res = await api.post('/auth/verify-phone-otp', { phoneNumber, otp });
+            const updatedUser = { ...user, phoneNumber: res.data.phoneNumber, isPhoneVerified: true };
+            setUser(updatedUser);
+            localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
+            toast.success("Phone number verified!");
+            return true;
+          } catch (err) {
+            toast.error(err.response?.data?.message || "Verification failed");
+            return false;
+          }
+        }
       }}
     >
       {/* 

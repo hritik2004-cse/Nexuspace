@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { FiX, FiCheck, FiUser, FiMail, FiLock, FiUpload, FiEye, FiTag } from 'react-icons/fi';
+import { FiX, FiCheck, FiUser, FiMail, FiLock, FiUpload, FiEye, FiTag, FiPhone, FiHash } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
   const { user, logout, updateProfile } = useAuth();
@@ -17,7 +18,12 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
   const [bio, setBio] = useState(profileData.bio || '');
   const [customTitle, setCustomTitle] = useState(profileData.customTitle || 'Member');
   const [email, setEmail] = useState(profileData.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(profileData.phoneNumber || '');
+  const [otp, setOtp] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isViewingImage, setIsViewingImage] = useState(false);
+  const { sendPhoneOtp, verifyPhone } = useAuth();
   
   if (!isOpen) return null;
 
@@ -109,7 +115,15 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   </span>
                 </div>
                 {profileData.bio && <p className="text-slate-400 mt-4 text-sm leading-relaxed max-w-sm mx-auto">{profileData.bio}</p>}
-                {profileData.email && <p className="text-slate-500 text-sm mt-4 items-center justify-center gap-2 bg-white/5 py-2 px-4 rounded-xl inline-flex"><FiMail className="w-4 h-4"/> {profileData.email}</p>}
+                <div className="flex flex-col gap-2 mt-4 items-center">
+                  {profileData.email && <p className="text-slate-500 text-sm items-center justify-center gap-2 bg-white/5 py-2 px-4 rounded-xl inline-flex w-fit"><FiMail className="w-4 h-4"/> {profileData.email}</p>}
+                  {profileData.phoneNumber && (
+                    <p className="text-slate-500 text-sm items-center justify-center gap-2 bg-white/5 py-2 px-4 rounded-xl inline-flex w-fit">
+                      <FiPhone className="w-4 h-4"/> {profileData.phoneNumber}
+                      {profileData.isPhoneVerified && <FiCheck className="text-emerald-400 w-3 h-3" />}
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
               <>
@@ -160,10 +174,84 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself..."
-                rows={3}
+                rows={2}
                 className="w-full bg-white/2 border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans resize-none placeholder:text-slate-600 hover:bg-white/4"
               />
             </div>
+
+            <div className="group/input">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 group-focus-within/input:text-indigo-400 transition-colors">
+                Phone Number {profileData.isPhoneVerified && <span className="text-emerald-400 normal-case ml-1 font-medium">(Verified)</span>}
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4 transition-colors group-focus-within/input:text-indigo-400" />
+                  <input 
+                    type="tel" 
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value);
+                      if (e.target.value !== profileData.phoneNumber) setIsOtpSent(false);
+                    }}
+                    placeholder="+1 234 567 8900"
+                    className="w-full bg-white/2 border border-white/10 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 hover:bg-white/4"
+                  />
+                </div>
+                {!profileData.isPhoneVerified && phoneNumber && !isOtpSent && (
+                  <button 
+                    onClick={async () => {
+                      const success = await sendPhoneOtp(phoneNumber);
+                      if (success) setIsOtpSent(true);
+                    }}
+                    className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-500 transition-colors shadow-lg"
+                  >
+                    Verify
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {isOtpSent && !profileData.isPhoneVerified && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="group/input pt-2">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Enter 6-digit OTP</label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <FiHash className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400 w-4 h-4" />
+                        <input 
+                          type="text" 
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          className="w-full bg-indigo-500/5 border border-indigo-500/30 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-mono tracking-[0.5em] text-center"
+                        />
+                      </div>
+                      <button 
+                        disabled={otp.length !== 6 || isVerifying}
+                        onClick={async () => {
+                          setIsVerifying(true);
+                          const success = await verifyPhone(phoneNumber, otp);
+                          if (success) {
+                            setIsOtpSent(false);
+                            setOtp('');
+                          }
+                          setIsVerifying(false);
+                        }}
+                        className="px-4 py-2 bg-emerald-600 disabled:bg-slate-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-900/20"
+                      >
+                        {isVerifying ? '...' : 'Verify OTP'}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Email Address</label>

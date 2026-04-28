@@ -199,6 +199,78 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 const bcrypt = require('bcryptjs');
 const sendEmail = require('../utils/sendEmail');
+const sendSMS = require('../utils/sendSMS');
+
+const sendPhoneOtp = asyncHandler(async (req, res) => {
+  const { phoneNumber } = req.body;
+  const User = require('../models/User');
+
+  if (!phoneNumber) {
+    res.status(400);
+    throw new Error('Please provide a phone number');
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const salt = await bcrypt.genSalt(10);
+  const hashedOtp = await bcrypt.hash(otp, salt);
+
+  user.phoneOtp = hashedOtp;
+  user.phoneOtpExpire = Date.now() + 5 * 60 * 1000; // 5 minutes
+  // Note: We don't save the phoneNumber yet, we wait for verification
+  await user.save();
+
+  try {
+    await sendSMS({
+      phoneNumber,
+      message: `Your Nexuspace verification code is: ${otp}. Valid for 5 minutes.`
+    });
+    res.status(200).json({ success: true, message: 'OTP sent to your phone' });
+  } catch (err) {
+    user.phoneOtp = undefined;
+    user.phoneOtpExpire = undefined;
+    await user.save();
+    console.error(err);
+    res.status(500);
+    throw new Error('SMS could not be sent');
+  }
+});
+
+const verifyPhoneOtp = asyncHandler(async (req, res) => {
+  const { phoneNumber, otp } = req.body;
+  const User = require('../models/User');
+
+  if (!phoneNumber || !otp) {
+    res.status(400);
+    throw new Error('Please provide phone number and OTP');
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user || !user.phoneOtp || user.phoneOtpExpire < Date.now()) {
+    res.status(400);
+    throw new Error('Invalid or expired OTP');
+  }
+
+  const isMatch = await bcrypt.compare(otp, user.phoneOtp);
+  if (!isMatch) {
+    res.status(400);
+    throw new Error('Invalid OTP');
+  }
+
+  user.phoneNumber = phoneNumber;
+  user.isPhoneVerified = true;
+  user.phoneOtp = undefined;
+  user.phoneOtpExpire = undefined;
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Phone number verified successfully', phoneNumber: user.phoneNumber });
+});
 
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
@@ -287,5 +359,7 @@ module.exports = {
   getMe,
   updateProfile,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  sendPhoneOtp,
+  verifyPhoneOtp
 };

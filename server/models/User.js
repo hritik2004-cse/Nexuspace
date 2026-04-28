@@ -60,6 +60,16 @@ const userSchema = new mongoose.Schema(
         ref: "Channel",
       },
     ],
+    phoneNumber: {
+      type: String,
+      default: "",
+    },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    phoneOtp: String,
+    phoneOtpExpire: Date,
   },
   { timestamps: true },
 );

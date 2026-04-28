@@ -29,4 +29,8 @@ router.post('/reset-password', resetPassword);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
 
+// Phone Verification
+router.post('/send-phone-otp', protect, sendPhoneOtp);
+router.post('/verify-phone-otp', protect, verifyPhoneOtp);
+
 module.exports = router;
