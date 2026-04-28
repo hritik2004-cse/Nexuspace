@@ -114,7 +114,7 @@ export default function Home() {
           <motion.h1 
             id="hero-heading"
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="text-6xl sm:text-7xl md:text-[8rem] font-black tracking-tighter leading-[0.95] text-center text-white max-w-5xl"
+            className="text-5xl sm:text-7xl md:text-[8rem] font-black tracking-tighter leading-[0.95] text-center text-white max-w-5xl"
           >
              Synchronize 
              <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-300 to-white block px-4">

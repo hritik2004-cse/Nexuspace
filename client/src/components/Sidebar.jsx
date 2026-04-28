@@ -182,7 +182,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <div className="relative">
           <div 
             onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-            className="h-16 flex items-center justify-between px-4 border-b border-slate-800 cursor-pointer hover:bg-slate-900 transition-colors"
+            className="h-16 flex items-center justify-between px-4 border-b border-slate-800 cursor-pointer lg:hover:bg-slate-900 transition-colors"
           >
             <h1 className="font-bold text-lg text-white font-sans tracking-tight truncate max-w-[200px]">
               {activeWorkspace ? activeWorkspace.name : 'Nexuspace'}
@@ -199,7 +199,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   <button 
                     key={w._id}
                     onClick={() => { switchWorkspace(w._id); setIsWorkspaceDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeWorkspace?._id === w._id ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeWorkspace?._id === w._id ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 lg:hover:bg-slate-800 lg:hover:text-white'}`}
                   >
                     {w.name}
                   </button>
@@ -207,7 +207,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 
                 <div className="pt-2 mt-2 border-t border-slate-700/50">
                   <Dialog open={isWorkspaceModalOpen} onOpenChange={setIsWorkspaceModalOpen}>
-                    <DialogTrigger className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 hover:bg-slate-800 transition-colors flex items-center">
+                    <DialogTrigger className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 lg:hover:bg-slate-800 transition-colors flex items-center">
                       <FiPlus className="mr-2" /> Create Workspace
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
@@ -231,7 +231,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                   {activeWorkspace && activeWorkspace.owner === user?._id && (
                     <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
-                      <DialogTrigger className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 hover:bg-slate-800 transition-colors flex items-center">
+                      <DialogTrigger className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 lg:hover:bg-slate-800 transition-colors flex items-center">
                         <FiPlus className="mr-2" /> Invite Member
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
@@ -283,7 +283,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <div className="px-4 flex items-center justify-between group">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-300 transition-colors">Channels</span>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger className="text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-slate-800 cursor-pointer flex items-center justify-center">
+              <DialogTrigger className="text-slate-400 hover:text-white transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded hover:bg-slate-800 cursor-pointer flex items-center justify-center">
                 <FiPlus className="w-4 h-4" />
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800 p-0 overflow-hidden shadow-2xl rounded-2xl">
@@ -353,7 +353,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
           <div className="mt-2 space-y-0.5">
             {channels.map((channelObj) => (
-              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-indigo-600/10' : 'hover:bg-slate-900'} transition-colors`}>
+              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-indigo-600/10' : 'lg:hover:bg-slate-900'} transition-colors`}>
                 <button
                   onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
                   aria-current={currentChannel === channelObj.name ? "page" : undefined}
@@ -362,7 +362,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-500'}`} />
                   {channelObj.name}
                 </button>
-                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                <div className="flex items-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity pr-2">
                   {channelObj.name !== 'general' && (
                     <button 
                       onClick={(e) => handleLeaveChannel(channelObj._id, e)}
@@ -393,7 +393,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       {/* User Footer */}
       <div 
         onClick={() => setIsProfileOpen(true)}
-        className="mt-auto px-4 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between cursor-pointer hover:bg-slate-900 transition-colors"
+        className="mt-auto px-4 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between cursor-pointer lg:hover:bg-slate-900 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="relative">

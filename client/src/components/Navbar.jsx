@@ -113,7 +113,7 @@ export default function Navbar({ onMenuClick }) {
         <button 
           onClick={handleCopyInvite}
           aria-label="Copy invite link"
-          className="flex items-center gap-2 overflow-hidden text-sm font-medium px-3 py-1.5 rounded-md transition-all border border-slate-700 hover:border-indigo-500/50 hover:bg-indigo-500/10 text-slate-300 relative"
+          className="flex items-center gap-2 overflow-hidden text-sm font-medium px-3 py-1.5 rounded-md transition-all border border-slate-700 lg:hover:border-indigo-500/50 lg:hover:bg-indigo-500/10 text-slate-300 relative"
         >
           {copied ? (
             <>
@@ -127,11 +127,11 @@ export default function Navbar({ onMenuClick }) {
             </>
           )}
         </button>
-        <button aria-label="Open inbox" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md">
+        <button aria-label="Open inbox" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 lg:hover:bg-slate-800 rounded-md">
           <FiInbox className="w-5 h-5" />
         </button>
         <Dialog>
-          <DialogTrigger aria-label="Help and shortcuts" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-800 rounded-md cursor-pointer flex items-center justify-center">
+          <DialogTrigger aria-label="Help and shortcuts" className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 lg:hover:bg-slate-800 rounded-md cursor-pointer flex items-center justify-center">
             <FiHelpCircle className="w-5 h-5" />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800">

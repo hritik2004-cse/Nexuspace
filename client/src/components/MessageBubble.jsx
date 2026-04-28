@@ -72,7 +72,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
               </span>
             </span>
-            <span className="text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">{timeString}</span>
+            <span className="text-xs text-slate-500 font-medium opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">{timeString}</span>
           </div>
           
           {/* Bubble & Actions Wrapper */}
@@ -125,7 +125,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
 
             {/* Hover Actions Menu */}
             {!isEditing && (
-              <div className={`opacity-0 group-hover:opacity-100 transition-opacity flex items-center bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-1 gap-1 absolute top-0 ${isOwnMessage ? 'right-full mr-2' : 'left-full ml-2'} z-10`}>
+              <div className={`opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-1 gap-1 absolute top-0 ${isOwnMessage ? 'right-full mr-2' : 'left-full ml-2'} z-10`}>
                 <div className="group/react relative">
                   <div role="button" tabIndex={0} className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-700 rounded transition-colors tooltip-trigger cursor-pointer">
                     <FiSmile className="w-4 h-4" />

@@ -13,6 +13,13 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
   const [attachment, setAttachment] = useState(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const [pickerHeight, setPickerHeight] = useState(400);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setPickerHeight(window.innerWidth < 640 ? 300 : 400);
+    }
+  }, []);
 
   // Mocked channel members for mentions
   const members = ['gaurav', 'lavkesh', 'ash', 'hritik'];
@@ -104,7 +111,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
       {/* Emoji Picker Popover */}
       {showEmoji && (
         <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-slate-700/50">
-          <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={350} />
+          <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={pickerHeight} />
         </div>
       )}
 

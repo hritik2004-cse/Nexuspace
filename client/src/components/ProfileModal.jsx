@@ -40,7 +40,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
           <h2 className="text-xl font-black font-sans text-white tracking-tight">{isReadOnly ? `${profileData.name}'s Profile` : 'Profile Settings'}</h2>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors p-2 rounded-xl hover:bg-white/5"
+            className="text-slate-400 lg:hover:text-white transition-colors p-2 rounded-xl lg:hover:bg-white/5"
           >
             <FiX className="w-5 h-5" />
           </button>
@@ -49,15 +49,15 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
         <div className="p-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 relative z-10">
           <div className="flex items-center justify-center mb-6">
             <div className="relative group">
-              <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full scale-110 group-hover:scale-125 transition-transform duration-500"></div>
+              <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full scale-110 lg:group-hover:scale-125 transition-transform duration-500"></div>
               {(profileData.avatar || profileData.profileImage) ? (
                 <img 
                   src={profileData.avatar || profileData.profileImage} 
                   alt="Profile" 
-                  className="w-28 h-28 rounded-full object-cover shadow-2xl ring-4 ring-[#0a0a0f] relative z-10"
+                  className="w-28 h-28 rounded-full object-cover shadow-2xl ring-4 ring-[#0a0a0f] relative z-10 lg:hover:scale-105 transition-transform"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-4xl shadow-2xl ring-4 ring-[#0a0a0f] relative z-10">
+                <div className="w-28 h-28 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-4xl shadow-2xl ring-4 ring-[#0a0a0f] relative z-10 lg:hover:scale-105 transition-transform">
                   {profileData.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
               )}
@@ -65,7 +65,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                 <div className="absolute bottom-2 right-2 w-6 h-6 bg-emerald-400 border-4 border-[#0a0a0f] rounded-full z-20 shadow-[0_0_15px_rgba(52,211,153,0.5)]"></div>
               )}
               
-              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-sm gap-3">
+              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-20 backdrop-blur-sm gap-3">
                 {!isReadOnly && (
                   <>
                     <button onClick={() => document.getElementById('avatar-upload').click()} className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white hover:text-indigo-300 transition-colors" title="Update Image">
