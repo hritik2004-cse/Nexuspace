@@ -1,5 +1,6 @@
 const Workspace = require('../models/Workspace');
 const User = require('../models/User');
+const Channel = require('../models/Channel');
 
 const createWorkspaceService = async (name, ownerId) => {
   const workspaceExists = await Workspace.findOne({ name });
@@ -11,6 +12,14 @@ const createWorkspaceService = async (name, ownerId) => {
   const workspace = await Workspace.create({
     name,
     owner: ownerId,
+    members: [ownerId]
+  });
+
+  // Create general channel for the new workspace
+  await Channel.create({
+    name: 'general',
+    workspaceId: workspace._id,
+    creator: ownerId,
     members: [ownerId]
   });
 
@@ -38,6 +47,13 @@ const addMemberService = async (workspaceId, memberEmail, ownerId) => {
   workspace.members.push(userToAdd._id);
   await workspace.save();
 
+  // Add user to the general channel of this workspace
+  await Channel.findOneAndUpdate(
+    { workspaceId, name: 'general' },
+    { $addToSet: { members: userToAdd._id } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+
   return workspace;
 };
 
@@ -48,6 +64,13 @@ const joinWorkspaceService = async (workspaceId, userId) => {
   if (!workspace.members.includes(userId)) {
     workspace.members.push(userId);
     await workspace.save();
+
+    // Add user to the general channel of this workspace
+    await Channel.findOneAndUpdate(
+      { workspaceId, name: 'general' },
+      { $addToSet: { members: userId } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
   }
   return workspace;
 };
