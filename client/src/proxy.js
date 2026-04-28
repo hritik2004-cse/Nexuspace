@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
+export function proxy(request) {
   // Extract token from cookies. We use csrf_token as a proxy for session existence 
   // because refresh_token is path-restricted to /api/auth/refresh and invisible to Next.js routes.
   const token = request.cookies.get('csrf_token')?.value;
