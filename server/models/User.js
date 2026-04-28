@@ -70,6 +70,10 @@ const userSchema = new mongoose.Schema(
     },
     phoneOtp: String,
     phoneOtpExpire: Date,
+    theme: {
+      type: String,
+      default: "midnight",
+    },
   },
   { timestamps: true },
 );

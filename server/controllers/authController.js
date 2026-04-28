@@ -153,7 +153,7 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
-  const { profileImage, channels, name, username, bio, customTitle } = req.body;
+  const { profileImage, channels, name, username, bio, customTitle, theme } = req.body;
   const User = require('../models/User');
 
   let updateFields = {};
@@ -163,6 +163,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   if (bio !== undefined) updateFields.bio = bio;
   if (customTitle !== undefined) updateFields.customTitle = customTitle;
   if (channels) updateFields.channels = channels;
+  if (theme) updateFields.theme = theme;
 
   // Cloudinary Upload Logic
   if (profileImage && profileImage.startsWith('data:image')) {

@@ -77,24 +77,24 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="h-full bg-slate-950 flex flex-col overflow-hidden">
+    <div className="h-full bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="p-8 border-b border-slate-800 bg-slate-900/30">
+      <div className="p-8 border-b border-border bg-white/5">
         <h1 className="text-3xl font-black text-white tracking-tighter uppercase">User Settings</h1>
         <p className="text-slate-400 mt-1 text-sm">Manage your account, security, and appearance</p>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Navigation Sidebar */}
-        <div className="w-64 border-r border-slate-800 p-4 space-y-2 overflow-y-auto bg-slate-950">
+        <div className="w-64 border-r border-border p-4 space-y-2 overflow-y-auto bg-sidebar">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                 activeTab === tab.id 
-                  ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' 
-                  : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                  ? 'bg-primary text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
               }`}
             >
               <span className="text-lg">{tab.icon}</span>
@@ -244,7 +244,7 @@ export default function SettingsPage() {
                   <button 
                     type="submit" 
                     disabled={isUpdatingPassword}
-                    className="w-full py-4 bg-indigo-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-indigo-500 transition-all disabled:opacity-50"
+                    className="w-full py-4 bg-primary text-white font-black uppercase tracking-widest rounded-2xl hover:opacity-90 transition-all disabled:opacity-50"
                   >
                     {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                   </button>

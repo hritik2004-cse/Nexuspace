@@ -38,15 +38,15 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 absolute inset-0">
+    <div className="flex flex-col h-full bg-background absolute inset-0">
       <div aria-live="polite" className="sr-only">
         {latestAnnouncement}
       </div>
       {/* Online Count & Pinned Messages Banner */}
-      <div className="bg-slate-800/80 border-b border-slate-700 shadow-sm z-20 sticky top-0 backdrop-blur-md shrink-0 flex flex-col">
+      <div className="bg-background/80 border-b border-border shadow-sm z-20 sticky top-0 backdrop-blur-md shrink-0 flex flex-col">
         {/* Online Count */}
-        <div className="flex justify-end px-4 py-1.5 border-b border-slate-700/50 bg-slate-900/50">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/50 shadow-sm">
+        <div className="flex justify-end px-4 py-1.5 border-b border-border bg-white/5">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2 py-0.5 rounded-full border border-border shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             {onlineCount} {onlineCount === 1 ? 'person' : 'people'} online
           </div>

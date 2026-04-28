@@ -144,32 +144,44 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.theme-emerald {
+:root.theme-midnight {
+  --background: #030014;
+  --sidebar: #0a0a0f;
+  --primary: #6366f1;
+  --sidebar-primary: #6366f1;
+  --border: rgba(255, 255, 255, 0.1);
+}
+
+:root.theme-emerald {
   --background: #020617;
   --sidebar: #061a14;
   --primary: #10b981;
   --sidebar-primary: #10b981;
+  --border: rgba(16, 185, 129, 0.1);
 }
 
-.theme-rose {
+:root.theme-rose {
   --background: #0c0205;
   --sidebar: #1a060a;
   --primary: #f43f5e;
   --sidebar-primary: #f43f5e;
+  --border: rgba(244, 63, 94, 0.1);
 }
 
-.theme-amber {
+:root.theme-amber {
   --background: #0a0500;
   --sidebar: #1a0d06;
   --primary: #f59e0b;
   --sidebar-primary: #f59e0b;
+  --border: rgba(245, 158, 11, 0.1);
 }
 
-.theme-aura {
+:root.theme-aura {
   --background: #05000a;
   --sidebar: #0f061a;
   --primary: #a855f7;
   --sidebar-primary: #a855f7;
+  --border: rgba(168, 85, 247, 0.1);
 }
 
 @layer base {
@@ -177,10 +189,11 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-500;
   }
   html {
     @apply font-sans;
+    transition: background-color 0.5s ease;
   }
 
   /* Fix Webkit Autofill background in dark mode */
