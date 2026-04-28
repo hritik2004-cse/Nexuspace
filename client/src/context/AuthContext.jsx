@@ -47,10 +47,14 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.login, { email, password });
-      const { tokens, ...userData } = res.data;
+      const data = res.data;
+      const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
+      const accessToken = data.tokens?.accessToken;
 
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      if (accessToken) {
+        localStorage.setItem("nexuspace_token", accessToken);
+      }
       setUser(userData);
 
       router.push("/workspace");
@@ -66,10 +70,14 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.register, { name, email, password });
-      const { tokens, ...userData } = res.data;
+      const data = res.data;
+      const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
+      const accessToken = data.tokens?.accessToken;
 
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      if (accessToken) {
+        localStorage.setItem("nexuspace_token", accessToken);
+      }
       setUser(userData);
 
       router.push("/workspace");
@@ -92,10 +100,14 @@ export function AuthProvider({ children }) {
         credential: credentialResponse.credential,
       });
 
-      const { tokens, ...userData } = res.data;
+      const data = res.data;
+      const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
+      const accessToken = data.tokens?.accessToken;
 
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
-      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      if (accessToken) {
+        localStorage.setItem("nexuspace_token", accessToken);
+      }
       setUser(userData);
 
       router.replace("/workspace");
