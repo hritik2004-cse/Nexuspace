@@ -122,7 +122,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
               className="text-sm font-semibold text-slate-200 flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer"
             >
               {message.sender}
-              <span className="bg-indigo-500/20 text-indigo-400 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
+              <span className="bg-primary/20 text-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
               </span>
             </span>
@@ -147,8 +147,8 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
             <div 
               className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap ${
                 isOwnMessage 
-                  ? 'bg-indigo-600 text-white rounded-tr-sm bg-linear-to-br from-indigo-500 to-indigo-600 border border-indigo-400/20' 
-                  : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700/50'
+                  ? 'bg-primary text-white rounded-tr-sm bg-linear-to-br from-primary to-primary/80 border border-white/10' 
+                  : 'bg-white/5 text-slate-100 rounded-tl-sm border border-white/5'
               }`}
             >
               {message.attachment && (

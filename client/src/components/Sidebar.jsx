@@ -177,7 +177,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           onClick={() => setIsOpen && setIsOpen(false)}
         />
       )}
-      <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col h-full border-r border-border transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-sidebar/80 backdrop-blur-xl flex flex-col h-full border-r border-border transition-all duration-500 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} shadow-[10px_0_30px_rgba(0,0,0,0.5)]`}>
         {/* Workspace Header Dropdown */}
         <div className="relative">
           <div 
@@ -358,13 +358,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
           <div className="mt-2 space-y-0.5">
             {channels.map((channelObj) => (
-              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-indigo-600/10' : 'lg:hover:bg-slate-900'} transition-colors`}>
+              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-primary/10 shadow-[inset_0_0_10px_rgba(var(--primary-rgb),0.1)]' : 'lg:hover:bg-white/5'} transition-all duration-300`}>
                 <button
                   onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
                   aria-current={currentChannel === channelObj.name ? "page" : undefined}
-                  className={`flex items-center flex-1 px-4 py-2 text-sm font-medium transition-colors ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-300 hover:text-slate-100'}`}
+                  className={`flex items-center flex-1 px-4 py-2 text-sm font-bold transition-colors ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-400 hover:text-slate-100'}`}
                 >
-                  <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-indigo-400' : 'text-slate-500'}`} />
+                  <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-500'}`} />
                   {channelObj.name}
                 </button>
                 <div className="flex items-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity pr-2">

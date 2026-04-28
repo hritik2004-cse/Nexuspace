@@ -90,17 +90,17 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
   };
 
   return (
-    <div className="p-4 bg-slate-900 border-t border-slate-800 shadow-xl relative">
+    <div className="p-4 bg-transparent relative z-20">
       {/* Mentions Popover */}
       {showMentions && (
-        <div className="absolute bottom-full left-4 mb-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl py-2 z-50">
+        <div className="absolute bottom-full left-4 mb-2 w-48 bg-sidebar/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl py-2 z-50">
           <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase">Members</div>
           {members.map(member => (
             <button 
               key={member}
               type="button"
               onClick={() => handleMention(member)}
-              className="w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+              className="w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-primary/20 hover:text-white transition-colors"
             >
               @{member}
             </button>
@@ -110,18 +110,18 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
 
       {/* Emoji Picker Popover */}
       {showEmoji && (
-        <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-slate-700/50">
+        <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-border/50">
           <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={pickerHeight} />
         </div>
       )}
 
       {/* Attachment Preview */}
       {attachment && (
-        <div className="mb-3 flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 w-fit relative group">
+        <div className="mb-3 flex items-center gap-3 p-3 bg-white/5 backdrop-blur-md rounded-lg border border-border/50 w-fit relative group">
           {attachment.type.startsWith('image/') ? (
             <img src={attachment.url} alt="preview" className="w-16 h-16 object-cover rounded shadow" />
           ) : (
-            <div className="w-16 h-16 flex items-center justify-center bg-slate-700 rounded shadow text-slate-300">
+            <div className="w-16 h-16 flex items-center justify-center bg-white/10 rounded shadow text-slate-300">
               <FiFile className="w-8 h-8" />
             </div>
           )}
@@ -138,7 +138,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
 
       <form 
         onSubmit={handleSubmit}
-        className="flex flex-row items-end bg-slate-800 rounded-xl border border-slate-700 p-1.5 focus-within:ring-2 focus-within:ring-indigo-500/50 focus-within:border-indigo-500 transition-all shadow-sm"
+        className="flex flex-row items-end bg-white/5 backdrop-blur-md rounded-xl border border-border p-1.5 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all shadow-lg"
       >
         <div className="flex shrink-0 px-2 pb-1.5 gap-2 text-slate-400">
           <input 
@@ -150,7 +150,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           <button 
             type="button" 
             onClick={() => fileInputRef.current?.click()}
-            className="hover:text-indigo-400 transition-colors p-1 rounded-md hover:bg-slate-700/50"
+            className="hover:text-primary transition-colors p-1 rounded-md hover:bg-white/5"
           >
             <FiPaperclip className="w-5 h-5"/>
           </button>
@@ -167,14 +167,14 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           <button 
             type="button" 
             onClick={() => setShowEmoji(!showEmoji)}
-            className={`text-slate-400 hover:text-indigo-400 transition-colors p-1 ${showEmoji ? 'text-indigo-400' : ''}`}
+            className={`text-slate-400 hover:text-primary transition-colors p-1 ${showEmoji ? 'text-primary' : ''}`}
           >
             <FiSmile className="w-5 h-5" />
           </button>
           <button 
             type="submit" 
             disabled={!text.trim() && !attachment}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white transition-all shadow-md group relative overflow-hidden"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary hover:opacity-90 disabled:bg-white/5 disabled:text-slate-600 text-white transition-all shadow-md group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
             <FiSend className="w-4 h-4 relative z-10 -ml-0.5 mt-0.5" />
@@ -182,7 +182,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
         </div>
       </form>
       <div className="px-4 py-2 flex justify-between">
-        <p className="text-[11px] text-slate-500 font-medium"><strong>Shift + Enter</strong> to add a new line</p>
+        <p className="text-[11px] text-slate-500 font-medium tracking-tight"><strong>Shift + Enter</strong> to add a new line</p>
       </div>
     </div>
   );

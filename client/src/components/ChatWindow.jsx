@@ -60,10 +60,10 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Pinned</h3>
               <span className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none">{pinnedMessages.length}</span>
             </div>
-            <div className="max-h-24 overflow-y-auto pr-2 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-600">
+            <div className="max-h-24 overflow-y-auto pr-2 space-y-1.5 scrollbar-thin scrollbar-thumb-white/10">
               {pinnedMessages.map(msg => (
-                <div key={msg.id || msg._id} className="text-sm text-slate-300 bg-slate-900/50 px-3 py-2 rounded-lg border border-slate-700/50 truncate cursor-pointer hover:bg-slate-800 transition-colors">
-                  <span className="font-semibold text-slate-400 mr-2">{msg.sender}:</span> 
+                <div key={msg.id || msg._id} className="text-sm text-slate-300 bg-white/5 px-3 py-2 rounded-lg border border-border truncate cursor-pointer hover:bg-white/10 transition-colors">
+                  <span className="font-semibold text-primary mr-2">{msg.sender}:</span> 
                   {msg.content}
                 </div>
               ))}
@@ -73,14 +73,14 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
       </div>
 
       {/* Scrollable Chat Area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent relative z-10">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-4">
-            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center shadow-inner">
-              <span className="text-3xl">👋</span>
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center shadow-inner border border-white/10">
+              <span className="text-3xl animate-bounce">👋</span>
             </div>
-            <p className="font-medium text-lg">Welcome to the beginning of the channel.</p>
-            <p className="text-sm">This is the start of your workspace history.</p>
+            <p className="font-bold text-lg text-slate-300">Welcome to the beginning of the channel.</p>
+            <p className="text-sm text-slate-500">This is the start of your workspace history.</p>
           </div>
         ) : (
           messages.map((msg, idx) => {
@@ -93,9 +93,9 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
                 {showDivider && (
                   <div className="flex justify-center my-6 relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-700/50"></div>
+                      <div className="w-full border-t border-border"></div>
                     </div>
-                    <div className="relative px-4 py-1 text-xs font-semibold text-slate-400 bg-slate-800 rounded-full border border-slate-700/50 shadow-sm z-10">
+                    <div className="relative px-4 py-1 text-[10px] font-black uppercase tracking-widest text-slate-400 bg-white/5 backdrop-blur-md rounded-full border border-border shadow-sm z-10">
                       {formatDividerDate(msg.createdAt)}
                     </div>
                   </div>
