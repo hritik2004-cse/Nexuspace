@@ -47,12 +47,11 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.login, { email, password });
-      const userData = res.data;
+      const { tokens, ...userData } = res.data;
 
-      localStorage.removeItem("nexuspace_user");
-      localStorage.removeItem("nexuspace_token");
-      setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      setUser(userData);
 
       router.push("/workspace");
       return userData;
@@ -67,12 +66,11 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       const res = await api.post(API_ENDPOINTS.auth.register, { name, email, password });
-      const userData = res.data;
+      const { tokens, ...userData } = res.data;
 
-      localStorage.removeItem("nexuspace_user");
-      localStorage.removeItem("nexuspace_token");
-      setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      setUser(userData);
 
       router.push("/workspace");
       return userData;
@@ -94,12 +92,11 @@ export function AuthProvider({ children }) {
         credential: credentialResponse.credential,
       });
 
-      const userData = res.data;
+      const { tokens, ...userData } = res.data;
 
-      localStorage.removeItem("nexuspace_user");
-      localStorage.removeItem("nexuspace_token");
-      setUser(userData);
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
+      localStorage.setItem("nexuspace_token", tokens.accessToken);
+      setUser(userData);
 
       router.replace("/workspace");
       return userData;

@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
   try {
     const { user, tokens } = await authService.registerLocalService({ name, email, password, sessionId, ip, userAgent });
     setAuthCookies(res, tokens, sessionId);
-    res.status(201).json(user);
+    res.status(201).json({ ...user.toObject(), tokens });
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -75,7 +75,7 @@ const loginUser = asyncHandler(async (req, res) => {
   try {
     const { user, tokens } = await authService.loginLocalService({ email, password, sessionId, ip, userAgent });
     setAuthCookies(res, tokens, sessionId);
-    res.status(200).json(user);
+    res.status(200).json({ ...user.toObject(), tokens });
   } catch (error) {
     console.error(`[Login Failure] RequestId: ${req.requestId} - Error: ${error.message}`);
     res.status(401);
@@ -97,7 +97,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 
   const { user, tokens } = await authService.googleLoginService(credential, sessionId, ip, userAgent);
   setAuthCookies(res, tokens, sessionId);
-  res.status(200).json(user);
+  res.status(200).json({ ...user.toObject(), tokens });
 });
 
 const refreshToken = asyncHandler(async (req, res) => {
@@ -114,7 +114,7 @@ const refreshToken = asyncHandler(async (req, res) => {
     // Service handles token rotation, reuse detection, grace windows, and session locking
     const { user, tokens, sessionId } = await authService.refreshTokenService(token, ip, userAgent);
     setAuthCookies(res, tokens, sessionId);
-    res.status(200).json(user);
+    res.status(200).json({ ...user.toObject(), tokens });
   } catch (error) {
     res.status(401);
     throw new Error(error.message);

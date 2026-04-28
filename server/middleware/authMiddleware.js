@@ -11,6 +11,11 @@ const generateRequestId = (req, res, next) => {
 const protect = asyncHandler(async (req, res, next) => {
   let token = req.cookies.access_token;
 
+  // Fallback to Authorization Header (Bearer token) for cross-domain support
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
   if (!token) {
     res.status(401);
     throw new Error('Not authorized, no access token');

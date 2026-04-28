@@ -21,7 +21,12 @@ const workspaceSocket = (io) => {
   io.use(async (socket, next) => {
     try {
       const cookies = cookie.parse(socket.handshake.headers.cookie || '');
-      const token = cookies.access_token;
+      let token = cookies.access_token;
+      
+      // Fallback to handshake auth token for cross-domain support
+      if (!token && socket.handshake.auth && socket.handshake.auth.token) {
+        token = socket.handshake.auth.token;
+      }
       
       if (!token) return next(new Error('Authentication error: No token'));
 

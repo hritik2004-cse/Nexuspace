@@ -2,7 +2,7 @@ import axios from "axios";
 
 const DEFAULT_API_URL =
   process.env.NODE_ENV === "production"
-    ? "/api"
+    ? "https://nexuspace-backend.onrender.com/api"
     : "http://localhost:5000/api";
 
 const getApiUrl = () => {
@@ -32,12 +32,19 @@ const api = axios.create({
   withCredentials: true, // Crucial for sending/receiving cookies
 });
 
-// Interceptor: Attach CSRF Token
+// Interceptor: Attach CSRF Token and Bearer Token
 api.interceptors.request.use(
   (config) => {
     const csrfToken = getCookie('csrf_token');
     if (csrfToken) {
       config.headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("nexuspace_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
