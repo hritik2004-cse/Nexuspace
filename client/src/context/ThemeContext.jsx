@@ -55,36 +55,42 @@ export const themes = {
 };
 
 export function ThemeProvider({ children }) {
-  const { user, updateProfile } = useAuth();
+  const { user } = useAuth();
   const [currentTheme, setCurrentTheme] = useState('midnight');
 
-  // 1. Initialize theme from User profile or LocalStorage
+  // Unified effect to handle initialization and DOM application
   useEffect(() => {
-    if (user?.theme && themes[user.theme]) {
+    // 1. Determine the source of truth for the theme
+    let themeToApply = currentTheme;
+    
+    // If user has a theme in DB, it takes priority during initialization or change
+    if (user?.theme && themes[user.theme] && user.theme !== currentTheme) {
+      themeToApply = user.theme;
       setCurrentTheme(user.theme);
     } else {
+      // Fallback to local storage if no user theme or if we're just starting
       const savedTheme = localStorage.getItem('nexuspace-theme');
-      if (savedTheme && themes[savedTheme]) {
+      if (savedTheme && themes[savedTheme] && !user?.theme) {
+        themeToApply = savedTheme;
         setCurrentTheme(savedTheme);
       }
     }
-  }, [user?.theme]); // Only re-run if the DB theme changes
 
-  // 2. Apply theme to DOM and save to LocalStorage
-  useEffect(() => {
-    const themeObj = themes[currentTheme] || themes.midnight;
+    // 2. Apply theme to DOM
+    const themeObj = themes[themeToApply] || themes.midnight;
     
-    // Remove all theme classes
+    // Clean up old classes
     Object.values(themes).forEach(t => {
       document.documentElement.classList.remove(t.class);
     });
     
     // Add current theme class
     document.documentElement.classList.add(themeObj.class);
-    localStorage.setItem('nexuspace-theme', currentTheme);
-  }, [currentTheme]);
+    localStorage.setItem('nexuspace-theme', themeToApply);
+    
+  }, [user?.theme, currentTheme]);
 
-  // 3. Exposed setter that also syncs to DB
+  // setter that also syncs to DB
   const setTheme = async (themeKey) => {
     if (!themes[themeKey]) return;
     
