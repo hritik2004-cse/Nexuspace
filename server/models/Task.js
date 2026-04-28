@@ -14,6 +14,14 @@ const taskSchema = new mongoose.Schema({
     enum: ['todo', 'doing', 'done'],
     default: 'todo',
   },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'low',
+  },
+  labels: [{
+    type: String
+  }],
   assignee: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -21,7 +29,7 @@ const taskSchema = new mongoose.Schema({
   dueDate: {
     type: String,
   },
-  boardId: { // In a broader sense this maps to Workspace or a specific Board entity
+  boardId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Workspace',
     required: true

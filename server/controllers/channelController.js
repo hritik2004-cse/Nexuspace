@@ -1,48 +1,61 @@
-const Channel = require('../models/Channel');
-const Workspace = require('../models/Workspace');
+const channelService = require('../services/channelService');
+const { asyncHandler } = require('../middleware/errorMiddleware');
 
-// @desc    Get or create a channel by name
-// @route   POST /api/channels/findOrCreate
-// @access  Private
-const findOrCreateChannel = async (req, res) => {
-  try {
-    const { name } = req.body;
-    
-    // For simplicity without a full Workspace selector UI, we map to a default global workspace
-    let globalWorkspace = await Workspace.findOne({ name: 'Nexuspace GlobalHQ' });
-    if (!globalWorkspace) {
-      globalWorkspace = await Workspace.create({
-        name: 'Nexuspace GlobalHQ',
-        owner: req.user._id,
-        members: [req.user._id]
-      });
-    }
-
-    let channel = await Channel.findOne({ name, workspaceId: globalWorkspace._id });
-    if (!channel) {
-      channel = await Channel.create({
-        name,
-        workspaceId: globalWorkspace._id,
-        creator: req.user._id,
-        members: [req.user._id]
-      });
-    }
-
-    res.status(200).json(channel);
-
-    // Broadcast "joined" message if it's a new join/creation (Simplified for now)
-    if (req.io) {
-      req.io.to(channel._id.toString()).emit('receive_message', {
-        content: `@${req.user.username || req.user.name} joined the channel`,
-        sender: { name: 'System', username: 'system' },
-        isSystem: true,
-        createdAt: new Date()
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+/**
+ * @desc    Create a new channel
+ * @route   POST /api/channels
+ */
+const createChannel = asyncHandler(async (req, res) => {
+  const { name, workspaceId } = req.body;
+  if (!name || !workspaceId) {
+    res.status(400);
+    throw new Error('Name and workspaceId are required');
   }
-};
 
-module.exports = { findOrCreateChannel };
+  const channel = await channelService.createChannelService(req.body, req.user._id);
+  res.status(201).json(channel);
+});
+
+/**
+ * @desc    Get all channels in a workspace
+ * @route   GET /api/channels/:workspaceId
+ */
+const getWorkspaceChannels = asyncHandler(async (req, res) => {
+  const channels = await channelService.getWorkspaceChannelsService(req.params.workspaceId);
+  res.status(200).json(channels);
+});
+
+/**
+ * @desc    Get channel details
+ * @route   GET /api/channels/details/:id
+ */
+const getChannelDetails = asyncHandler(async (req, res) => {
+  const channel = await channelService.getChannelDetailsService(req.params.id);
+  res.status(200).json(channel);
+});
+
+/**
+ * @desc    Update channel details
+ * @route   PUT /api/channels/:id
+ */
+const updateChannel = asyncHandler(async (req, res) => {
+  const channel = await channelService.updateChannelService(req.params.id, req.body, req.user._id);
+  res.status(200).json(channel);
+});
+
+/**
+ * @desc    Delete channel
+ * @route   DELETE /api/channels/:id
+ */
+const deleteChannel = asyncHandler(async (req, res) => {
+  const result = await channelService.deleteChannelService(req.params.id, req.user._id);
+  res.status(200).json(result);
+});
+
+module.exports = { 
+  createChannel,
+  getWorkspaceChannels, 
+  getChannelDetails,
+  updateChannel,
+  deleteChannel
+};

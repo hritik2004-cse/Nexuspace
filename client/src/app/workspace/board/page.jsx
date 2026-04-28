@@ -108,7 +108,7 @@ export default function KanbanBoard() {
         dueDate: newTaskDueDate || 'No limit',
         boardId
       });
-      
+
       setIsModalOpen(false);
       setNewTaskTitle('');
       setNewTaskDesc('');
@@ -229,7 +229,7 @@ export default function KanbanBoard() {
                       <span className="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-bold">{colTasks.length}</span>
                     </h3>
                   </div>
-                  
+
                   <Droppable droppableId={column.id} isDropDisabled={false}>
                     {(provided, snapshot) => (
                       <div
@@ -248,7 +248,7 @@ export default function KanbanBoard() {
                               >
                                 <div className="flex justify-between items-start gap-2 mb-1">
                                   {editingTaskId === task._id ? (
-                                    <input 
+                                    <input
                                       value={editTaskTitle}
                                       onChange={(e) => setEditTaskTitle(e.target.value)}
                                       className="w-full text-sm font-semibold bg-slate-950/50 border border-slate-700/50 text-slate-100 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
@@ -275,7 +275,7 @@ export default function KanbanBoard() {
                                   </div>
                                 </div>
                                 {editingTaskId === task._id ? (
-                                  <textarea 
+                                  <textarea
                                     value={editTaskDesc}
                                     onChange={(e) => setEditTaskDesc(e.target.value)}
                                     className="w-full text-xs bg-slate-950/50 border border-slate-700/50 text-slate-300 rounded px-2 py-1 mt-1 mb-2 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none"
@@ -284,11 +284,11 @@ export default function KanbanBoard() {
                                 ) : (
                                   <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">{task.description}</p>
                                 )}
-                                
+
                                 <div className="flex items-center justify-between pt-3 border-t border-slate-800/60 mt-2">
                                   {editingTaskId === task._id ? (
                                     <>
-                                      <input 
+                                      <input
                                         value={editTaskDueDate}
                                         onChange={(e) => setEditTaskDueDate(e.target.value)}
                                         placeholder="Due Date"
@@ -332,7 +332,7 @@ export default function KanbanBoard() {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-5 border-b border-slate-800">
               <h2 className="text-lg font-bold text-white">Create New Task</h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-slate-400 hover:text-white transition-colors p-1"
               >
@@ -342,8 +342,8 @@ export default function KanbanBoard() {
             <form onSubmit={handleCreateTask} className="p-5 space-y-4 text-sm">
               <div>
                 <label className="block font-medium text-slate-400 mb-1">Task Title <span className="text-red-400">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="E.g. Fix login UI"
@@ -354,7 +354,7 @@ export default function KanbanBoard() {
               </div>
               <div>
                 <label className="block font-medium text-slate-400 mb-1">Description</label>
-                <textarea 
+                <textarea
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
                   placeholder="Task details and scope..."
@@ -364,15 +364,15 @@ export default function KanbanBoard() {
               </div>
               <div>
                 <label className="block font-medium text-slate-400 mb-1">Due Date</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newTaskDueDate}
                   onChange={(e) => setNewTaskDueDate(e.target.value)}
                   placeholder="E.g. Oct 24 or ASAP"
                   className="w-full bg-slate-950/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 />
               </div>
-              
+
               <div className="pt-3 flex justify-end gap-3 text-sm">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-medium text-slate-300 hover:text-white transition-colors">
                   Cancel

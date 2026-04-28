@@ -11,9 +11,8 @@ export default function TaskCard({ task, index }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`bg-slate-800 p-4 mb-3 rounded-xl border ${
-            snapshot.isDragging ? 'border-indigo-500 shadow-xl shadow-indigo-500/10 scale-105' : 'border-slate-700 hover:border-slate-600 shadow-sm'
-          } transition-all cursor-grab active:cursor-grabbing font-sans relative group`}
+          className={`bg-slate-800 p-4 mb-3 rounded-xl border ${snapshot.isDragging ? 'border-indigo-500 shadow-xl shadow-indigo-500/10 scale-105' : 'border-slate-700 hover:border-slate-600 shadow-sm'
+            } transition-all cursor-grab active:cursor-grabbing font-sans relative group`}
           style={{ ...provided.draggableProps.style }}
         >
           <div className="flex justify-between items-start mb-2">
@@ -28,11 +27,11 @@ export default function TaskCard({ task, index }) {
               <FiMoreHorizontal />
             </button>
           </div>
-          
+
           <h4 className="text-sm font-semibold text-slate-100 mb-2 leading-snug">
             {task.title}
           </h4>
-          
+
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center text-xs text-slate-400 gap-3 font-medium">
               {task.date && (

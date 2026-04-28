@@ -2,12 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { Server } = require('socket.io');
 
 const connectDB = require('./config/db');
 const validateEnv = require('./config/envValidator');
 const { errorHandler } = require('./middleware/errorMiddleware');
-const workspaceSocket = require('./sockets/workspaceSocket');
+const { workspaceSocket } = require('./sockets/workspaceSocket');
 
 // 1. Validate Environment Variables
 validateEnv();
@@ -25,6 +26,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // 5. Initialize Socket.io (WebSocket Layer)
 const io = new Server(server, {
@@ -48,8 +50,16 @@ app.get('/', (req, res) => res.send('Nexuspace API Layered Architecture Running.
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/workspaces', require('./routes/workspaceRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
-app.use('/api/channels', require('./routes/channels')); // Legacy mapped reference
-app.use('/api/messages', require('./routes/messages')); // Legacy mapped reference
+app.use('/api/channels', require('./routes/channels'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/search', require('./routes/searchRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/files', require('./routes/fileRoutes'));
+
+// Serve static uploads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 8. Error Boundary Middleware
 app.use(errorHandler);

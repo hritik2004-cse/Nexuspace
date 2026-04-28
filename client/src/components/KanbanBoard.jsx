@@ -78,7 +78,7 @@ export default function KanbanBoard() {
           <p className="text-sm text-slate-400 mt-1">Manage tasks and workflow across the team.</p>
         </div>
       </div>
-      
+
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-6 h-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {data.columnOrder.map((columnId) => {

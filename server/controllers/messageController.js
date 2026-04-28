@@ -1,112 +1,99 @@
-const Message = require('../models/Message');
+const messageService = require('../services/messageService');
+const { asyncHandler } = require('../middleware/errorMiddleware');
 
-// @desc    Get all messages in a channel
-// @route   GET /api/messages/:channelId
-// @access  Private
-const getMessages = async (req, res) => {
-  try {
-    const messages = await Message.find({ channelId: req.params.channelId })
-      .populate('sender', 'name avatar role username')
-      .sort({ createdAt: 1 });
-    
-    // Convert reactions Map back to a clean object for React
-    const formattedMessages = messages.map(msg => {
-      const msgObj = msg.toObject();
-      const reactionsFormatted = {};
-      if (msgObj.reactions) {
-        for (const [emoji, users] of Object.entries(msgObj.reactions)) {
-          reactionsFormatted[emoji] = users.map(u => u.toString());
-        }
-      }
-      return { ...msgObj, reactions: reactionsFormatted };
-    });
+/**
+ * @desc    Get messages for a channel
+ * @route   GET /api/messages/:channelId
+ */
+const getMessages = asyncHandler(async (req, res) => {
+  const messages = await messageService.getMessagesService(req.params.channelId);
+  res.status(200).json(messages);
+});
 
-    res.json(formattedMessages);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+/**
+ * @desc    Create a new message
+ * @route   POST /api/messages
+ */
+const createMessage = asyncHandler(async (req, res) => {
+  const { content, channelId } = req.body;
+  if (!content || !channelId) {
+    res.status(400);
+    throw new Error('Content and channelId are required');
   }
-};
 
-// @desc    Create a new message
-// @route   POST /api/messages
-// @access  Private
-const createMessage = async (req, res) => {
-  try {
-    const { content, channelId, attachments } = req.body;
-
-    const message = await Message.create({
-      content,
-      sender: req.user._id,
-      channelId,
-      attachments: attachments || []
-    });
-
-    const populatedMessage = await message.populate('sender', 'name avatar role username');
-    
-    // Broadcast via socket io attached to req
-    req.io.to(channelId).emit('receive_message', populatedMessage);
-
-    res.status(201).json(populatedMessage);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+  const message = await messageService.createMessageService(req.body, req.user._id);
+  
+  if (req.io) {
+    req.io.to(channelId).emit('receive_message', message);
   }
+
+  res.status(201).json(message);
+});
+
+/**
+ * @desc    Delete message
+ * @route   DELETE /api/messages/:id
+ */
+const deleteMessage = asyncHandler(async (req, res) => {
+  const result = await messageService.deleteMessageService(req.params.id, req.user._id);
+  res.status(200).json(result);
+});
+
+/**
+ * @desc    Add reaction
+ * @route   POST /api/messages/:id/react
+ */
+const addReaction = asyncHandler(async (req, res) => {
+  const { emoji } = req.body;
+  const result = await messageService.addReactionService(req.params.id, emoji, req.user._id);
+  res.status(200).json(result);
+});
+
+/**
+ * @desc    Remove reaction
+ * @route   DELETE /api/messages/:id/react
+ */
+const removeReaction = asyncHandler(async (req, res) => {
+  const { emoji } = req.body;
+  const result = await messageService.removeReactionService(req.params.id, emoji, req.user._id);
+  res.status(200).json(result);
+});
+
+/**
+ * @desc    Pin message
+ * @route   POST /api/messages/:id/pin
+ */
+const pinMessage = asyncHandler(async (req, res) => {
+  const result = await messageService.pinMessageService(req.params.id);
+  res.status(200).json(result);
+});
+
+/**
+ * @desc    Unpin message
+ * @route   DELETE /api/messages/:id/pin
+ */
+const unpinMessage = asyncHandler(async (req, res) => {
+  const result = await messageService.unpinMessageService(req.params.id);
+  res.status(200).json(result);
+});
+
+/**
+ * @desc    Search messages
+ * @route   GET /api/messages/search
+ */
+const searchMessages = asyncHandler(async (req, res) => {
+  const { q } = req.query;
+  const messages = await messageService.searchMessagesService(q);
+  res.status(200).json(messages);
+});
+
+module.exports = {
+  getMessages,
+  createMessage,
+  deleteMessage,
+  addReaction,
+  removeReaction,
+  pinMessage,
+  unpinMessage,
+  searchMessages
 };
-
-// @desc    React to a message
-// @route   PUT /api/messages/:id/react
-// @access  Private
-const reactToMessage = async (req, res) => {
-  try {
-    const { emoji } = req.body;
-    const userId = req.user._id;
-
-    const message = await Message.findById(req.params.id);
-    if (!message) return res.status(404).json({ message: 'Message not found' });
-
-    let currentReacts = message.reactions.get(emoji) || [];
-    
-    // Toggle logic: If user already reacted, remove them. Otherwise, add.
-    const hasReacted = currentReacts.some(id => id.toString() === userId.toString());
-    
-    if (hasReacted) {
-      currentReacts = currentReacts.filter(id => id.toString() !== userId.toString());
-      if (currentReacts.length === 0) {
-        message.reactions.delete(emoji);
-      } else {
-        message.reactions.set(emoji, currentReacts);
-      }
-    } else {
-      currentReacts.push(userId);
-      message.reactions.set(emoji, currentReacts);
-    }
-
-    await message.save();
-
-    res.json({ messageId: message._id, reactions: message.reactions });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
-  }
-};
-
-// @desc    Pin or unpin a message
-// @route   PUT /api/messages/:id/pin
-// @access  Private (Admin Only via middleware)
-const togglePinMessage = async (req, res) => {
-  try {
-    const message = await Message.findById(req.params.id);
-    if (!message) return res.status(404).json({ message: 'Message not found' });
-
-    message.isPinned = !message.isPinned;
-    await message.save();
-
-    res.json({ messageId: message._id, isPinned: message.isPinned });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
-  }
-};
-
-module.exports = { getMessages, createMessage, reactToMessage, togglePinMessage };

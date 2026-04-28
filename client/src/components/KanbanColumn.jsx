@@ -26,9 +26,8 @@ export default function KanbanColumn({ column, tasks }) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 overflow-y-auto p-3 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent ${
-              snapshot.isDraggingOver ? 'bg-slate-800/20' : ''
-            } transition-colors`}
+            className={`flex-1 overflow-y-auto p-3 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent ${snapshot.isDraggingOver ? 'bg-slate-800/20' : ''
+              } transition-colors`}
           >
             {tasks.map((task, index) => (
               <TaskCard key={task.id} task={task} index={index} />
