@@ -45,7 +45,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
     >
       <div className={`flex max-w-[75%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} gap-3 group`}>
         {/* Avatar */}
-        <div className="shrink-0 mt-1 relative cursor-pointer w-9 h-9" onClick={() => !isOwnMessage && setIsProfileOpen(true)}>
+        <div className="shrink-0 mt-1 relative cursor-pointer w-9 h-9" onClick={() => setIsProfileOpen(true)}>
           { (isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)) ? (
             <img 
               src={isOwnMessage ? (user?.avatar || user?.profileImage) : (message.senderDetails?.avatar || message.senderDetails?.profileImage)} 
@@ -66,7 +66,10 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
         <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
           {/* Sender & Timestamp */}
           <div className={`flex items-baseline gap-2 mb-1 px-1 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-            <span className="text-sm font-semibold text-slate-200 flex items-center justify-center gap-1.5 hover:underline decoration-slate-500 underline-offset-2">
+            <span 
+              onClick={() => setIsProfileOpen(true)}
+              className="text-sm font-semibold text-slate-200 flex items-center justify-center gap-1.5 hover:underline decoration-slate-500 underline-offset-2 cursor-pointer"
+            >
               {message.sender}
               <span className="bg-indigo-500/20 text-indigo-400 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
@@ -178,7 +181,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           <ProfileModal 
             isOpen={isProfileOpen} 
             onClose={() => setIsProfileOpen(false)} 
-            viewUser={{ name: message.sender, username: message.sender.toLowerCase(), isOnline: true }}
+            viewUser={isOwnMessage ? null : message.senderDetails}
           />
         )}
       </AnimatePresence>
