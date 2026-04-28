@@ -8,12 +8,14 @@ const authLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
   message: { success: false, message: "Too many login attempts, please try again later", code: "RATE_LIMIT_EXCEEDED" },
+  validate: { trustProxy: false },
 });
 
 const forgotPasswordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   message: { success: false, message: "Too many password reset requests, please try again after an hour", code: "RATE_LIMIT_EXCEEDED" },
+  validate: { trustProxy: false },
 });
 
 router.post('/register', registerUser);

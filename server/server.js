@@ -44,7 +44,13 @@ validateEnv();
 // 2. Initialize Express app
 const app = express();
 const server = http.createServer(app);
-app.set("trust proxy", true); // Respect X-Forwarded-For from all proxies (Render/Cloudflare)
+
+// Respect X-Forwarded-For from proxies in production (Render/Vercel)
+if (process.env.NODE_ENV === 'production') {
+  app.set("trust proxy", 1); 
+} else {
+  app.set("trust proxy", false);
+}
 
 // 3. Connect to MongoDB (Don't await to unblock server startup)
 connectDB();
@@ -69,6 +75,7 @@ const apiLimiter = rateLimit({
   message: { success: false, message: "Too many requests", code: "RATE_LIMIT_EXCEEDED" },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
 });
 app.use("/api/", apiLimiter);
 
