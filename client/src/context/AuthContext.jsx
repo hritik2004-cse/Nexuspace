@@ -51,12 +51,14 @@ export function AuthProvider({ children }) {
       const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
       const accessToken = data.tokens?.accessToken;
 
+      console.log("[Auth] Login Success. Saving to storage...");
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       if (accessToken) {
         localStorage.setItem("nexuspace_token", accessToken);
       }
       setUser(userData);
 
+      console.log("[Auth] Redirecting to /workspace...");
       router.push("/workspace");
       return userData;
     } catch (error) {
@@ -104,12 +106,14 @@ export function AuthProvider({ children }) {
       const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
       const accessToken = data.tokens?.accessToken;
 
+      console.log("[Auth] Google Login Success. Saving to storage...");
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       if (accessToken) {
         localStorage.setItem("nexuspace_token", accessToken);
       }
       setUser(userData);
 
+      console.log("[Auth] Redirecting to /workspace...");
       router.replace("/workspace");
       return userData;
     } catch (error) {
