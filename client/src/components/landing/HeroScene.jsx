@@ -89,7 +89,7 @@ function Scene() {
 
 export default function HeroScene() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 bg-[#030014]">
       <Canvas dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
         <ambientLight intensity={0.5} />

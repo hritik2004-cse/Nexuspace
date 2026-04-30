@@ -102,8 +102,8 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} font-sans antialiased`} id="main-content">
+    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
+      <body className={`${poppins.variable} font-sans antialiased bg-[#030014] text-white`} id="main-content">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-indigo-600 focus:text-white">
           Skip to main content
         </a>
