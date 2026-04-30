@@ -114,7 +114,10 @@ export function AuthProvider({ children }) {
       }
       setUser(userData);
 
-      router.replace("/workspace");
+      toast.success("Welcome back! Syncing your workspace...");
+      setTimeout(() => {
+        window.location.href = "/workspace";
+      }, 500);
       return userData;
     } catch (error) {
       throw new Error(
