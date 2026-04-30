@@ -139,7 +139,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 w-full max-w-md md:max-w-none"
+                  className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-md md:max-w-none mx-auto"
                 >
                   <Link href="/register" className="w-full sm:w-auto">
                     <m.button 
