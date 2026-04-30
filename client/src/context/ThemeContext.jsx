@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import api from '@/services/api';
 
@@ -56,39 +57,61 @@ export const themes = {
 
 export function ThemeProvider({ children }) {
   const { user } = useAuth();
-  const [currentTheme, setCurrentTheme] = useState('midnight');
+  const pathname = usePathname();
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('nexuspace-theme');
+      return (saved && themes[saved]) ? saved : 'midnight';
+    }
+    return 'midnight';
+  });
 
-  // Unified effect to handle initialization and DOM application
+  // Initialize theme from user or local storage
   useEffect(() => {
-    // 1. Determine the source of truth for the theme
-    let themeToApply = currentTheme;
-    
-    // If user has a theme in DB, it takes priority during initialization or change
-    if (user?.theme && themes[user.theme] && user.theme !== currentTheme) {
-      themeToApply = user.theme;
+    const isWorkspace = pathname?.startsWith('/workspace');
+    if (!isWorkspace) return;
+
+    if (user?.theme && themes[user.theme]) {
       setCurrentTheme(user.theme);
     } else {
-      // Fallback to local storage if no user theme or if we're just starting
       const savedTheme = localStorage.getItem('nexuspace-theme');
-      if (savedTheme && themes[savedTheme] && !user?.theme) {
-        themeToApply = savedTheme;
+      if (savedTheme && themes[savedTheme]) {
         setCurrentTheme(savedTheme);
       }
     }
+  }, [user?.theme, pathname]);
 
-    // 2. Apply theme to DOM
+  // Apply currentTheme to DOM
+  useEffect(() => {
+    const isWorkspace = pathname?.startsWith('/workspace');
+    
+    // Determine the theme to apply
+    // If workspace: use currentTheme (defaulting to localStorage if state is fresh)
+    // If landing: use midnight (default)
+    let themeToApply = isWorkspace ? currentTheme : 'midnight';
+    
+    // Emergency fallback to localStorage if in workspace and currentTheme is somehow lost
+    if (isWorkspace && themeToApply === 'midnight') {
+      const saved = localStorage.getItem('nexuspace-theme');
+      if (saved && themes[saved]) themeToApply = saved;
+    }
+
     const themeObj = themes[themeToApply] || themes.midnight;
     
-    // Clean up old classes
+    // Clean up ALL theme classes to prevent collisions
     Object.values(themes).forEach(t => {
       document.documentElement.classList.remove(t.class);
     });
     
-    // Add current theme class
-    document.documentElement.classList.add(themeObj.class);
-    localStorage.setItem('nexuspace-theme', themeToApply);
-    
-  }, [user?.theme, currentTheme]);
+    // Add theme class and persist if in workspace
+    if (isWorkspace) {
+      document.documentElement.classList.add(themeObj.class);
+      localStorage.setItem('nexuspace-theme', themeToApply);
+    } else {
+      // On landing, we might want a clean state or just keep midnight
+      document.documentElement.classList.add(themes.midnight.class);
+    }
+  }, [currentTheme, pathname]);
 
   // setter that also syncs to DB
   const setTheme = async (themeKey) => {
@@ -100,7 +123,6 @@ export function ThemeProvider({ children }) {
       try {
         await api.put('/auth/profile', { theme: themeKey });
       } catch (err) {
-        console.error("Failed to sync theme to DB", err);
       }
     }
   };

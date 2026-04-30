@@ -8,9 +8,10 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['mention', 'message', 'task'],
+    enum: ['mention', 'message', 'task', 'reply', 'channel_invite'],
     required: true,
   },
+
   entityId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

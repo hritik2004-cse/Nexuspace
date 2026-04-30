@@ -16,7 +16,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -28,6 +27,11 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+
+  // 2FA State
+  const [is2FAOpen, setIs2FAOpen] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("nexuspace_remember_email");
@@ -51,7 +55,6 @@ export default function LoginPage() {
     try {
       await loginWithGoogle({ credential: tokenResponse.access_token });
     } catch (err) {
-      setError(err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -61,8 +64,8 @@ export default function LoginPage() {
   const loginWithGoogleFlow = useGoogleLogin({
     onSuccess: handleGoogleSuccess,
     onError: () => {
-      setError("Google login popup was closed or failed.");
-      toast.error("Google login popup was closed or failed.");
+      setError("We couldn't connect to Google. Please try again or use your email.");
+      toast.error("We couldn't connect to Google. Please try again or use your email.");
     },
   });
 
@@ -78,21 +81,44 @@ export default function LoginPage() {
     }
 
     try {
-      await login(email, password);
+      const res = await login(email, password);
+      if (res?.require2FA) {
+        setIs2FAOpen(true);
+        toast.info(res.message || "Please enter your security code to continue.");
+      }
     } catch (err) {
-      setError(err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    setTwoFactorLoading(true);
+    try {
+      const res = await api.post("/auth/verify-admin-2fa", { email, pin: twoFactorCode });
+      
+      // Verification successful, context login will take care of redirect
+      // But since we are calling api directly here, we need to sync the AuthContext
+      // Actually, AuthContext.login already does this if we use it.
+      // Let's just use window.location.reload() or let the app redirect.
+      toast.success("Identity verified! Welcome back, Admin.");
+      setTimeout(() => window.location.href = "/workspace", 1000);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "That code doesn't look right. Please try again.");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setForgotLoading(true);
     try {
       await api.post("/auth/forgot-password", { email: forgotEmail });
-      toast.success("If an account exists, a reset code was sent.");
+      toast.success("If that email is in our system, we've sent you a reset code!");
       setResendTimer(60);
       setForgotStep(2);
     } catch (err) {
@@ -107,7 +133,7 @@ export default function LoginPage() {
     setForgotLoading(true);
     try {
       await api.post("/auth/reset-password", { email: forgotEmail, code: forgotCode, newPassword });
-      toast.success("Password reset successfully!");
+      toast.success("Success! Your password has been updated.");
       setForgotStep(3);
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
@@ -140,7 +166,7 @@ export default function LoginPage() {
         className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"
       />
 
-      <div className="max-w-md w-full space-y-8 bg-slate-900/50 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 bg-slate-900/50 backdrop-blur-xl p-6 sm:p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
         <div>
           <h2 className="mt-2 text-center text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-purple-400 tracking-tight">
             Nexuspace
@@ -218,17 +244,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <AnimatePresence>
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className="text-red-400 text-sm font-medium text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20"
-                role="alert"
-              >
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div>
             <button
@@ -282,6 +297,62 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+
+      {/* Admin 2FA Modal */}
+      <AnimatePresence>
+        {is2FAOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-10 max-w-md w-full shadow-[0_0_50px_rgba(79,70,229,0.2)] relative overflow-hidden"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-indigo-500 to-purple-500"></div>
+              
+              <button 
+                onClick={() => setIs2FAOpen(false)}
+                className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors cursor-pointer"
+              >✕</button>
+
+              <div className="text-center space-y-6">
+                <div className="w-20 h-20 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto text-indigo-400 border border-indigo-500/20 shadow-inner">
+                  <FiLock className="w-10 h-10" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-black text-white tracking-tight">Admin Security</h3>
+                  <p className="text-slate-400 text-sm font-medium">A 6-digit PIN has been sent to your security email. Please enter it to unlock administrative access.</p>
+                </div>
+
+                <form onSubmit={handleVerify2FA} className="space-y-8">
+                  <input 
+                    type="text" 
+                    required 
+                    maxLength={6} 
+                    value={twoFactorCode} 
+                    onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))} 
+                    placeholder="000000" 
+                    className="w-full px-6 py-5 bg-slate-950 border border-slate-700 rounded-2xl text-white focus:ring-2 focus:ring-indigo-500 outline-none text-center text-4xl tracking-[0.4em] font-black placeholder:opacity-20" 
+                    autoFocus
+                  />
+                  
+                  <button 
+                    type="submit" 
+                    disabled={twoFactorLoading || twoFactorCode.length < 6} 
+                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50 disabled:grayscale transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {twoFactorLoading ? "Verifying..." : "Unlock Access"}
+                  </button>
+
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">High Security Session</p>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Forgot Password Modal */}
       <AnimatePresence>

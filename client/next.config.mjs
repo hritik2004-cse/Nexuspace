@@ -1,7 +1,27 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  /* Optimization Settings */
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   reactCompiler: true,
+  
+  // Top-level key for Turbopack as per the warning
+  turbopack: {
+    root: path.join(__dirname, '..'),
+  },
+
+  experimental: {
+    // Experimental key for package imports if not yet stable in this version
+    optimizePackageImports: ['react-icons/si', 'react-icons/fa', 'lucide-react'],
+  },
+
   images: {
     remotePatterns: [
       {

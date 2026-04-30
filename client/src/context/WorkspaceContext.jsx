@@ -15,6 +15,8 @@ export function WorkspaceProvider({ children }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [isMemberListOpen, setIsMemberListOpen] = useState(false);
 
   // Sync with URL params optionally
   const workspaceParam = searchParams.get('workspace');
@@ -50,9 +52,11 @@ export function WorkspaceProvider({ children }) {
           const selected = lastMatch || res.data[0];
           setActiveWorkspace(selected);
           localStorage.setItem('lastActiveWorkspaceId', selected._id);
+        } else {
+          setActiveWorkspace(null);
         }
       } catch (error) {
-        console.error("Error fetching workspaces:", error);
+        setActiveWorkspace(null);
       } finally {
         setLoading(false);
       }
@@ -87,6 +91,10 @@ export function WorkspaceProvider({ children }) {
         workspaces,
         activeWorkspace,
         loading,
+        onlineCount,
+        setOnlineCount,
+        isMemberListOpen,
+        setIsMemberListOpen,
         createWorkspace,
         switchWorkspace
       }}

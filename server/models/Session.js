@@ -22,7 +22,12 @@ const sessionSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  isAdmin2FAVerified: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
+
 
 // TTL index to automatically remove expired sessions
 sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

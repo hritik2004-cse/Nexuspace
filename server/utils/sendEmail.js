@@ -1,41 +1,29 @@
-const nodemailer = require("nodemailer");
+const emailjs = require('@emailjs/nodejs');
 
 const sendEmail = async (options) => {
-  // Create reusable transporter object using the default SMTP transport
-  // Note: For production, you should configure this with real SMTP credentials (e.g., SendGrid, Mailgun, AWS SES)
-  // For development/fallback, we'll use a mocked/test approach or rely on environment variables
-  
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.mailtrap.io",
-    port: process.env.SMTP_PORT || 2525,
-    auth: {
-      user: process.env.SMTP_EMAIL || "test",
-      pass: process.env.SMTP_PASSWORD || "test",
-    },
-  });
-
-  const message = {
-    from: `${process.env.FROM_NAME || "Nexuspace"} <${process.env.FROM_EMAIL || "noreply@nexuspace.com"}>`,
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-    html: options.html,
-  };
-
   try {
-    const info = await transporter.sendMail(message);
-    console.log("Message sent: %s", info.messageId);
+    // We only send the email and the content. 
+    // No name input required.
+    const templateParams = {
+      to_email: options.email,
+      subject: options.subject,
+      html_content: options.html || '',
+    };
+
+    const response = await emailjs.send(
+      process.env.EMAILJS_SERVICE_ID,
+      process.env.EMAILJS_TEMPLATE_ID,
+      templateParams,
+      {
+        publicKey: process.env.EMAILJS_PUBLIC_KEY,
+        privateKey: process.env.EMAILJS_PRIVATE_KEY,
+      }
+    );
+
+    console.log('🚀 Email Sent to:', options.email);
+    return response;
   } catch (error) {
-    // If we're using placeholder credentials, just log the email to the console
-    if (process.env.SMTP_EMAIL === "test" || error.code === 'EAUTH') {
-      console.log("==================================================");
-      console.log("⚠️ SMTP Authentication Failed (Mock Mode)");
-      console.log("To: ", options.email);
-      console.log("Subject: ", options.subject);
-      console.log("Message: \n", options.message);
-      console.log("==================================================");
-      return; // Return success anyway so the frontend flow works during dev
-    }
+    console.error('❌ EmailJS Error:', error);
     throw error;
   }
 };

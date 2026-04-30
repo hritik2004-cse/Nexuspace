@@ -73,15 +73,127 @@ const loginUser = asyncHandler(async (req, res) => {
   const userAgent = req.headers['user-agent'];
 
   try {
-    const { user, tokens } = await authService.loginLocalService({ email, password, sessionId, ip, userAgent });
-    setAuthCookies(res, tokens, sessionId);
-    res.status(200).json({ ...user.toObject(), tokens });
+    const result = await authService.loginLocalService({ email, password, sessionId, ip, userAgent });
+    
+    if (result.require2FA) {
+      console.log(`[2FA Triggered] Sending PIN for ${result.user.email} to ${process.env.ADMIN_2FA_TARGET_EMAIL}`);
+      const user = result.user;
+      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      const bcrypt = require('bcryptjs');
+      const salt = await bcrypt.genSalt(10);
+      user.admin2faCode = await bcrypt.hash(pin, salt);
+      user.admin2faExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+      await user.save();
+
+      try {
+        await sendEmail({
+          email: process.env.ADMIN_2FA_TARGET_EMAIL,
+          subject: 'Nexuspace Admin 2FA PIN',
+          message: `Your Admin Login PIN is: ${pin}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+              <h2 style="color: #4f46e5;">Admin Security Verification</h2>
+              <p>A login attempt was made for the Global Admin account. Use the following 6-digit PIN to unlock admin features:</p>
+              <h1 style="background: #f8fafc; padding: 20px; text-align: center; letter-spacing: 10px; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px;">${pin}</h1>
+              <p style="color: #64748b; font-size: 12px;">This PIN will expire in 10 minutes.</p>
+            </div>
+          `,
+        });
+        console.log(`[2FA Success] PIN sent successfully to ${process.env.ADMIN_2FA_TARGET_EMAIL}`);
+      } catch (emailError) {
+        console.error(`[2FA Email Error] Failed to send PIN: ${emailError.message}`);
+        throw new Error('Failed to send security PIN. Please check SMTP configuration.');
+      }
+
+      return res.status(200).json({ 
+        require2FA: true, 
+        email: user.email,
+        message: 'A 6-digit PIN has been sent to your security email.'
+      });
+    }
+
+
+    setAuthCookies(res, result.tokens, sessionId);
+    res.status(200).json({ ...result.user.toObject(), tokens: result.tokens });
   } catch (error) {
     console.error(`[Login Failure] RequestId: ${req.requestId} - Error: ${error.message}`);
     res.status(401);
     throw new Error(error.message);
   }
 });
+
+const verifyAdmin2FA = asyncHandler(async (req, res) => {
+  const { email, pin } = req.body;
+  const User = require('../models/User');
+  const bcrypt = require('bcryptjs');
+
+  if (!email || !pin) {
+    res.status(400);
+    throw new Error('Please provide email and PIN');
+  }
+
+  const user = await User.findOne({ email });
+  if (!user || !user.admin2faCode || user.admin2faExpire < Date.now()) {
+    res.status(401);
+    throw new Error('Invalid or expired PIN');
+  }
+
+  const isMatch = await bcrypt.compare(pin, user.admin2faCode);
+  if (!isMatch) {
+    res.status(401);
+    throw new Error('Invalid PIN');
+  }
+
+  const sessionId = uuidv4();
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  // Clear PIN
+  user.admin2faCode = undefined;
+  user.admin2faExpire = undefined;
+  await user.save();
+
+  // Generate tokens
+  const jwt = require('jsonwebtoken');
+  const crypto = require('crypto');
+  
+  const payload = {
+    id: user._id,
+    sessionVersion: user.sessionVersion || 0,
+    sessionId,
+  };
+
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+  const randomStr = crypto.randomBytes(40).toString('hex');
+  const refreshToken = `${sessionId}.${randomStr}`;
+  
+  const Session = require('../models/Session');
+  const refreshTokenHash = Session.hashToken(randomStr);
+  await Session.findOneAndUpdate(
+    { sessionId },
+    { 
+      userId: user._id, 
+      sessionId, 
+      refreshTokenHash, 
+      ip, 
+      userAgent, 
+      expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      isAdmin2FAVerified: true // Set flag on session
+    },
+    { upsert: true }
+  );
+
+  const finalTokens = { accessToken, refreshToken };
+  setAuthCookies(res, finalTokens, sessionId);
+
+  res.status(200).json({ 
+    ...user.toObject(), 
+    tokens: finalTokens,
+    message: 'Admin features unlocked.'
+  });
+});
+
 
 const googleLogin = asyncHandler(async (req, res) => {
   const { credential } = req.body;
@@ -273,6 +385,34 @@ const verifyPhoneOtp = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: 'Phone number verified successfully', phoneNumber: user.phoneNumber });
 });
 
+const updateLastRead = asyncHandler(async (req, res) => {
+  const { channelId } = req.body;
+  const User = require('../models/User');
+
+  if (!channelId) {
+    res.status(400);
+    throw new Error('Channel ID is required');
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (!user.lastRead) user.lastRead = [];
+
+  const lastReadEntry = user.lastRead.find(lr => lr.channelId.toString() === channelId.toString());
+  if (lastReadEntry) {
+    lastReadEntry.lastReadAt = Date.now();
+  } else {
+    user.lastRead.push({ channelId, lastReadAt: Date.now() });
+  }
+
+  await user.save();
+  res.status(200).json({ success: true });
+});
+
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const User = require('../models/User');
@@ -388,9 +528,11 @@ module.exports = {
   logoutAll,
   getMe,
   updateProfile,
+  updateLastRead,
   forgotPassword,
   resetPassword,
   sendPhoneOtp,
   verifyPhoneOtp,
-  changePassword
+  changePassword,
+  verifyAdmin2FA
 };

@@ -18,7 +18,6 @@ export default function InboxModal({ isOpen, onClose }) {
       const res = await api.get('/notifications');
       setNotifications(res.data);
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -30,7 +29,6 @@ export default function InboxModal({ isOpen, onClose }) {
       await api.put(`/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
-      console.error("Failed to mark read:", err);
     }
   };
 
@@ -39,7 +37,6 @@ export default function InboxModal({ isOpen, onClose }) {
       await api.put('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (err) {
-      console.error("Failed to mark all read:", err);
     }
   };
 

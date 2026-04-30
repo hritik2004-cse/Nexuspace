@@ -74,7 +74,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "midnight",
     },
+    lastRead: [
+      {
+        channelId: { type: mongoose.Schema.Types.ObjectId, ref: "Channel" },
+        lastReadAt: { type: Date, default: Date.now },
+      },
+    ],
+    admin2faCode: String,
+    admin2faExpire: Date,
   },
+
+
   { timestamps: true },
 );
 

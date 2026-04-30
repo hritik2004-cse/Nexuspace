@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2, FiLock, FiLogOut } from 'react-icons/fi';
+import { FiHash, FiPlus, FiChevronDown, FiBell, FiSettings, FiTrash2, FiLock, FiLogOut, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import ProfileModal from './ProfileModal';
 import InboxModal from './InboxModal';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +27,7 @@ import api from '@/services/api';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { useSocket } from '@/context/SocketContext';
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }) {
   const { user } = useAuth();
   const { socket } = useSocket();
   const { activeWorkspace, workspaces, switchWorkspace, createWorkspace } = useWorkspace();
@@ -34,6 +39,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadChannels, setUnreadChannels] = useState(new Set());
   const [newChannelName, setNewChannelName] = useState('');
   const [isPrivateChannel, setIsPrivateChannel] = useState(false);
   const [channelPin, setChannelPin] = useState('');
@@ -45,7 +51,63 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   
   // Real Channel mapping
   const [channels, setChannels] = useState([]);
+  const [isLoadingChannels, setIsLoadingChannels] = useState(true);
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+
+  // Listen for unread messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (msg) => {
+      // If message is in current active channel, don't mark as unread
+      if (msg.channelName && msg.channelName !== currentChannel) {
+        setChannels(prev => prev.map(c => 
+          c.name === msg.channelName 
+            ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } 
+            : c
+        ));
+      }
+    };
+
+    const handleNewChannel = (newChannel) => {
+      setChannels(prev => {
+        if (prev.some(c => c._id === newChannel._id)) return prev;
+        return [...prev, newChannel];
+      });
+    };
+
+    const handleChannelUpdated = (updatedChannel) => {
+      setChannels(prev => prev.map(c => 
+        c._id === updatedChannel._id ? updatedChannel : c
+      ));
+    };
+
+    socket.on('receive_message', handleNewMessage);
+    socket.on('channel_created', handleNewChannel);
+    socket.on('channel_updated', handleChannelUpdated);
+    return () => {
+      socket.off('receive_message', handleNewMessage);
+      socket.off('channel_created', handleNewChannel);
+      socket.off('channel_updated', handleChannelUpdated);
+    };
+  }, [socket, currentChannel]);
+
+  // Clear unread when channel changes and sync with backend
+  useEffect(() => {
+    const syncReadStatus = async () => {
+      const channelObj = channels.find(c => c.name === currentChannel);
+      if (channelObj) {
+        try {
+          await api.post('/auth/update-last-read', { channelId: channelObj._id });
+          setChannels(prev => prev.map(c => 
+            c.name === currentChannel ? { ...c, unreadCount: 0 } : c
+          ));
+        } catch (err) {
+        }
+      }
+    };
+    syncReadStatus();
+  }, [currentChannel, channels.length > 0]); // Trigger when currentChannel changes or channels are loaded
   
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
@@ -63,9 +125,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         await api.post(`/workspaces/${activeWorkspace._id}/members`, { memberEmail: inviteEmail });
         setInviteEmail('');
         setIsInviteModalOpen(false);
-        toast.success("Invitation sent successfully!");
+        toast.success(`Success! We've sent an invitation to ${inviteEmail}.`);
       } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to invite user");
+        toast.error(err.response?.data?.message || "We couldn't send the invitation. Please check the email and try again.");
       }
     }
   };
@@ -73,11 +135,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   useEffect(() => {
     const fetchChannels = async () => {
       if (activeWorkspace) {
+        setIsLoadingChannels(true);
         try {
           const res = await api.get(`/channels/${activeWorkspace._id}`);
           setChannels(res.data);
         } catch (err) {
-          console.error("Failed to fetch real channels", err);
+        } finally {
+          setIsLoadingChannels(false);
         }
       }
     };
@@ -88,7 +152,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           const res = await api.get('/notifications');
           setUnreadCount(res.data.filter(n => !n.isRead).length);
         } catch (err) {
-          console.error("Failed to fetch notifications", err);
         }
       }
     };
@@ -133,9 +196,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         setChannelPin('');
         setIsDialogOpen(false);
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${formattedName}`);
-        toast.success(`Channel #${formattedName} created!`);
+        toast.success(`Welcome to #${formattedName}! The channel is ready for you.`);
       } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to create channel");
+        toast.error(err.response?.data?.message || "We couldn't create the channel. Please try a different name.");
       }
     }
   };
@@ -148,9 +211,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       if (currentChannel === channels.find(c => c._id === channelId)?.name) {
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=general`);
       }
-      toast.success("Channel deleted");
+      toast.success("Channel deleted successfully. It's gone!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete channel");
+      toast.error(err.response?.data?.message || "We couldn't delete the channel. Please try again.");
     }
   };
 
@@ -162,9 +225,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       if (currentChannel === channels.find(c => c._id === channelId)?.name) {
         router.push(`/workspace?workspace=${activeWorkspace._id}&channel=general`);
       }
-      toast.success("Left channel");
+      toast.success("You've successfully left the channel.");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to leave channel");
+      toast.error(err.response?.data?.message || "We couldn't process your request to leave. Please try again.");
     }
   };
 
@@ -177,83 +240,77 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           onClick={() => setIsOpen && setIsOpen(false)}
         />
       )}
-      <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-sidebar/80 backdrop-blur-xl flex flex-col h-full border-r border-border transition-all duration-500 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} shadow-[10px_0_30px_rgba(0,0,0,0.5)]`}>
+      <aside className={`fixed md:relative inset-y-0 left-0 z-50 ${isCollapsed ? 'w-20' : 'w-64 md:w-64'} w-[280px] bg-sidebar/80 backdrop-blur-3xl flex flex-col h-full border-r border-border transition-all duration-500 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} shadow-[10px_0_40px_rgba(0,0,0,0.6)] group/sidebar`}>
+        {/* Collapse Toggle Button (Desktop only) */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden md:flex absolute -right-3.5 top-20 w-7 h-7 bg-primary text-white rounded-full items-center justify-center shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] border border-white/20 z-50 lg:opacity-0 group-hover/sidebar:opacity-100 transition-all hover:scale-110 active:scale-95"
+            >
+              {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{isCollapsed ? 'Expand' : 'Collapse'}</TooltipContent>
+        </Tooltip>
+
         {/* Workspace Header Dropdown */}
         <div className="relative">
           <div 
             onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-            className="h-16 flex items-center justify-between px-4 border-b border-border cursor-pointer lg:hover:bg-white/5 transition-colors"
+            className={`h-16 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-4'} border-b border-border cursor-pointer lg:hover:bg-white/5 transition-all duration-300 relative overflow-hidden group/header`}
           >
-            <h1 className="font-bold text-lg text-white font-sans tracking-tight truncate max-w-[200px]">
-              {activeWorkspace ? activeWorkspace.name : 'Nexuspace'}
-            </h1>
-            <FiChevronDown className="text-slate-400 shrink-0" />
+            {isCollapsed ? (
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)] group-hover/header:scale-105 transition-transform">
+                {activeWorkspace ? activeWorkspace.name.charAt(0).toUpperCase() : 'N'}
+              </div>
+            ) : (
+              <h1 className="font-black text-lg text-white font-sans tracking-tighter truncate max-w-[180px] animate-in fade-in slide-in-from-left-2 duration-500">
+                {activeWorkspace ? activeWorkspace.name : 'Nexuspace'}
+              </h1>
+            )}
+            {!isCollapsed && <FiChevronDown className="text-slate-500 shrink-0 group-hover/header:text-primary transition-colors" />}
           </div>
 
           {/* Dropdown Menu */}
           {isWorkspaceDropdownOpen && (
-            <div className="absolute top-full left-0 w-full bg-sidebar border-b border-r border-border shadow-2xl z-50">
-              <div className="p-2 space-y-1">
-                <div className="px-2 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Your Workspaces</div>
+            <div className={`absolute top-full left-0 ${isCollapsed ? 'w-64 ml-2 rounded-xl' : 'w-full'} bg-surface/95 backdrop-blur-2xl border border-border shadow-2xl z-50 animate-in zoom-in-95 fade-in duration-200 overflow-hidden`}>
+              <div className="p-3 space-y-1">
+                <div className="px-2 py-1 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Workspaces</div>
                 {workspaces.map(w => (
                   <button 
                     key={w._id}
                     onClick={() => { switchWorkspace(w._id); setIsWorkspaceDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeWorkspace?._id === w._id ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 lg:hover:bg-slate-800 lg:hover:text-white'}`}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeWorkspace?._id === w._id ? 'bg-primary text-white shadow-lg' : 'text-slate-400 lg:hover:bg-white/5 lg:hover:text-white'}`}
                   >
                     {w.name}
                   </button>
                 ))}
                 
-                <div className="pt-2 mt-2 border-t border-slate-700/50">
+                <div className="pt-3 mt-3 border-t border-border">
                   <Dialog open={isWorkspaceModalOpen} onOpenChange={setIsWorkspaceModalOpen}>
-                    <DialogTrigger className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-400 lg:hover:bg-slate-800 transition-colors flex items-center">
-                      <FiPlus className="mr-2" /> Create Workspace
+                    <DialogTrigger className="w-full text-left px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-primary lg:hover:bg-primary/10 transition-all flex items-center gap-2">
+                      <FiPlus className="w-4 h-4" /> Create New
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
+                    <DialogContent className="bg-surface/95 backdrop-blur-2xl border-border">
                       <DialogHeader>
-                        <DialogTitle>Create New Workspace</DialogTitle>
+                        <DialogTitle className="text-white">Create Workspace</DialogTitle>
+                        <DialogDescription className="text-slate-400">Enter a name for your new workspace.</DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleCreateWorkspace} className="space-y-4 pt-4">
-                        <input
-                          autoFocus
+                      <form onSubmit={handleCreateWorkspace} className="space-y-4">
+                        <input 
+                          type="text" 
+                          placeholder="Workspace Name" 
                           value={newWorkspaceName}
                           onChange={(e) => setNewWorkspaceName(e.target.value)}
-                          placeholder="My Awesome Team"
-                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
+                          className="w-full bg-background/50 border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                         />
                         <DialogFooter>
-                          <button type="submit" disabled={!newWorkspaceName} className="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 disabled:opacity-50 font-semibold w-full">Create</button>
+                          <button type="submit" className="w-full bg-primary text-white font-black py-3 rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">Create Workspace</button>
                         </DialogFooter>
                       </form>
                     </DialogContent>
                   </Dialog>
-
-                  {activeWorkspace && activeWorkspace.owner === user?._id && (
-                    <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
-                      <DialogTrigger className="w-full mt-1 text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-400 lg:hover:bg-slate-800 transition-colors flex items-center">
-                        <FiPlus className="mr-2" /> Invite Member
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
-                        <DialogHeader>
-                          <DialogTitle>Invite Member to {activeWorkspace.name}</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleInviteUser} className="space-y-4 pt-4">
-                          <input
-                            autoFocus
-                            type="email"
-                            value={inviteEmail}
-                            onChange={(e) => setInviteEmail(e.target.value)}
-                            placeholder="colleague@example.com"
-                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500"
-                          />
-                          <DialogFooter>
-                            <button type="submit" disabled={!inviteEmail} className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-500 disabled:opacity-50 font-semibold w-full">Send Invite</button>
-                          </DialogFooter>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  )}
                 </div>
               </div>
             </div>
@@ -261,93 +318,98 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         </div>
 
       {/* Navigation */}
-      <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto py-6 space-y-8 scrollbar-hide">
         {/* Tools Section */}
         <div>
-          <div className="px-4 flex items-center justify-between group">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-300 transition-colors">Tools</span>
-          </div>
-          <div className="mt-2 space-y-1">
+          {!isCollapsed && (
+            <div className="px-6 flex items-center justify-between group mb-3">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Tools</span>
+            </div>
+          )}
+          <div className="space-y-1 px-3">
             <a
               href="/workspace/board"
-              className="flex items-center px-4 py-2 text-sm font-medium transition-colors text-slate-300 hover:bg-slate-900 hover:text-slate-100"
+              className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 rounded-xl'} text-sm font-bold transition-all relative group/tool ${router.pathname === '/workspace/board' ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+              title={isCollapsed ? "Kanban Board" : ""}
             >
-              <FiPlus className="w-4 h-4 mr-2 text-purple-400" />
-              Kanban Board
+              <FiPlus className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} text-primary group-hover/tool:scale-110 transition-transform`} />
+              {!isCollapsed && <span>Kanban Board</span>}
+              {isCollapsed && (
+                <div className="absolute left-full ml-4 px-3 py-1.5 bg-surface border border-border text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover/tool:opacity-100 transition-all pointer-events-none whitespace-nowrap z-50">
+                  Kanban Board
+                </div>
+              )}
             </a>
           </div>
         </div>
 
         {/* Channels Section */}
         <div>
-          <div className="px-4 flex items-center justify-between group">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-300 transition-colors">Channels</span>
+          <div className={`px-6 flex items-center ${isCollapsed ? 'justify-center px-0 mb-4' : 'justify-between mb-3'} group`}>
+            {!isCollapsed && <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Channels</span>}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger className="text-slate-400 hover:text-white transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded hover:bg-white/5 cursor-pointer flex items-center justify-center">
+              <DialogTrigger className={`text-slate-500 hover:text-white transition-all p-1.5 rounded-lg border border-transparent hover:border-border hover:bg-white/5 cursor-pointer flex items-center justify-center ${isCollapsed ? 'w-10 h-10 bg-white/5 rounded-xl' : ''}`}>
                 <FiPlus className="w-4 h-4" />
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800 p-0 overflow-hidden shadow-2xl rounded-2xl">
-                <div className="p-6 border-b border-slate-800 bg-slate-900/50">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold font-sans text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-purple-400">Create Channel</DialogTitle>
-                    <DialogDescription className="text-slate-400 text-sm mt-1.5 leading-relaxed">
-                      Channels are where your team communicates. They're best when organized around a topic.
-                    </DialogDescription>
-                  </DialogHeader>
-                </div>
-                <form onSubmit={handleCreateChannel} className="p-6 space-y-6 bg-slate-900">
-                  <div className="space-y-3">
-                    <label htmlFor="name" className="text-sm font-semibold text-slate-300">
-                      Channel Name
-                    </label>
-                    <div className="relative flex items-center">
-                      <span className="absolute left-3 text-slate-500 font-bold">#</span>
-                      <input
-                        id="name"
+              <DialogContent className="bg-surface/95 backdrop-blur-2xl border-border">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Channel</DialogTitle>
+                  <DialogDescription className="text-slate-400">Channels are where your team communicates.</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateChannel} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Channel Name</label>
+                    <div className="relative">
+                      <FiHash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input 
+                        type="text" 
+                        placeholder="e.g. marketing" 
                         value={newChannelName}
                         onChange={(e) => setNewChannelName(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-700/50 text-slate-100 rounded-lg pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-sans placeholder:text-slate-600 shadow-inner"
-                        placeholder="e.g. marketing"
-                        autoFocus
+                        className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <label className="text-sm font-semibold text-slate-500 flex items-center gap-2">
-                          <FiLock className="text-amber-400" /> Set Private
-                        </label>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Requires a 6-digit PIN to join</p>
+                  {user?.role === 'Admin' && (
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center justify-between px-1">
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-bold text-white">Private Channel</p>
+                          <p className="text-[10px] text-slate-500 font-medium">Only invited members can join</p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => setIsPrivateChannel(!isPrivateChannel)}
+                          className={`w-10 h-5 rounded-full transition-all relative ${isPrivateChannel ? 'bg-primary' : 'bg-slate-700'}`}
+                        >
+                          <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${isPrivateChannel ? 'left-6' : 'left-1'}`} />
+                        </button>
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={isPrivateChannel}
-                        onChange={(e) => setIsPrivateChannel(e.target.checked)}
-                        className="w-5 h-5 text-indigo-600 bg-slate-900 border-slate-700 rounded-lg focus:ring-indigo-500 cursor-pointer"
-                      />
-                    </div>
-                    {isPrivateChannel && (
-                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Channel PIN</label>
-                        <input
-                          type="text"
-                          value={channelPin}
-                          onChange={(e) => setChannelPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          maxLength={6}
-                          className="w-full bg-slate-950/80 border border-amber-500/30 text-amber-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all font-mono tracking-[0.5em] text-center text-xl shadow-inner"
-                          placeholder="000000"
-                        />
-                      </div>
-                    )}
-                  </div>
 
-                  <DialogFooter className="pt-2 bg-transparent">
+                      {isPrivateChannel && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Channel PIN</label>
+                          <div className="relative">
+                            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <input 
+                              type="password" 
+                              placeholder="4-digit PIN" 
+                              maxLength={4}
+                              value={channelPin}
+                              onChange={(e) => setChannelPin(e.target.value)}
+                              className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <DialogFooter className="pt-4">
                     <button 
                       type="submit" 
-                      disabled={!newChannelName.trim() || (isPrivateChannel && channelPin.length !== 6)} 
-                      className="px-5 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] text-sm font-black uppercase tracking-widest w-full flex justify-center items-center gap-2"
+                      className="w-full bg-primary text-white font-black py-3 rounded-xl shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                       Create Channel
                     </button>
@@ -355,88 +417,93 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 </form>
               </DialogContent>
             </Dialog>
+
           </div>
-          <div className="mt-2 space-y-0.5">
-            {channels.map((channelObj) => (
-              <div key={channelObj._id} className={`group flex items-center justify-between rounded-lg mx-2 ${currentChannel === channelObj.name ? 'bg-primary/10 shadow-[inset_0_0_10px_rgba(var(--primary-rgb),0.1)]' : 'lg:hover:bg-white/5'} transition-all duration-300`}>
-                <button
-                  onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
-                  aria-current={currentChannel === channelObj.name ? "page" : undefined}
-                  className={`flex items-center flex-1 px-4 py-2 text-sm font-bold transition-colors ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-400 hover:text-slate-100'}`}
-                >
-                  <FiHash className={`w-4 h-4 mr-2 ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-500'}`} />
-                  {channelObj.name}
-                </button>
-                <div className="flex items-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity pr-2">
-                  {channelObj.name !== 'general' && (
-                    <button 
-                      onClick={(e) => handleLeaveChannel(channelObj._id, e)}
-                      aria-label="Leave Channel"
-                      className="text-slate-500 hover:text-orange-400 p-1"
-                      title="Leave Channel"
-                    >
-                      <FiLogOut className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {(activeWorkspace?.owner === user?._id || channelObj.creator === user?._id) && channelObj.name !== 'general' && (
-                    <button 
-                      onClick={(e) => handleDeleteChannel(channelObj._id, e)}
-                      aria-label="Delete Channel"
-                      className="text-slate-500 hover:text-red-400 p-1 ml-1"
-                      title="Delete Channel"
-                    >
-                      <FiTrash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+          <div className="space-y-1 px-3">
+            {isLoadingChannels ? (
+              // Loading Skeleton
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={`h-10 rounded-xl bg-white/5 animate-pulse mb-1 ${isCollapsed ? 'w-12 mx-auto' : 'w-full'}`} />
+              ))
+            ) : (
+              channels.map((channelObj) => (
+                <div key={channelObj._id} className="relative group/channel">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
+                        className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 rounded-xl w-full'} text-sm font-bold transition-all relative ${currentChannel === channelObj.name ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                      >
+                        <FiHash className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} ${currentChannel === channelObj.name ? 'text-white' : 'text-slate-600 group-hover/channel:text-primary'} transition-colors`} />
+                        {!isCollapsed && <span className="truncate">{channelObj.name}</span>}
+                        
+                        {/* Unread Badge */}
+                        {channelObj.unreadCount > 0 && (
+                          <span className={`absolute ${isCollapsed ? '-top-1 -right-1' : 'right-4'} min-w-[1.25rem] h-5 px-1 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-sidebar shadow-lg`}>
+                            {channelObj.unreadCount > 99 ? '99+' : channelObj.unreadCount}
+                          </span>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    {isCollapsed && <TooltipContent side="right">#{channelObj.name}</TooltipContent>}
+                  </Tooltip>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </nav>
 
       {/* User Footer */}
-      <div 
-        onClick={() => router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`)}
-        className="mt-auto px-4 py-3 border-t border-border bg-white/5 flex items-center justify-between cursor-pointer lg:hover:bg-white/10 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            {user?.avatar || user?.profileImage ? (
-              <img 
-                src={user.avatar || user.profileImage} 
-                alt="Profile" 
-                className="w-8 h-8 rounded-full object-cover shadow-lg"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                {user?.name?.charAt(0).toUpperCase() || 'A'}
+      <div className={`mt-auto p-3 border-t border-border bg-white/5 relative overflow-hidden group/footer transition-all duration-300`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-2'}`}>
+          <div 
+            onClick={() => router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`)}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} cursor-pointer transition-all min-w-0 flex-1`}
+          >
+            <div className="relative shrink-0">
+              {user?.avatar || user?.profileImage ? (
+                <img 
+                  src={user.avatar || user.profileImage} 
+                  alt="Profile" 
+                  className={`w-9 h-9 rounded-xl object-cover shadow-2xl ring-2 ring-transparent group-hover/footer:ring-primary/50 transition-all`}
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-primary to-primary/60 flex items-center justify-center text-white font-black text-lg shadow-2xl">
+                  {user?.name?.charAt(0).toUpperCase() || 'A'}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-sidebar rounded-full shadow-lg"></div>
+            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-black text-white truncate leading-tight">{user?.name || 'User'}</p>
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter truncate">@{user?.username || 'user'}</p>
               </div>
             )}
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-slate-950 rounded-full"></div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-white">{user?.name || 'Ash'}</p>
-            <p className="text-xs text-slate-400">@{user?.username || 'ash'}</p>
-          </div>
-        </div>
-        <div className="flex gap-2 relative z-10">
-          <button aria-label="Notifications" onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-400 hover:text-white transition-colors p-1 relative">
-            <FiBell className="w-4 h-4" />
-            {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>}
-          </button>
-          <button 
-            aria-label="Settings" 
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`); 
-            }} 
-            className="text-slate-400 hover:text-white transition-colors p-1"
-          >
-            <FiSettings className="w-4 h-4" />
-          </button>
+          
+          {!isCollapsed && (
+            <div className="flex items-center gap-0.5 shrink-0">
+              <button aria-label="Notifications" onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5 relative group/notif">
+                <FiBell className="w-4 h-4" />
+                {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-sidebar shadow-lg"></span>}
+              </button>
+              <button 
+                aria-label="Settings" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`); 
+                }} 
+                className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5"
+              >
+                <FiSettings className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
       </aside>
       
       <AnimatePresence>

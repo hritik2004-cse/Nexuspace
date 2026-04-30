@@ -121,6 +121,7 @@ app.use("/api/tasks", require("./routes/taskRoutes"));
 app.use("/api/channels", require("./routes/channels")); // Legacy mapped reference
 app.use("/api/messages", require("./routes/messages")); // Legacy mapped reference
 app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/newsletter", require("./routes/newsletterRoutes"));
 
 // 8. Error Boundary Middleware
 app.use(errorHandler);

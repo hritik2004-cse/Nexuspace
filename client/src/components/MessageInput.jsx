@@ -6,7 +6,7 @@ import EmojiPicker from 'emoji-picker-react';
 
 import { toast } from 'react-toastify';
 
-export default function MessageInput({ onSendMessage, socket, channelId, channelName, currentUser }) {
+export default function MessageInput({ onSendMessage, socket, channelId, channelName, currentUser, replyingTo, onCancelReply }) {
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
@@ -27,10 +27,11 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
   const handleSubmit = (e) => {
     e.preventDefault();
     if (text.trim() || attachment) {
-      onSendMessage(text, attachment);
+      onSendMessage(text, attachment, replyingTo?._id);
       setText('');
       setAttachment(null);
       setShowEmoji(false);
+      if (onCancelReply) onCancelReply();
       
       if (socket && channelId) {
         socket.emit('stop_typing', { channelId });
@@ -110,8 +111,27 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
 
       {/* Emoji Picker Popover */}
       {showEmoji && (
-        <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-border/50">
-          <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={pickerHeight} />
+        <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-border/50 max-w-[90vw]">
+          <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={pickerHeight} width="100%" />
+        </div>
+      )}
+
+      {/* Reply Preview */}
+      {replyingTo && (
+        <div className="mb-2 flex items-center justify-between p-3 bg-primary/10 backdrop-blur-md rounded-xl border border-primary/20 animate-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-1 bg-primary h-8 rounded-full shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Replying to {replyingTo.sender}</span>
+              <p className="text-xs text-slate-300 truncate">{replyingTo.content}</p>
+            </div>
+          </div>
+          <button 
+            onClick={onCancelReply}
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-all"
+          >
+            <FiX className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -138,7 +158,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
 
       <form 
         onSubmit={handleSubmit}
-        className="flex flex-row items-end bg-white/5 backdrop-blur-md rounded-xl border border-border p-1.5 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all shadow-lg"
+        className="flex flex-row items-end bg-white/5 backdrop-blur-md rounded-xl border border-border p-1 md:p-1.5 transition-all shadow-lg"
       >
         <div className="flex shrink-0 px-2 pb-1.5 gap-2 text-slate-400">
           <input 
@@ -159,7 +179,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           value={text}
           onChange={handleChange}
           placeholder={`Message #${channelName || 'general'}`}
-          className="flex-1 bg-transparent text-slate-100 placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none focus:outline-none focus:ring-0 leading-relaxed font-sans w-full"
+          className="flex-1 bg-transparent text-slate-100 placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none outline-none ring-0 focus:outline-none focus:ring-0 leading-relaxed font-sans w-full border-none shadow-none"
           rows={1}
           onKeyDown={handleKeyDown}
         />
@@ -181,7 +201,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           </button>
         </div>
       </form>
-      <div className="px-4 py-2 flex justify-between">
+      <div className="px-4 py-2 hidden sm:flex justify-between">
         <p className="text-[11px] text-slate-500 font-medium tracking-tight"><strong>Shift + Enter</strong> to add a new line</p>
       </div>
     </div>

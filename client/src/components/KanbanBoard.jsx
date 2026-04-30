@@ -64,7 +64,6 @@ export default function KanbanBoard() {
         setTasks(taskMap);
         setColumns(colMap);
       } catch (err) {
-        console.error("Failed to fetch Kanbans", err);
       }
     };
     fetchTasks();

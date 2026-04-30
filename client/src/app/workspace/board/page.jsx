@@ -104,7 +104,6 @@ export default function KanbanBoard() {
       const res = await taskApi.getByBoard(boardId);
       setTasks(res.data);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
     }
   };
 
@@ -216,32 +215,46 @@ export default function KanbanBoard() {
     try {
       await taskApi.update(draggableId, { status: destination.droppableId });
     } catch (error) {
-      console.error("Error updating task status:", error);
       // Revert state on failure
       fetchTasks();
     }
   };
+
+  const [activeTab, setActiveTab] = useState("todo");
 
   if (!mounted)
     return <div className="p-8 text-slate-400">Loading board...</div>;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 absolute inset-0">
-      <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/95 sticky top-0 z-10 backdrop-blur">
-        <h1 className="text-xl font-bold text-white flex items-center gap-2">
+      <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/95 sticky top-0 z-20 backdrop-blur">
+        <h1 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
           Project Tasks
         </h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors shadow-sm"
         >
-          <FiPlus /> New Task
+          <FiPlus /> <span className="hidden xs:inline">New Task</span>
         </button>
       </div>
 
-      <div className="flex-1 overflow-x-auto p-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      {/* Mobile Tabs */}
+      <div className="flex lg:hidden bg-slate-950 border-b border-slate-800 p-1 sticky top-[61px] z-20">
+        {boardData.columnOrder.map((colId) => (
+          <button
+            key={colId}
+            onClick={() => setActiveTab(colId)}
+            className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${activeTab === colId ? "bg-indigo-600 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"}`}
+          >
+            {boardData.columns[colId].title}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-x-auto lg:overflow-x-hidden p-4 md:p-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-6 h-full items-start min-w-max pb-4">
+          <div className="flex lg:grid lg:grid-cols-3 gap-6 h-full items-start pb-4">
             {boardData.columnOrder.map((columnId) => {
               const column = boardData.columns[columnId];
               // map to actual task objects
@@ -250,7 +263,7 @@ export default function KanbanBoard() {
                 .filter(Boolean);
 
               return (
-                <div key={column.id} className="w-80 flex flex-col shrink-0">
+                <div key={column.id} className={`w-80 md:w-full lg:w-auto flex flex-col shrink-0 lg:shrink ${activeTab === columnId ? 'flex' : 'hidden lg:flex'}`}>
                   <div className="flex items-center justify-between mb-4 px-1">
                     <h3 className="font-semibold text-slate-200 flex items-center gap-2 uppercase tracking-wide text-xs">
                       {column.title}

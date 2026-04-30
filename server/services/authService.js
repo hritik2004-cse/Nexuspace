@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Session = require('../models/Session');
+const workspaceService = require('./workspaceService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -209,12 +210,7 @@ const googleLoginService = async (credential, sessionId, ip, userAgent) => {
       provider: 'google',
     });
 
-    const Workspace = require('../models/Workspace');
-    await Workspace.create({
-      name: `${user.name}'s Workspace`,
-      owner: user._id,
-      members: [user._id]
-    });
+    await workspaceService.createWorkspaceService(`${user.name}'s Workspace`, user._id);
   }
 
   const tokens = generateTokensWithSession(user, sessionId);
@@ -236,12 +232,7 @@ const registerLocalService = async ({ name, email, password, sessionId, ip, user
     provider: 'local',
   });
 
-  const Workspace = require('../models/Workspace');
-  await Workspace.create({
-    name: `${newUser.name}'s Workspace`,
-    owner: newUser._id,
-    members: [newUser._id]
-  });
+  await workspaceService.createWorkspaceService(`${newUser.name}'s Workspace`, newUser._id);
 
   const tokens = generateTokensWithSession(newUser, sessionId);
   await storeSessionFixed(newUser._id, sessionId, tokens.randomStr, ip, userAgent);
@@ -250,7 +241,53 @@ const registerLocalService = async ({ name, email, password, sessionId, ip, user
 };
 
 const loginLocalService = async ({ email, password, sessionId, ip, userAgent }) => {
-  const user = await User.findOne({ email });
+  const isAdminCredentials = email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase() && password === process.env.ADMIN_PASSWORD;
+
+  
+  let user = await User.findOne({ email });
+
+    if (isAdminCredentials) {
+      if (!user) {
+        const username = await generateUniqueUsername('Global Admin');
+        user = await User.create({
+          name: 'Global Admin',
+          email,
+          password, // This will be hashed by pre-save hook
+          username,
+          role: 'Admin',
+          provider: 'local',
+        });
+        
+        const Workspace = require('../models/Workspace');
+        const workspace = await Workspace.create({
+          name: `Admin Workspace`,
+          owner: user._id,
+          members: [user._id]
+        });
+
+        // Add workspace ID to user channels or logic? 
+        // Actually, let's create the #general channel for this workspace
+        const Channel = require('../models/Channel');
+        const generalChannel = await Channel.create({
+          name: 'general',
+          workspaceId: workspace._id,
+          creator: user._id,
+          owner: user._id,
+          members: [{ user: user._id, role: 'owner' }]
+        });
+        
+        user.channels.push(generalChannel._id);
+        await user.save();
+      } else if (user.role !== 'Admin') {
+        user.role = 'Admin';
+        await user.save();
+      }
+      
+      // For this specific admin, we require 2FA
+      return { user, require2FA: true };
+    }
+
+
   if (!user || !(await user.matchPassword(password))) {
     throw new Error('Invalid email or password');
   }
@@ -260,6 +297,7 @@ const loginLocalService = async ({ email, password, sessionId, ip, userAgent }) 
 
   return { user, tokens: { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken } };
 };
+
 
 module.exports = {
   googleLoginService,

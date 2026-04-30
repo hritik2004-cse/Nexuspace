@@ -31,7 +31,7 @@ export default function RegisterPage() {
       <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="max-w-md w-full space-y-8 bg-slate-900/50 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 bg-slate-900/50 backdrop-blur-xl p-6 sm:p-10 rounded-2xl shadow-2xl border border-slate-800/60 relative z-10">
         <div>
           <h2 className="mt-2 text-center text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-indigo-400 tracking-tight">
             Join Nexuspace

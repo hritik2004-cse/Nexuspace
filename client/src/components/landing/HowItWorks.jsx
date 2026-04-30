@@ -39,7 +39,7 @@ export default function HowItWorks() {
   };
 
   return (
-    <section className="relative z-10 py-32 border-b border-white/5">
+    <section className="relative z-0 py-32 border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-24">
           <motion.h2 

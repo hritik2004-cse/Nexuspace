@@ -48,7 +48,3 @@ export const TESTIMONIALS = [
     rating: 5,
   },
 ];
-
-export const INTEGRATION_LOGOS = [
-  "GitHub", "Vercel", "Stripe", "Figma", "Sentry", "Supabase", "Linear", "Notion", "AWS", "Netlify", "Slack", "Jira"
-];

@@ -19,10 +19,16 @@ const channelSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  members: [{
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+  },
+
+  members: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    role: { type: String, enum: ['owner', 'admin', 'member'], default: 'member' }
   }],
+
   pinHash: {
     type: String,
     default: null

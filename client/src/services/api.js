@@ -73,8 +73,6 @@ api.interceptors.response.use(
 
     // Handle Network Errors
     if (!error.response) {
-      console.error("[Axios] Network Error - Server Unreachable");
-      // Toast logic can go here or in components
       return Promise.reject(error);
     }
 
@@ -83,7 +81,6 @@ api.interceptors.response.use(
 
     // 403 Permission Errors
     if (status === 403) {
-      console.error("[Axios] 403 Forbidden:", error.response.data?.message || "Permission Denied");
       return Promise.reject(error);
     }
 

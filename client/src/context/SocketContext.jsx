@@ -12,15 +12,12 @@ export function SocketProvider({ children }) {
     connectSocket();
 
     const onConnect = () => {
-      console.log("[Socket] Connected successfully");
       setIsConnected(true);
     };
     const onDisconnect = () => {
-      console.log("[Socket] Disconnected");
       setIsConnected(false);
     };
     const onError = (err) => {
-      console.error("[Socket] Connection Error:", err.message);
     };
 
     socket.on('connect', onConnect);

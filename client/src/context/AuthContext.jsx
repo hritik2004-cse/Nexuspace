@@ -16,23 +16,29 @@ export function AuthProvider({ children }) {
   // Validate session against backend on load
   useEffect(() => {
     const checkAuth = async () => {
+      // 1. Silent Check: If no session cookie exists, don't even try to fetch.
+      // This prevents the "red" 401 error in the browser console for guest users.
+      const hasSession = document.cookie.split(';').some((item) => item.trim().startsWith('csrf_token='));
+      
+      if (!hasSession) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/auth/me');
         const userData = res.data;
         setUser(userData);
         localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       } catch (err) {
-        if (err.response?.status !== 401) {
-          console.error("Session validation failed:", err.message);
-        }
+        // Silently clear local state if unauthorized
         setUser(null);
         localStorage.removeItem("nexuspace_user");
         localStorage.removeItem("nexuspace_token");
-        // Destroy legacy cookies and proxy tokens
         document.cookie = "nexuspace_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         document.cookie = "csrf_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         
-        // Explicitly redirect if on a protected route
         if (window.location.pathname.startsWith('/workspace')) {
           window.location.href = '/login';
         }
@@ -51,18 +57,15 @@ export function AuthProvider({ children }) {
       const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
       const accessToken = data.tokens?.accessToken;
 
-      console.log("[Auth] Login Success. Saving to storage...");
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       if (accessToken) {
         localStorage.setItem("nexuspace_token", accessToken);
       }
       setUser(userData);
 
-      console.log("[Auth] Redirecting to /workspace...");
       router.push("/workspace");
       return userData;
     } catch (error) {
-      console.error("Login Error:", error);
       throw new Error(
         error.response?.data?.message || "Invalid credentials. Please try again."
       );
@@ -85,7 +88,6 @@ export function AuthProvider({ children }) {
       router.push("/workspace");
       return userData;
     } catch (error) {
-      console.error("Registration Error:", error);
       throw new Error(
         error.response?.data?.message || "Registration failed. Please check your details."
       );
@@ -106,18 +108,15 @@ export function AuthProvider({ children }) {
       const userData = data.tokens ? (({ tokens, ...rest }) => rest)(data) : data;
       const accessToken = data.tokens?.accessToken;
 
-      console.log("[Auth] Google Login Success. Saving to storage...");
       localStorage.setItem("nexuspace_user", JSON.stringify(userData));
       if (accessToken) {
         localStorage.setItem("nexuspace_token", accessToken);
       }
       setUser(userData);
 
-      console.log("[Auth] Redirecting to /workspace...");
       router.replace("/workspace");
       return userData;
     } catch (error) {
-      console.error("Google Auth Error:", error);
       throw new Error(
         error.response?.data?.message ||
           "Authentication with Nexuspace Server failed",
@@ -132,9 +131,9 @@ export function AuthProvider({ children }) {
         const updatedUser = res.data;
         setUser(updatedUser);
         localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
-        toast.success("Profile updated successfully!");
+        toast.success("All set! Your profile has been updated.");
       } catch (err) {
-        toast.error("Profile update failed. Reverting changes.");
+        toast.error("We couldn't save your profile changes. Please try again in a moment.");
         const fallbackUser = { ...user, ...updates };
         setUser(fallbackUser);
         localStorage.setItem("nexuspace_user", JSON.stringify(fallbackUser));
@@ -156,7 +155,6 @@ export function AuthProvider({ children }) {
     try {
       await api.post('/auth/logout');
     } catch(err) {
-      console.error("Logout failed silently", err);
     }
     
     setUser(null);
@@ -180,10 +178,10 @@ export function AuthProvider({ children }) {
         sendPhoneOtp: async (phoneNumber) => {
           try {
             await api.post('/auth/send-phone-otp', { phoneNumber });
-            toast.success("Verification code sent to your phone!");
+            toast.success("Verification code sent! Please check your phone.");
             return true;
           } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to send OTP");
+            toast.error(err.response?.data?.message || "We couldn't send the code. Please check the number and try again.");
             return false;
           }
         },
@@ -193,10 +191,10 @@ export function AuthProvider({ children }) {
             const updatedUser = { ...user, phoneNumber: res.data.phoneNumber, isPhoneVerified: true };
             setUser(updatedUser);
             localStorage.setItem("nexuspace_user", JSON.stringify(updatedUser));
-            toast.success("Phone number verified!");
+            toast.success("Great! Your phone number is now verified.");
             return true;
           } catch (err) {
-            toast.error(err.response?.data?.message || "Verification failed");
+            toast.error(err.response?.data?.message || "That code doesn't look right. Please double-check and try again.");
             return false;
           }
         }

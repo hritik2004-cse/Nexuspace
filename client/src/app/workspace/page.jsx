@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 export default function WorkspacePage() {
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
-  const { activeWorkspace } = useWorkspace();
+  const { activeWorkspace, setOnlineCount } = useWorkspace();
   const searchParams = useSearchParams();
   const currentChannel = searchParams.get('channel') || 'general';
   
@@ -28,7 +28,6 @@ export default function WorkspacePage() {
   const [notification, setNotification] = useState(null);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [lockedChannel, setLockedChannel] = useState(null);
-  const [onlineCount, setOnlineCount] = useState(0);
 
   // Authenticate Socket connection
   useEffect(() => {
@@ -57,18 +56,22 @@ export default function WorkspacePage() {
           ...m,
           id: m._id,
           sender: m.sender?.name || m.sender?.username || 'Unknown',
-          senderDetails: m.sender
+          senderDetails: m.sender,
+          replyTo: m.replyTo
         }));
         
         setMessages(parsedMessages);
+        if (parsedMessages.length > 0) {
+          toast.success("All caught up! Messages loaded.", { toastId: 'load-success' });
+        }
       } catch (error) {
         if (error.response?.status === 403) {
           // Channel is private and no active session
+          const returnedChannelId = error.response.data.channelId;
           setMessages([]);
-          setLockedChannel({ id: channelId, name: currentChannel }); // Warning: channelId might not be set yet if findOrCreate returned 403, but findOrCreate shouldn't block, GET /messages blocks. Wait, we set channelId on line 46, so it's fine!
+          setLockedChannel({ id: returnedChannelId, name: currentChannel }); 
           setIsPinModalOpen(true);
         } else {
-          console.error("Error fetching channel data:", error);
         }
       }
     };
@@ -86,7 +89,6 @@ export default function WorkspacePage() {
     socket.emit('join_channel', channelId);
 
     const handleNewMessage = (newMessage) => {
-      console.log("[Socket] Received new message via WebSocket:", newMessage);
       const formatted = {
         ...newMessage,
         id: newMessage._id,
@@ -133,12 +135,26 @@ export default function WorkspacePage() {
       setTimeout(() => setNotification(null), 4000);
     };
 
+    const handleMessageDeleted = (data) => {
+      setMessages((prev) => prev.filter(m => m.id !== data.messageId && m._id !== data.messageId));
+    };
+
+    const handleMessageEdited = (data) => {
+      setMessages((prev) => prev.map(m =>
+        (m.id === data.messageId || m._id === data.messageId)
+          ? { ...m, content: data.content, isEdited: true }
+          : m
+      ));
+    };
+
     socket.on('receive_message', handleNewMessage);
     socket.on('reaction_updated', handleReaction);
     socket.on('message_pinned', handlePinState);
     socket.on('display_typing', handleDisplayTyping);
     socket.on('hide_typing', handleHideTyping);
     socket.on('receive_notification', handleNotification);
+    socket.on('message_deleted', handleMessageDeleted);
+    socket.on('message_edited', handleMessageEdited);
     
     socket.on('channel_online_count', (count) => setOnlineCount(count));
     
@@ -160,17 +176,20 @@ export default function WorkspacePage() {
       socket.off('display_typing', handleDisplayTyping);
       socket.off('hide_typing', handleHideTyping);
       socket.off('receive_notification', handleNotification);
+      socket.off('message_deleted', handleMessageDeleted);
+      socket.off('message_edited', handleMessageEdited);
     };
   }, [socket, channelId, isConnected]);
 
-  const handleSendMessage = async (content, attachment = null) => {
+  const handleSendMessage = async (content, attachment = null, replyToId = null) => {
     if (!channelId) return;
 
     try {
       const payload = {
         content,
         channelId,
-        attachments: attachment ? [attachment] : []
+        attachments: attachment ? [attachment] : [],
+        replyTo: replyToId
       };
 
       // The backend posts it to DB, then socket broadcasts it to others
@@ -180,7 +199,8 @@ export default function WorkspacePage() {
         ...res.data,
         id: res.data._id,
         sender: res.data.sender?.name || res.data.sender?.username || 'Unknown',
-        senderDetails: res.data.sender
+        senderDetails: res.data.sender,
+        replyTo: res.data.replyTo
       };
 
       // Add locally for the sender if the socket hasn't already added it
@@ -191,16 +211,29 @@ export default function WorkspacePage() {
         return [...prev, formatted];
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error sending message");
+      toast.error(error.response?.data?.message || "We couldn't send your message. Please try again in a moment.");
     }
   };
 
-  const handleDeleteMessage = (id) => {
-    setMessages((prev) => prev.filter(m => m.id !== id));
+  const handleDeleteMessage = async (id) => {
+    try {
+      await api.delete(`/messages/${id}`);
+      // Local removal is handled by the 'message_deleted' socket event
+      // but we also remove locally immediately for snappy UX
+      setMessages((prev) => prev.filter(m => m.id !== id && m._id !== id));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "We couldn't delete this message. Please try again.");
+    }
   };
 
-  const handleEditMessage = (id, newContent) => {
-    setMessages((prev) => prev.map(m => m.id === id ? { ...m, content: newContent } : m));
+  const handleEditMessage = async (id, newContent) => {
+    try {
+      await api.put(`/messages/${id}`, { content: newContent });
+      // Local update is handled by the 'message_edited' socket event
+      setMessages((prev) => prev.map(m => (m.id === id || m._id === id) ? { ...m, content: newContent, isEdited: true } : m));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "We couldn't save your changes. Please try again.");
+    }
   };
 
   const handleReactToMessage = async (id, emoji) => {
@@ -224,7 +257,7 @@ export default function WorkspacePage() {
          });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error reacting to message");
+      toast.error(error.response?.data?.message || "We couldn't add your reaction. Please try again.");
     }
   };
 
@@ -249,7 +282,7 @@ export default function WorkspacePage() {
          });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error pinning message");
+      toast.error(error.response?.data?.message || "We couldn't pin this message. Please try again.");
     }
   };
 
@@ -285,7 +318,6 @@ export default function WorkspacePage() {
         channelId={channelId}
         channelName={currentChannel}
         socket={socket}
-        onlineCount={onlineCount}
       />
       
       <PinModal 

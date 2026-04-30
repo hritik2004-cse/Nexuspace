@@ -49,20 +49,33 @@ const protect = asyncHandler(async (req, res, next) => {
 const { hasPermission } = require('../config/permissions');
 
 const checkPermission = (requiredPermission) => {
-  return (req, res, next) => {
+  return asyncHandler(async (req, res, next) => {
+
     if (!req.user || !req.user.role) {
       res.status(401);
       throw new Error('Not authorized, role missing');
     }
 
     if (hasPermission(req.user.role, requiredPermission)) {
+      // High-security 2FA check for global admin account (session-based)
+      if (req.user.role === 'Admin' && req.user.email === process.env.ADMIN_EMAIL) {
+        const Session = require('../models/Session');
+        const session = await Session.findOne({ sessionId: req.sessionId });
+        if (!session || !session.isAdmin2FAVerified) {
+          res.status(403);
+          throw new Error('Admin 2FA verification required for this session');
+        }
+      }
       next();
     } else {
+
+
       res.status(403);
       throw new Error(`Permission Denied: Requires ${requiredPermission}`);
     }
-  };
+  });
 };
+
 
 const Channel = require('../models/Channel');
 const Workspace = require('../models/Workspace');
@@ -111,4 +124,36 @@ const verifyChannelAccess = asyncHandler(async (req, res, next) => {
   throw new Error('Access denied. Please enter the PIN.');
 });
 
-module.exports = { protect, checkPermission, verifyChannelAccess, generateRequestId };
+const checkChannelRole = (requiredRole) => {
+  return asyncHandler(async (req, res, next) => {
+    const channelId = req.params.id || req.params.channelId || req.body.channelId || req.body.id;
+    if (!channelId) {
+      res.status(400);
+      throw new Error('Channel ID required for this action');
+    }
+
+    const channel = await Channel.findById(channelId);
+    if (!channel) {
+      res.status(404);
+      throw new Error('Channel not found');
+    }
+
+    const member = channel.members.find(m => m.user && m.user.toString() === req.user._id.toString());
+    const roleHierarchy = { 'owner': 3, 'admin': 2, 'member': 1 };
+    
+    // Global Admins can bypass channel roles
+    const userRoleValue = req.user.role === 'Admin' ? 3 : (member ? roleHierarchy[member.role] : 0);
+    const requiredRoleValue = roleHierarchy[requiredRole];
+
+    if (userRoleValue >= requiredRoleValue) {
+      req.channel = channel;
+      next();
+    } else {
+      res.status(403);
+      throw new Error(`Permission Denied: This action requires ${requiredRole} privileges in this channel.`);
+    }
+  });
+};
+
+module.exports = { protect, checkPermission, verifyChannelAccess, checkChannelRole, generateRequestId };
+

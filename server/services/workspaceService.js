@@ -20,7 +20,8 @@ const createWorkspaceService = async (name, ownerId) => {
     name: 'general',
     workspaceId: workspace._id,
     creator: ownerId,
-    members: [ownerId]
+    owner: ownerId,
+    members: [{ user: ownerId, role: 'owner' }]
   });
 
   return workspace;
@@ -50,7 +51,7 @@ const addMemberService = async (workspaceId, memberEmail, ownerId) => {
   // Add user to the general channel of this workspace
   await Channel.findOneAndUpdate(
     { workspaceId, name: 'general' },
-    { $addToSet: { members: userToAdd._id } },
+    { $addToSet: { members: { user: userToAdd._id, role: 'member' } } },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
@@ -68,7 +69,7 @@ const joinWorkspaceService = async (workspaceId, userId) => {
     // Add user to the general channel of this workspace
     await Channel.findOneAndUpdate(
       { workspaceId, name: 'general' },
-      { $addToSet: { members: userId } },
+      { $addToSet: { members: { user: userId, role: 'member' } } },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
   }

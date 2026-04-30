@@ -13,8 +13,11 @@ const csrfProtection = (req, res, next) => {
     '/api/auth/google', 
     '/api/auth/refresh',
     '/api/auth/forgot-password',
-    '/api/auth/reset-password'
+    '/api/auth/reset-password',
+    '/api/auth/verify-admin-2fa',
+    '/api/newsletter/subscribe',  // Public endpoint — no session cookie available
   ];
+
   if (exemptRoutes.includes(req.originalUrl)) {
     return next();
   }

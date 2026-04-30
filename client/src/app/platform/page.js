@@ -17,52 +17,52 @@ export const metadata = {
 export default function PlatformPage() {
   return (
     <MainLayout>
-      <div className="relative z-10 pt-32 pb-20 overflow-hidden">
+      <div className="relative z-10 pt-24 md:pt-32 pb-12 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 relative text-center">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-8 border border-indigo-500/30 mx-auto">
-            <Cpu className="text-indigo-400 w-8 h-8" />
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6 md:mb-8 border border-indigo-500/30 mx-auto">
+            <Cpu className="text-indigo-400 w-6 h-6 md:w-8 md:h-8" />
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6">The Nexuspace Platform.</h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">Built entirely on edge-rendered WebSockets and highly available NoSQL layers. Uncompromising performance.</p>
+          <h1 className="text-4xl md:text-7xl font-black tracking-tight text-white mb-6">The Nexuspace Platform.</h1>
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">Built entirely on edge-rendered WebSockets and highly available NoSQL layers. Uncompromising performance.</p>
         </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-6 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-indigo-500/30 group">
-            <MessageSquare className="w-10 h-10 text-indigo-400 mb-6 group-hover:scale-110 transition-transform" />
-            <h3 className="text-2xl font-bold text-white mb-4">Real-time Chat Engine</h3>
-            <p className="text-slate-400 leading-relaxed mb-8">Instant messaging distributed across edge nodes. Create infinite channels, direct messages, and secure client-facing threads without a single millisecond of lag.</p>
-            <ul className="space-y-3 mb-8">
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Threaded conversations</li>
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> End-to-end file encryption</li>
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Rich text & code blocks</li>
+          <div className="p-6 md:p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-indigo-500/30 group">
+            <MessageSquare className="w-8 h-8 md:w-10 md:h-10 text-indigo-400 mb-4 md:mb-6 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4">Real-time Chat Engine</h3>
+            <p className="text-sm md:text-base text-slate-400 leading-relaxed mb-6 md:mb-8">Instant messaging distributed across edge nodes. Create infinite channels, direct messages, and secure client-facing threads without a single millisecond of lag.</p>
+            <ul className="space-y-3 mb-6 md:mb-8">
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Threaded conversations</li>
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> End-to-end file encryption</li>
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Rich text & code blocks</li>
             </ul>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-fuchsia-500/30 group">
-            <Layout className="w-10 h-10 text-fuchsia-400 mb-6 group-hover:scale-110 transition-transform" />
-            <h3 className="text-2xl font-bold text-white mb-4">Predictive Kanban Boards</h3>
-            <p className="text-slate-400 leading-relaxed mb-8">Visual project management rendered using optimistic UI. Drag and drop thousands of tasks seamlessly while the backend resolves conflict states automatically.</p>
-            <ul className="space-y-3 mb-8">
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Virtualized infinite scrolling</li>
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Custom column workflows</li>
-              <li className="text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Automated sprint rollovers</li>
+          <div className="p-6 md:p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-fuchsia-500/30 group">
+            <Layout className="w-8 h-8 md:w-10 md:h-10 text-fuchsia-400 mb-4 md:mb-6 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4">Predictive Kanban Boards</h3>
+            <p className="text-sm md:text-base text-slate-400 leading-relaxed mb-6 md:mb-8">Visual project management rendered using optimistic UI. Drag and drop thousands of tasks seamlessly while the backend resolves conflict states automatically.</p>
+            <ul className="space-y-3 mb-6 md:mb-8">
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Virtualized infinite scrolling</li>
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Custom column workflows</li>
+              <li className="text-xs md:text-sm text-slate-300 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></div> Automated sprint rollovers</li>
             </ul>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-emerald-500/30 group">
-            <Zap className="w-10 h-10 text-emerald-400 mb-6 group-hover:scale-110 transition-transform" />
-            <h3 className="text-2xl font-bold text-white mb-4">Edge Sync Subsystem</h3>
-            <p className="text-slate-400 leading-relaxed mb-8">Your entire workspace shares a singular source of truth. The millisecond a task moves or a letter is typed, our backend propagates the event worldwide.</p>
+          <div className="p-6 md:p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-emerald-500/30 group">
+            <Zap className="w-8 h-8 md:w-10 md:h-10 text-emerald-400 mb-4 md:mb-6 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4">Edge Sync Subsystem</h3>
+            <p className="text-sm md:text-base text-slate-400 leading-relaxed mb-4 md:mb-8">Your entire workspace shares a singular source of truth. The millisecond a task moves or a letter is typed, our backend propagates the event worldwide.</p>
           </div>
 
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-rose-500/30 group">
-            <Shield className="w-10 h-10 text-rose-400 mb-6 group-hover:scale-110 transition-transform" />
-            <h3 className="text-2xl font-bold text-white mb-4">Enterprise Security</h3>
-            <p className="text-slate-400 leading-relaxed mb-8">Instantly branch off entirely separate Workspaces for private clients or secure internal ops without cross-pollution. Compliant with strict SOC2 standards.</p>
+          <div className="p-6 md:p-10 rounded-3xl border border-white/10 bg-white/2 hover:bg-white/4 transition-all hover:border-rose-500/30 group">
+            <Shield className="w-8 h-8 md:w-10 md:h-10 text-rose-400 mb-4 md:mb-6 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4">Enterprise Security</h3>
+            <p className="text-sm md:text-base text-slate-400 leading-relaxed mb-4 md:mb-8">Instantly branch off entirely separate Workspaces for private clients or secure internal ops without cross-pollution. Compliant with strict SOC2 standards.</p>
           </div>
 
         </div>

@@ -19,10 +19,21 @@ function DropdownMenuPortal({
 }
 
 function DropdownMenuTrigger({
+  asChild,
+  children,
   ...props
 }) {
-  return <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
+  return (
+    <MenuPrimitive.Trigger
+      data-slot="dropdown-menu-trigger"
+      render={asChild ? children : undefined}
+      {...props}
+    >
+      {asChild ? undefined : children}
+    </MenuPrimitive.Trigger>
+  );
 }
+
 
 function DropdownMenuContent({
   align = "start",

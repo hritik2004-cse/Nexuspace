@@ -15,7 +15,13 @@ const verifyPin = async (req, res) => {
     const { pin } = req.body;
     const userId = req.user._id;
 
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(channelId)) {
+      return res.status(400).json({ message: 'Invalid channel ID format.' });
+    }
+
     const channel = await Channel.findById(channelId);
+
     if (!channel || !channel.isPrivate) {
       return res.status(400).json({ message: 'Channel is not private or not found.' });
     }
@@ -70,8 +76,13 @@ const changePin = async (req, res) => {
     const { id: channelId } = req.params;
     const { newPin } = req.body;
     
-    // Auth logic: Only Admin can change PIN. Handled by middleware? Let's check workspace owner too.
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(channelId)) {
+      return res.status(400).json({ message: 'Invalid channel ID format.' });
+    }
+
     const channel = await Channel.findById(channelId);
+
     const workspace = await Workspace.findById(channel.workspaceId);
     if (workspace.owner.toString() !== req.user._id.toString() && req.user.role !== 'Admin') {
       return res.status(403).json({ message: 'Not authorized' });
@@ -105,7 +116,12 @@ const changePin = async (req, res) => {
 const revokeSessions = async (req, res) => {
   try {
     const { id: channelId } = req.params;
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(channelId)) {
+      return res.status(400).json({ message: 'Invalid channel ID format.' });
+    }
     await revokeAllSessions(channelId);
+
     await AuditLog.create({ action: 'SESSIONS_REVOKED', userId: req.user._id, channelId });
 
     if (req.io) {
