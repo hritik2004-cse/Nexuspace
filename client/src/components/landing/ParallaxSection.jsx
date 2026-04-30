@@ -31,7 +31,7 @@ export default function ParallaxSection({ children, speed = 1, className = "" })
   }, [speed]);
 
   return (
-    <div ref={triggerRef} className={`relative overflow-hidden ${className}`}>
+    <div ref={triggerRef} className={`relative ${className}`}>
       <div ref={sectionRef} className="will-change-transform">
         {children}
       </div>

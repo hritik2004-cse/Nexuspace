@@ -38,7 +38,7 @@ export default function Section({
     <section 
       id={id}
       aria-label={ariaLabel}
-      className={`relative w-full overflow-hidden ${background} ${padding} ${className}`}
+      className={`relative w-full ${background} ${padding} ${className}`}
     >
       <m.div
         initial="hidden"
