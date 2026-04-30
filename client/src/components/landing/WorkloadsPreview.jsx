@@ -59,7 +59,7 @@ export default function WorkloadsPreview() {
       />
 
       {/* Sidebar - Workload Focused */}
-      <div className="w-14 md:w-64 border-r border-white/5 bg-white/[0.02] flex flex-col p-2 md:p-4 shrink-0 relative z-10">
+      <div className="w-14 md:w-64 border-r border-white/5 bg-white/2 flex flex-col p-2 md:p-4 shrink-0 relative z-10">
         <div className="flex items-center gap-3 mb-6 md:mb-8 px-1 md:px-2">
           <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
             <Image src="/web-app-manifest-512x512.png" alt="Logo" width={20} height={20} />
@@ -92,7 +92,7 @@ export default function WorkloadsPreview() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/[0.01]">
+        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/1">
           <div className="flex items-center gap-3 md:gap-4">
             <LayoutDashboard className="w-4 h-4 md:w-5 md:h-5 text-fuchsia-400" />
             <h2 className="font-bold text-white text-xs md:text-base tracking-tight">System Deployment</h2>
@@ -111,7 +111,7 @@ export default function WorkloadsPreview() {
 
         <div className="flex-1 p-3 md:p-6 overflow-hidden md:overflow-y-auto">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 h-auto md:h-full">
-              <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 flex flex-col gap-5 overflow-hidden shadow-inner">
+              <div className="rounded-2xl border border-white/5 bg-white/5 p-5 flex flex-col gap-5 overflow-hidden shadow-inner">
                  <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 md:gap-2 shrink-0">
                     <Clock className="w-3 md:w-3.5 h-3 md:h-3.5 text-fuchsia-400" /> Active Backlog
                  </h3>

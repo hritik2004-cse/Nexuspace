@@ -28,7 +28,7 @@ export function BackgroundRings() {
             scale: { duration: 6, repeat: Infinity, ease: "easeInOut" },
             opacity: { duration: 4, repeat: Infinity, ease: "easeInOut" }
           }}
-          className="absolute border border-white/[0.03] rounded-full will-change-transform"
+          className="absolute border border-white/3 rounded-full will-change-transform"
           style={{
             width: `${500 + i * 200}px`,
             height: `${500 + i * 200}px`,
@@ -52,7 +52,7 @@ export function AnimatedGradientText({ children, className = "" }) {
         repeat: Infinity, 
         ease: "linear" 
       }}
-      className={`bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 bg-[length:200%_auto] bg-clip-text text-transparent will-change-[background-position] ${className}`}
+      className={`bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 bg-size-[200%_auto] bg-clip-text text-transparent will-change-[background-position] ${className}`}
     >
       {children}
     </m.span>

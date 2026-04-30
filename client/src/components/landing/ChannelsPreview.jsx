@@ -64,7 +64,7 @@ export default function ChannelsPreview() {
       />
 
       {/* Sidebar - Channels Focused */}
-      <div className="w-14 md:w-64 border-r border-white/5 bg-white/[0.02] flex flex-col p-2 md:p-4 shrink-0 relative z-10">
+      <div className="w-14 md:w-64 border-r border-white/5 bg-white/2 flex flex-col p-2 md:p-4 shrink-0 relative z-10">
         <div className="flex items-center gap-3 mb-6 md:mb-8 px-1 md:px-2">
           <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
             <Image src="/web-app-manifest-512x512.png" alt="Logo" width={20} height={20} />
@@ -100,7 +100,7 @@ export default function ChannelsPreview() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/[0.01]">
+        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/1">
           <div className="flex items-center gap-2 md:gap-4">
             <Hash className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />
             <h2 className="font-bold text-white text-[10px] md:text-base tracking-tight">global-ops</h2>
@@ -108,14 +108,14 @@ export default function ChannelsPreview() {
           <div className="flex items-center gap-4">
             <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border border-white/10 overflow-hidden relative shrink-0 aspect-square">
                <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&auto=format&fit=crop" alt="User" fill sizes="36px" className="object-cover" />
-               <span className="absolute bottom-0 right-0 w-2 w-2 md:w-2.5 md:h-2.5 bg-emerald-500 rounded-full border border-slate-950 animate-pulse" />
+                <span className="absolute bottom-0 right-0 w-2 md:w-2.5 md:h-2.5 bg-emerald-500 rounded-full border border-slate-950 animate-pulse" />
             </div>
           </div>
         </header>
 
         <div className="flex-1 p-6 overflow-hidden">
-             <div className="flex flex-col h-full gap-4">
-                <div className="flex-1 rounded-2xl border border-white/5 bg-white/[0.01] p-3 md:p-4 flex flex-col overflow-hidden">
+              <div className="flex flex-col h-full gap-4">
+                <div className="flex-1 rounded-2xl border border-white/5 bg-white/1 p-3 md:p-4 flex flex-col overflow-hidden">
                    <div className="flex-1 flex flex-col gap-3 md:gap-6 overflow-y-auto custom-scrollbar pr-2 pb-2 md:pb-4">
                       <AnimatePresence mode="popLayout">
                         {messages.map((msg, i) => (

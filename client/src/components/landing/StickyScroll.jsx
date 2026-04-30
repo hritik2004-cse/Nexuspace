@@ -78,7 +78,7 @@ export default function StickyScroll() {
           </div>
 
           <div className="w-[65%] flex items-center justify-center relative">
-             <div className="w-full h-[68vh] rounded-[2rem] overflow-hidden relative group border border-white/10 shadow-2xl shadow-indigo-500/10 transition-all duration-500">
+             <div className="w-full h-[68vh] rounded-4xl overflow-hidden relative group border border-white/10 shadow-2xl shadow-indigo-500/10 transition-all duration-500">
                 <AnimatePresence mode="wait">
                   <m.div
                     key={activeCard}

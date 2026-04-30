@@ -107,7 +107,7 @@ export default function GlassDashboard({ activeScene = 0 }) {
       />
 
       {/* Sidebar */}
-      <div className="w-14 md:w-64 border-r border-white/5 bg-white/[0.02] flex flex-col p-2 md:p-4 shrink-0 relative z-10">
+      <div className="w-14 md:w-64 border-r border-white/5 bg-white/2 flex flex-col p-2 md:p-4 shrink-0 relative z-10">
         <div className="flex items-center gap-3 mb-8 px-2">
           <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg overflow-hidden relative group/logo">
             <div className="absolute inset-0 bg-indigo-500/20 group-hover/logo:bg-indigo-500/40 transition-colors" />
@@ -169,7 +169,7 @@ export default function GlassDashboard({ activeScene = 0 }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Header */}
-        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/[0.01]">
+        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/1">
           <div className="flex items-center gap-3 md:gap-4">
             <Hash className="w-4 h-4 md:w-5 md:h-5 text-slate-500" />
             <h2 className="font-bold text-white text-[10px] md:text-base tracking-tight">global-operations</h2>
@@ -215,7 +215,7 @@ export default function GlassDashboard({ activeScene = 0 }) {
         <div className="flex-1 p-6 overflow-hidden">
           {activeScene === 0 && (
              <div className="flex flex-col h-full gap-4">
-                <div className="flex-1 rounded-2xl border border-white/5 bg-white/[0.01] p-4 flex flex-col overflow-hidden">
+                <div className="flex-1 rounded-2xl border border-white/5 bg-white/1 p-4 flex flex-col overflow-hidden">
                    {/* Scrollable Message Area */}
                    <div className="flex-1 flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2 pb-4">
                       <AnimatePresence mode="popLayout">
@@ -280,7 +280,7 @@ export default function GlassDashboard({ activeScene = 0 }) {
 
           {activeScene === 1 && (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-hidden">
-                <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-3 md:p-5 flex flex-col gap-4 overflow-hidden shadow-inner">
+                <div className="rounded-2xl border border-white/5 bg-white/1 p-3 md:p-5 flex flex-col gap-4 overflow-hidden shadow-inner">
                    <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 shrink-0">
                       <Clock className="w-3 h-3 text-indigo-400" /> Backlog
                    </h3>
