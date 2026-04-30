@@ -103,7 +103,7 @@ export default function Home() {
           <HeroScene />
           
           {/* Hero Section */}
-          <Section className="min-h-[70vh] md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-48 pb-12 relative z-10">
+          <Section className="min-h-[70vh] md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-32 pb-12 relative z-10">
             <ParallaxSection speed={-0.5} className="w-full">
               <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
                 <m.div 
