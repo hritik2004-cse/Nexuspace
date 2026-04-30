@@ -92,7 +92,7 @@ function NewsletterForm() {
           type="submit"
           disabled={status === "loading" || !email.trim()}
           aria-label="Subscribe to newsletter"
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 hover:from-indigo-500 hover:to-purple-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+          className="bg-linear-to-r from-indigo-600 to-purple-600 px-4 py-3 hover:from-indigo-500 hover:to-purple-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
         >
           {status === "loading" ? (
             <Loader2 className="w-4 h-4 text-white animate-spin" aria-hidden="true" />

@@ -10,8 +10,8 @@ export default function TrustMetrics() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-10">
           
           <div className="text-center md:text-left">
-            <h3 className="text-3xl font-black text-white mb-2">Enterprise Grade.</h3>
-            <p className="text-slate-300 font-medium">Metrics that back our infrastructure.</p>
+            <h3 className="text-4xl font-black text-white mb-2">Enterprise Grade.</h3>
+            <p className="text-base text-slate-300 font-medium">Metrics that back our infrastructure.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-12 lg:gap-24">
@@ -21,7 +21,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-white to-slate-500 mb-2"
                >
                  <CountUp end={99.9} suffix="%" decimals={1} />
                </motion.span>
@@ -36,7 +36,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5, delay: 0.1 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-indigo-400 to-purple-500 mb-2"
                >
                  <CountUp end={50} suffix="ms" />
                </motion.span>
@@ -51,7 +51,7 @@ export default function TrustMetrics() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5, delay: 0.2 }}
-                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-cyan-500 mb-2"
+                 className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-emerald-400 to-cyan-500 mb-2"
                >
                  <CountUp end={10} suffix="k+" />
                </motion.span>

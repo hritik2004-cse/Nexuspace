@@ -52,7 +52,7 @@ export default function LandingNavbar({ scrolled }) {
                 setActiveDropdown={setActiveDropdown}
               >
                 <div className="p-6 grid grid-cols-2 gap-6 relative w-[500px]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
                   
                   <div className="flex flex-col gap-2 relative z-10">
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Features</h4>
@@ -156,8 +156,8 @@ export default function LandingNavbar({ scrolled }) {
               <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors hidden sm:block">Log in</Link>
               <div className="hidden sm:flex">
                 <Link href="/register">
-                  <button className="text-sm font-bold bg-gradient-to-r from-white to-slate-200 text-black px-4 md:px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)] flex items-center gap-2 relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+                  <button className="text-sm font-bold bg-linear-to-r from-white to-slate-200 text-black px-4 md:px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)] flex items-center gap-2 relative group overflow-hidden">
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                     <span className="hidden xs:inline">Start Free</span><span className="xs:hidden">Join</span> <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </Link>

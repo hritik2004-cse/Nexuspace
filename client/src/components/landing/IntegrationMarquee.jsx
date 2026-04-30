@@ -73,8 +73,8 @@ const LOGOS = [
 export default function IntegrationMarquee() {
   return (
     <section aria-label="Our Technology Stack" className="relative z-10 w-full overflow-hidden py-12 border-y border-white/5 bg-slate-950/30 backdrop-blur-md">
-      <div className="absolute left-0 w-32 h-full bg-gradient-to-r from-[#030014] to-transparent z-10 top-0"></div>
-      <div className="absolute right-0 w-32 h-full bg-gradient-to-l from-[#030014] to-transparent z-10 top-0"></div>
+      <div className="absolute left-0 w-32 h-full bg-linear-to-r from-[#030014] to-transparent z-10 top-0"></div>
+      <div className="absolute right-0 w-32 h-full bg-linear-to-l from-[#030014] to-transparent z-10 top-0"></div>
       
       <div className="flex gap-20 whitespace-nowrap px-8 w-[200%] animate-marquee">
         {[...LOGOS, ...LOGOS, ...LOGOS].map((tech, i) => (

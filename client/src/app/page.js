@@ -20,7 +20,10 @@ const ComparisonTable = dynamic(() => import('@/components/landing/ComparisonTab
 const StickyScroll = dynamic(() => import('@/components/landing/StickyScroll'), { ssr: false });
 const IntegrationMarquee = dynamic(() => import('@/components/landing/IntegrationMarquee'), { ssr: false });
 const TrustMetrics = dynamic(() => import('@/components/landing/TrustMetrics'), { ssr: false });
-const HeroScene = dynamic(() => import('@/components/landing/HeroScene'), { ssr: false });
+const HeroScene = dynamic(() => import('@/components/landing/HeroScene'), { 
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-[#030014]" />
+});
 const ParallaxSection = dynamic(() => import('@/components/landing/ParallaxSection'), { ssr: false });
 
 // --- Optimized Spotlight Card Component ---
@@ -94,13 +97,13 @@ export default function Home() {
   return (
     <LazyMotion features={domAnimation}>
       <MainLayout>
-        <div ref={containerRef} className="w-full overflow-clip bg-[#030014]">
+        <div ref={containerRef} className="relative w-full overflow-clip bg-[#030014]">
           
           {/* Background Scene */}
           <HeroScene />
           
           {/* Hero Section */}
-          <Section className="min-h-[90vh] flex flex-col items-center justify-center pt-50 pb-12 relative z-10">
+          <Section className="min-h-[70vh] md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-48 pb-12 relative z-10">
             <ParallaxSection speed={-0.5} className="w-full">
               <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
                 <m.div 
@@ -118,16 +121,16 @@ export default function Home() {
                   initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-5xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-[0.9] max-w-5xl"
+                  className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-[0.9] max-w-5xl"
                 >
-                  The Operating System for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 animate-gradient-x">Modern Teams.</span>
+                  The Operating System for <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 animate-gradient-x">Modern Teams.</span>
                 </m.h1>
 
                 <m.p 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-lg md:text-2xl text-slate-400 max-w-2xl font-light mb-12 leading-relaxed"
+                  className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-12 leading-relaxed"
                 >
                   Unify your communication, tasks, and documentation in a single, lightning-fast workspace.
                 </m.p>
@@ -136,17 +139,25 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="flex flex-col sm:flex-row items-center gap-6"
+                  className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 w-full max-w-md md:max-w-none"
                 >
-                  <Link href="/register">
-                    <button className="group h-16 px-10 bg-white text-black font-black rounded-2xl text-lg flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-white/10">
-                      Get Started Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                  <Link href="/register" className="w-full sm:w-auto">
+                    <m.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-full px-8 py-3.5 md:py-4 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl md:rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
+                    >
+                      Get Started Now <ArrowRight className="w-5 h-5" />
+                    </m.button>
                   </Link>
-                  <Link href="/demo">
-                    <button className="h-16 px-10 bg-slate-900 border border-white/10 text-white font-bold rounded-2xl text-lg hover:bg-slate-800 transition-colors">
+                  <Link href="/demo" className="w-full sm:w-auto">
+                    <m.button 
+                      whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.1)" }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-full px-8 py-3.5 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl text-white font-bold transition-colors"
+                    >
                       Book a Demo
-                    </button>
+                    </m.button>
                   </Link>
                 </m.div>
               </m.div>
@@ -158,15 +169,19 @@ export default function Home() {
           <StickyScroll />
 
           {/* Featured Dashboard Preview */}
-          <Section padding="py-32 overflow-visible">
-             <ParallaxSection speed={0.3}>
+          <Section padding="py-12 md:py-32 overflow-visible">
+             <ParallaxSection speed={typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 0.3}>
                 <m.div 
-                  style={{ y: dashboardY, rotateX: dashboardRotateX, scale: dashboardScale }}
-                  className="relative mx-auto max-w-6xl [perspective:1500px] z-20"
+                  style={{ 
+                    y: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : dashboardY, 
+                    rotateX: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : dashboardRotateX, 
+                    scale: dashboardScale 
+                  }}
+                  className="relative mx-auto max-w-6xl perspective-[1500px] z-20"
                 >
-                  <div className="relative rounded-3xl border border-white/10 bg-slate-950 p-1 shadow-2xl shadow-indigo-500/20 overflow-hidden group">
-                     <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 pointer-events-none"></div>
-                     <div className="rounded-2xl border border-white/5 overflow-hidden">
+                  <div className="relative rounded-2xl md:rounded-3xl border border-white/10 bg-slate-950 p-1 shadow-2xl shadow-indigo-500/20 overflow-hidden group">
+                     <div className="absolute inset-0 bg-linear-to-tr from-indigo-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 pointer-events-none"></div>
+                     <div className="rounded-xl md:rounded-2xl border border-white/5 overflow-hidden">
                        <GlassDashboard />
                      </div>
                   </div>
@@ -180,7 +195,7 @@ export default function Home() {
           <LivePreview />
 
           {/* Middle CTA */}
-          <Section padding="py-32 md:py-48" className="text-center relative overflow-hidden bg-[#030014]">
+          <Section padding="py-16 md:py-48" className="text-center relative overflow-hidden bg-[#030014]">
             <BackgroundRings />
             
             <m.div 
@@ -202,7 +217,7 @@ export default function Home() {
                   visible: { opacity: 1, y: 0, scale: 1 }
                 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-[2.5rem] md:text-7xl font-black text-white mb-10 tracking-tighter leading-[1.1]"
+                className="text-4xl md:text-7xl font-black text-white mb-10 tracking-tighter leading-[1.1]"
               >
                 Build the future of your <br /> team in <AnimatedGradientText>seconds.</AnimatedGradientText>
               </m.h2>
@@ -224,8 +239,8 @@ export default function Home() {
           {/* Infrastructure Grid */}
           <Section id="infrastructure" stagger background="bg-slate-950/20" padding="py-20 md:py-32">
             <div className="text-center mb-16 px-4">
-              <h2 className="text-[2rem] md:text-6xl font-black text-white mb-6 leading-tight">Unrivaled Infrastructure.</h2>
-              <p className="text-[15px] md:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">Nexuspace is built on edge-rendered WebSockets and highly available NoSQL layers for sub-millisecond sync.</p>
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">Unrivaled Infrastructure.</h2>
+              <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">Nexuspace is built on edge-rendered WebSockets and highly available NoSQL layers for sub-millisecond sync.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -254,16 +269,28 @@ export default function Home() {
                  <h3 className="text-xl font-bold text-white mb-3">99.9% Uptime</h3>
                  <p className="text-slate-300 text-sm font-light leading-relaxed">Zero-latency failover across all geographic regions.</p>
               </SpotlightCard>
+
+              <SpotlightCard className="md:col-span-2 p-8 flex flex-col justify-center">
+                 <div className="flex items-center gap-6">
+                   <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                     <Activity className="w-6 h-6 text-emerald-400" />
+                   </div>
+                   <div>
+                     <h3 className="text-xl font-bold text-white mb-1">Sub-millisecond Sync</h3>
+                     <p className="text-slate-400 text-sm font-light leading-relaxed">Proprietary transport layer optimized for high-frequency updates.</p>
+                   </div>
+                 </div>
+              </SpotlightCard>
             </div>
           </Section>
 
           {/* Final CTA Section */}
-          <Section padding="py-24 md:py-48" className="text-center relative">
+          <Section padding="py-16 md:py-48" className="text-center relative">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.08),transparent_70%)] pointer-events-none" />
             <div className="relative inline-block mb-10">
-               <h2 className="text-[2.5rem] md:text-8xl font-black text-white leading-[1] tracking-tighter px-4">
+               <h2 className="text-4xl md:text-8xl font-black text-white leading-none tracking-tighter px-4">
                  Escape <br />
-                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400">velocity.</span>
+                 <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-400 to-fuchsia-400">velocity.</span>
                </h2>
             </div>
             
@@ -273,11 +300,11 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto px-6">
               <Link href="/register" className="flex-1">
-                <button className="w-full h-14 bg-white text-black font-black rounded-2xl text-lg shadow-[0_20px_50px_-10px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all">
+                <button className="w-full py-3.5 md:py-4 bg-white text-black font-black rounded-xl md:rounded-2xl text-base md:text-lg shadow-[0_20px_50px_-10px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all">
                   Get Started Free
                 </button>
               </Link>
-              <button className="flex-1 h-14 bg-slate-900 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <button className="flex-1 py-3.5 md:py-4 bg-slate-900 border border-white/10 text-white font-bold rounded-xl md:rounded-2xl text-base hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2">
                 Founders Demo <ArrowRight className="w-5 h-5" />
               </button>
             </div>

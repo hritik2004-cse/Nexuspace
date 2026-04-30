@@ -52,7 +52,7 @@ export function AnimatedGradientText({ children, className = "" }) {
         repeat: Infinity, 
         ease: "linear" 
       }}
-      className={`bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 bg-[length:200%_auto] bg-clip-text text-transparent will-change-[background-position] ${className}`}
+      className={`bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 bg-[length:200%_auto] bg-clip-text text-transparent will-change-[background-position] ${className}`}
     >
       {children}
     </m.span>
@@ -87,7 +87,7 @@ export function PremiumCTA({ href, children }) {
         <span className="relative z-10">{children}</span>
         
         {/* Subtle Hover Glow */}
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-50/0 via-indigo-50/30 to-indigo-50/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+        <div className="absolute inset-0 bg-linear-to-r from-indigo-50/0 via-indigo-50/30 to-indigo-50/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
       </m.a>
     </m.div>
   );
