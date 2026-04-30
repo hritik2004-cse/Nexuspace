@@ -272,7 +272,7 @@ export default function LoginPage() {
           <div className="flex justify-center">
             <div className="w-full">
               {/* Using official GoogleLogin component to resolve COOP/POPUP issues in production */}
-              <div className="w-full flex justify-center [&>div]:!w-full [&>div>div]:!w-full [&>div>div>iframe]:!w-full">
+              <div className="w-full flex justify-center [&>div]:w-full! [&>div>div]:w-full! [&>div>div>iframe]:w-full!">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => {
