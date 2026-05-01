@@ -101,7 +101,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
               key={member}
               type="button"
               onClick={() => handleMention(member)}
-              className="w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-primary/20 hover:text-white transition-colors"
+              className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/20 hover:text-white transition-colors"
             >
               @{member}
             </button>
@@ -179,7 +179,7 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           value={text}
           onChange={handleChange}
           placeholder={`Message #${channelName || 'general'}`}
-          className="flex-1 bg-transparent text-slate-100 placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none outline-none ring-0 focus:outline-none focus:ring-0 leading-relaxed font-sans w-full border-none shadow-none"
+          className="flex-1 bg-transparent text-foreground placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none outline-none ring-0 focus:outline-none focus:ring-0 leading-relaxed font-sans w-full border-none shadow-none"
           rows={1}
           onKeyDown={handleKeyDown}
         />

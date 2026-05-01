@@ -61,6 +61,7 @@
 [data-theme="light"] {
   --background: #ffffff !important;
   --foreground: #0f172a !important;
+  --foreground-muted: #64748b !important;
   --primary: #4f46e5 !important;
   --primary-rgb: 79, 70, 229 !important;
   --sidebar: #f8fafc !important;

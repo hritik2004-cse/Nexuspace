@@ -36,7 +36,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 30 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="relative flex flex-col bg-surface border border-white/10 rounded-[2.5rem] shadow-[0_0_100px_-20px_rgba(var(--primary-rgb),0.2)] w-full max-w-[440px] max-h-[90vh] overflow-hidden backdrop-blur-3xl"
+        className="relative flex flex-col bg-surface border border-border rounded-[2.5rem] shadow-[0_0_100px_-20px_rgba(var(--primary-rgb),0.2)] w-full max-w-[440px] max-h-[90vh] overflow-hidden backdrop-blur-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cover Photo Background */}
@@ -45,7 +45,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
            <button 
              onClick={onClose}
-             className="absolute top-4 right-4 z-20 text-white/50 lg:hover:text-white transition-colors p-2 rounded-full lg:hover:bg-white/10 backdrop-blur-md border border-white/10"
+             className="absolute top-4 right-4 z-20 text-foreground/50 lg:hover:text-foreground transition-colors p-2 rounded-full lg:hover:bg-foreground/10 backdrop-blur-md border border-white/10"
            >
              <FiX className="w-5 h-5" />
            </button>
@@ -76,7 +76,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
             <div className="absolute inset-0 rounded-[2.5rem] flex items-center justify-center opacity-0 lg:group-hover:opacity-100 transition-all duration-300 z-20 bg-black/40 backdrop-blur-[2px] gap-4">
               {!isReadOnly && (
                 <>
-                  <button onClick={() => document.getElementById('avatar-upload').click()} className="p-3 bg-white/20 hover:bg-white/40 rounded-2xl text-white transition-all transform hover:scale-110" title="Update Image">
+                  <button onClick={() => document.getElementById('avatar-upload').click()} className="p-3 bg-white/20 hover:bg-white/40 rounded-2xl text-foreground transition-all transform hover:scale-110" title="Update Image">
                     <FiUpload className="w-5 h-5" />
                   </button>
                   <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={(e) => {
@@ -90,7 +90,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                 </>
               )}
               {(profileData.avatar || profileData.profileImage) && (
-                <button onClick={() => setIsViewingImage(true)} className="p-3 bg-white/20 hover:bg-white/40 rounded-2xl text-white transition-all transform hover:scale-110" title="View Image">
+                <button onClick={() => setIsViewingImage(true)} className="p-3 bg-white/20 hover:bg-white/40 rounded-2xl text-foreground transition-all transform hover:scale-110" title="View Image">
                   <FiEye className="w-5 h-5" />
                 </button>
               )}
@@ -99,7 +99,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
 
           {/* User Info Header */}
           <div className="text-center w-full mb-8">
-            <h3 className="text-3xl font-black text-white tracking-tight leading-tight">{profileData.name}</h3>
+            <h3 className="text-3xl font-black text-foreground tracking-tight leading-tight">{profileData.name}</h3>
             <p className="text-primary font-bold tracking-wide mt-1 underline decoration-primary/30 underline-offset-4">@{profileData.username || profileData.name?.toLowerCase()}</p>
             <div className="flex justify-center mt-4">
               <span className="bg-primary text-primary-foreground text-[11px] font-black px-4 py-1.5 rounded-xl shadow-lg tracking-[0.1em] uppercase flex items-center gap-2 border border-white/10">
@@ -113,7 +113,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
               <div className="space-y-4">
                 <div className="bg-white/5 rounded-2xl p-5 border border-white/5">
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">About Me</label>
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                  <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
                     {profileData.bio || "Passionate about building great things with Nexuspace."}
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><FiMail /></div>
                       <div className="flex-1 overflow-hidden">
                         <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500">Email</label>
-                        <p className="text-slate-300 text-sm truncate">{profileData.email}</p>
+                        <p className="text-foreground text-sm truncate">{profileData.email}</p>
                       </div>
                     </div>
                   )}
@@ -134,7 +134,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                         <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
                           Phone {profileData.isPhoneVerified && <FiCheck className="text-emerald-400 w-3 h-3" />}
                         </label>
-                        <p className="text-slate-300 text-sm">{profileData.phoneNumber}</p>
+                        <p className="text-foreground text-sm">{profileData.phoneNumber}</p>
                       </div>
                     </div>
                   )}
@@ -150,7 +150,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                       type="text" 
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 text-white rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white/[0.08] shadow-inner"
+                      className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
                     />
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                       onChange={(e) => setCustomTitle(e.target.value)}
                       maxLength={50}
                       placeholder="e.g. Designer, Developer..."
-                      className="w-full bg-white/5 border border-white/10 text-white rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white/[0.08] shadow-inner"
+                      className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
                     />
                   </div>
                 </div>
@@ -177,7 +177,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Briefly describe yourself..."
                     rows={3}
-                    className="w-full bg-white/5 border border-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium resize-none placeholder:text-slate-600 lg:hover:bg-white/[0.08] shadow-inner"
+                    className="w-full bg-background/50 border border-border text-foreground rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium resize-none placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
                   />
                 </div>
 
@@ -196,7 +196,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                           if (e.target.value !== profileData.phoneNumber) setIsOtpSent(false);
                         }}
                         placeholder="+1 234..."
-                        className="w-full bg-white/5 border border-white/10 text-white rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white/[0.08] shadow-inner"
+                        className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
                       />
                     </div>
                     {!profileData.isPhoneVerified && phoneNumber && !isOtpSent && (
@@ -205,7 +205,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                           const success = await sendPhoneOtp(phoneNumber);
                           if (success) setIsOtpSent(true);
                         }}
-                        className="px-5 py-2 bg-primary text-white text-xs font-black rounded-2xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] uppercase tracking-widest"
+                        className="px-5 py-2 bg-primary text-primary-foreground text-xs font-black rounded-2xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] uppercase tracking-widest"
                       >
                         Verify
                       </button>
@@ -231,7 +231,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                               value={otp}
                               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                               placeholder="000000"
-                              className="w-full bg-black/40 border border-primary/30 text-white rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono tracking-[0.5em] text-center text-lg"
+                              className="w-full bg-background border border-primary/30 text-foreground rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono tracking-[0.5em] text-center text-lg"
                             />
                           </div>
                           <button 
@@ -274,9 +274,9 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                   >
                     Cancel
                   </button>
-                  <button 
+                   <button 
                     onClick={() => { updateProfile({ name, username, bio, customTitle }); onClose(); }}
-                    className="flex-[1.5] py-3 text-xs font-black uppercase tracking-widest bg-white text-black rounded-2xl lg:hover:bg-slate-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 active:scale-95"
+                    className="flex-[1.5] py-3 text-xs font-black uppercase tracking-widest bg-primary text-primary-foreground rounded-2xl lg:hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-2 active:scale-95"
                   >
                     <FiCheck className="w-4 h-4" /> Save
                   </button>

@@ -53,7 +53,7 @@ export default function Navbar({ onMenuClick }) {
       <div className="flex items-center gap-4">
         <button 
           aria-label="Toggle sidebar menu" 
-          className="md:hidden text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-surface border border-transparent hover:border-border" 
+          className="md:hidden text-slate-400 hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-surface border border-transparent hover:border-border" 
           onClick={onMenuClick}
         >
           <FiMenu className="w-5 h-5" />
@@ -62,7 +62,7 @@ export default function Navbar({ onMenuClick }) {
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
             <span className="text-primary font-black text-xl tracking-tighter shrink-0">#</span> 
-            <h2 className="font-black text-white uppercase tracking-widest text-sm truncate max-w-[120px] sm:max-w-[200px]">
+            <h2 className="font-black text-foreground uppercase tracking-widest text-sm truncate max-w-[120px] sm:max-w-[200px]">
               {currentChannel}
             </h2>
           </div>
@@ -88,7 +88,7 @@ export default function Navbar({ onMenuClick }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="w-full bg-surface/50 border border-border text-xs text-slate-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-600"
+            className="w-full bg-background/50 border border-border text-xs text-foreground rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-600"
           />
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function Navbar({ onMenuClick }) {
             </TooltipTrigger>
             <TooltipContent side="bottom">Help</TooltipContent>
           </Tooltip>
-          <DialogContent className="sm:max-w-[425px] bg-surface text-white border-border rounded-2xl shadow-2xl">
+          <DialogContent className="sm:max-w-[425px] bg-surface text-foreground border-border rounded-2xl shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-widest">Nexuspace Help</DialogTitle>
               <DialogDescription className="text-slate-500 font-medium">

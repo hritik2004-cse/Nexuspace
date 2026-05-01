@@ -403,7 +403,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
                   {(currentUserChannelRole === 'owner' || currentUserChannelRole === 'admin') && (
                     <button 
                       onClick={() => { setNewName(channelName); setIsRenameDialogOpen(true); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 lg:hover:bg-white/5 transition-all border border-transparent hover:border-border"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-foreground lg:hover:bg-white/5 transition-all border border-transparent hover:border-border"
                     >
                       <FiEdit3 className="w-4 h-4 text-primary" /> Rename Channel
                     </button>
@@ -437,7 +437,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-500" />
             </div>
-            <DialogTitle className="text-white font-black uppercase tracking-widest text-lg">
+            <DialogTitle className="text-foreground font-black uppercase tracking-widest text-lg">
               {confirmAction === 'delete' ? 'Delete Channel' : 'Leave Channel'}
             </DialogTitle>
             <DialogDescription className="text-slate-400 pt-2">
@@ -470,7 +470,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
           <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50"></div>
           
           <DialogHeader className="pt-6 px-6">
-            <DialogTitle className="text-white font-black uppercase tracking-[0.2em] text-xl flex items-center gap-3">
+            <DialogTitle className="text-foreground font-black uppercase tracking-[0.2em] text-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <FiEdit3 className="w-5 h-5 text-primary" />
               </div>
@@ -496,7 +496,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="new-channel-name"
-                    className="w-full bg-background/50 backdrop-blur-md border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-700"
+                    className="w-full bg-background/50 backdrop-blur-md border border-border rounded-2xl pl-12 pr-5 py-4 text-base font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-700"
                     autoFocus
                   />
                 </div>

@@ -116,7 +116,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           <div className={`flex items-baseline gap-2 mb-1 px-1 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} max-w-full`}>
             <span 
               onClick={() => setIsProfileOpen(true)}
-              className="text-sm font-semibold text-slate-200 flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate"
+              className="text-sm font-semibold text-foreground flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate"
             >
               {message.sender}
               {(isOwnMessage ? (user?.role === 'Admin' || user?.role === 'Owner') : (message.senderDetails?.role === 'Admin' || message.senderDetails?.role === 'Owner')) && (
@@ -148,7 +148,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
               className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap wrap-break-word min-w-0 ${
                 isOwnMessage 
                   ? 'bg-primary text-white rounded-tr-sm bg-linear-to-br from-primary to-primary/80 border border-white/10 shadow-[0_4px_15px_rgba(var(--primary-rgb),0.3)]' 
-                  : 'bg-white/5 text-slate-100 rounded-tl-sm border border-white/5'
+                  : 'bg-surface text-foreground rounded-tl-sm border border-border'
               }`}
             >
               {message.attachment && (
@@ -169,7 +169,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="w-full bg-black/20 text-white p-2 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-white/50"
+                    className="w-full bg-background/50 text-foreground p-2 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary/50"
                     rows={2}
                     autoFocus
                   />
@@ -185,7 +185,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                 <>
                   {message.content}
                   {message.isEdited && (
-                    <span className="text-[10px] text-white/60 ml-2 italic">(edited)</span>
+                    <span className="text-[10px] text-foreground/60 ml-2 italic">(edited)</span>
                   )}
                 </>
               )}
