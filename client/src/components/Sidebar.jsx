@@ -265,11 +265,11 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                 {activeWorkspace ? activeWorkspace.name.charAt(0).toUpperCase() : 'N'}
               </div>
             ) : (
-              <h1 className="font-black text-lg text-foreground font-sans tracking-tighter truncate max-w-[180px] animate-in fade-in slide-in-from-left-2 duration-500">
+              <h1 className="font-black text-lg text-white font-sans tracking-tighter truncate max-w-[180px] animate-in fade-in slide-in-from-left-2 duration-500">
                 {activeWorkspace ? activeWorkspace.name : 'Nexuspace'}
               </h1>
             )}
-            {!isCollapsed && <FiChevronDown className="text-slate-500 shrink-0 group-hover/header:text-primary transition-colors" />}
+            {!isCollapsed && <FiChevronDown className="text-white/40 shrink-0 group-hover/header:text-primary transition-colors" />}
           </div>
 
           {/* Dropdown Menu */}
@@ -294,7 +294,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     </DialogTrigger>
                     <DialogContent className="bg-surface/95 backdrop-blur-2xl border-border">
                       <DialogHeader>
-                        <DialogTitle className="text-foreground">Create Workspace</DialogTitle>
+                        <DialogTitle className="text-white">Create Workspace</DialogTitle>
                         <DialogDescription className="text-slate-400">Enter a name for your new workspace.</DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleCreateWorkspace} className="space-y-4">
@@ -303,7 +303,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                           placeholder="Workspace Name" 
                           value={newWorkspaceName}
                           onChange={(e) => setNewWorkspaceName(e.target.value)}
-                          className="w-full bg-background/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                          className="w-full bg-background/50 border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                         />
                         <DialogFooter>
                           <button type="submit" className="w-full bg-primary text-white font-black py-3 rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">Create Workspace</button>
@@ -353,7 +353,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
               </DialogTrigger>
               <DialogContent className="bg-surface/95 backdrop-blur-2xl border-border">
                 <DialogHeader>
-                  <DialogTitle className="text-foreground">Create Channel</DialogTitle>
+                  <DialogTitle className="text-white">Create Channel</DialogTitle>
                   <DialogDescription className="text-slate-400">Channels are where your team communicates.</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleCreateChannel} className="space-y-4">
@@ -366,7 +366,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                         placeholder="e.g. marketing" 
                         value={newChannelName}
                         onChange={(e) => setNewChannelName(e.target.value)}
-                        className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                       />
                     </div>
                   </div>
@@ -375,7 +375,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     <div className="space-y-4 pt-2">
                       <div className="flex items-center justify-between px-1">
                         <div className="space-y-0.5">
-                          <p className="text-sm font-bold text-foreground">Private Channel</p>
+                          <p className="text-sm font-bold text-white">Private Channel</p>
                           <p className="text-[10px] text-slate-500 font-medium">Only invited members can join</p>
                         </div>
                         <button 
@@ -398,7 +398,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                               maxLength={4}
                               value={channelPin}
                               onChange={(e) => setChannelPin(e.target.value)}
-                              className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                              className="w-full bg-background/50 border border-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                             />
                           </div>
                         </div>
@@ -432,10 +432,10 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
-                        className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 rounded-xl w-full'} text-sm font-bold transition-all relative ${currentChannel === channelObj.name ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                        className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 rounded-xl w-full'} text-sm font-bold transition-all relative ${currentChannel === channelObj.name ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
                       >
                         <FiHash className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} ${currentChannel === channelObj.name ? 'text-white' : 'text-slate-600 group-hover/channel:text-primary'} transition-colors`} />
-                        {!isCollapsed && <span className="truncate">{channelObj.name}</span>}
+                        {!isCollapsed && <span className="truncate text-white/90">{channelObj.name}</span>}
                         
                         {/* Unread Badge */}
                         {channelObj.unreadCount > 0 && (
@@ -477,7 +477,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-black text-foreground truncate leading-tight">{user?.name || 'User'}</p>
+                <p className="text-[13px] font-black text-white truncate leading-tight">{user?.name || 'User'}</p>
                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter truncate">@{user?.username || 'user'}</p>
               </div>
             )}
