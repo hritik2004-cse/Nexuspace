@@ -104,64 +104,62 @@ export default function Home() {
           
           {/* Hero Section */}
           <Section className="min-h-[60vh] md:min-h-[75vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-28 pb-16 relative z-10">
-            <ParallaxSection speed={-0.5} className="w-full">
-              <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
-                <m.div 
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold mb-4 uppercase tracking-widest"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                  </span>
-                  v2.0 is now live
-                </m.div>
-
-                <m.h1 
-                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-5xl"
-                >
-                  The Operating System for <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 animate-gradient-x">Modern Teams.</span>
-                </m.h1>
-
-                <m.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-8 leading-relaxed"
-                >
-                  Unify your communication, tasks, and documentation in a single, lightning-fast workspace.
-                </m.p>
-
-                <m.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-md md:max-w-none mx-auto"
-                >
-                  <Link href="/register" className="w-full sm:w-auto">
-                    <m.button 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-full px-8 py-3.5 md:py-4 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl md:rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
-                    >
-                      Get Started Now <ArrowRight className="w-5 h-5" />
-                    </m.button>
-                  </Link>
-                  <Link href="/demo" className="w-full sm:w-auto">
-                    <m.button 
-                      whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.1)" }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-full px-8 py-3.5 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl text-white font-bold transition-colors"
-                    >
-                      Book a Demo
-                    </m.button>
-                  </Link>
-                </m.div>
+            <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
+              <m.div 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold mb-4 uppercase tracking-widest"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                v2.0 is now live
               </m.div>
-            </ParallaxSection>
+
+              <m.h1 
+                initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-5xl"
+              >
+                The Operating System for <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 animate-gradient-x">Modern Teams.</span>
+              </m.h1>
+
+              <m.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-8 leading-relaxed"
+              >
+                Unify your communication, tasks, and documentation in a single, lightning-fast workspace.
+              </m.p>
+
+              <m.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-md md:max-w-none mx-auto"
+              >
+                <Link href="/register" className="w-full sm:w-auto">
+                  <m.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full px-8 py-3.5 md:py-4 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl md:rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
+                  >
+                    Get Started Now <ArrowRight className="w-5 h-5" />
+                  </m.button>
+                </Link>
+                <Link href="/demo" className="w-full sm:w-auto">
+                  <m.button 
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.1)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full px-8 py-3.5 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl text-white font-bold transition-colors"
+                  >
+                    Book a Demo
+                  </m.button>
+                </Link>
+              </m.div>
+            </m.div>
           </Section>
 
           <TrustMetrics />
