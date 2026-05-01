@@ -17,9 +17,9 @@ export default function AppearanceSection() {
       description="Customize the interface and theme of your workspace."
     >
       <div className="space-y-8">
-        <div className="flex items-center justify-between bg-white/5 p-6 rounded-3xl border border-white/10">
+        <div className="flex items-center justify-between bg-surface p-6 rounded-3xl border border-border">
           <div className="space-y-1">
-            <p className="text-sm font-black text-white uppercase tracking-tight">Active Theme</p>
+            <p className="text-sm font-black text-foreground uppercase tracking-tight">Active Theme</p>
             <p className="text-xs text-slate-500 font-medium">Auto-saves instantly as you select.</p>
           </div>
           {isSaving && (
@@ -42,7 +42,7 @@ export default function AppearanceSection() {
                   relative group p-6 rounded-[2rem] border-2 transition-all text-left overflow-hidden
                   ${isSelected 
                     ? 'border-primary bg-primary/5 scale-[1.02] shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.2)]' 
-                    : 'border-white/5 bg-slate-900/20 hover:border-white/10 hover:bg-slate-900/40 hover:-translate-y-1'
+                    : 'border-border bg-surface hover:border-primary/20 hover:bg-surface/80 hover:-translate-y-1'
                   }
                 `}
               >
@@ -52,7 +52,7 @@ export default function AppearanceSection() {
                 )}
 
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <span className="text-xs font-black text-white uppercase tracking-[0.2em]">{theme.name}</span>
+                  <span className="text-xs font-black text-foreground uppercase tracking-[0.2em]">{theme.name}</span>
                   {isSelected && <FiCheck className="text-primary text-xl" />}
                 </div>
                 

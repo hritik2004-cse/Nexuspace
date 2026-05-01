@@ -52,6 +52,16 @@ export const themes = {
     sidebar: '#0f061a',
     accent: 'purple-500',
     id: 'aura'
+  },
+  light: {
+    name: 'Light',
+    primary: 'indigo',
+    primaryHex: '#4f46e5',
+    bg: '#ffffff',
+    sidebar: '#f8fafc',
+    surface: '#f1f5f9',
+    accent: 'indigo-600',
+    id: 'light'
   }
 };
 

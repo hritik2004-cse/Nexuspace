@@ -13,7 +13,7 @@ export default function SectionWrapper({ title, description, children, id }) {
       className="space-y-6"
     >
       <div className="space-y-1">
-        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight uppercase">{title}</h2>
         {description && <p className="text-slate-400 text-sm font-medium">{description}</p>}
       </div>
       

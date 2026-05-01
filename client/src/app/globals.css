@@ -58,6 +58,17 @@
   --accent-glow: rgba(168, 85, 247, 0.15) !important;
 }
 
+[data-theme="light"] {
+  --background: #ffffff !important;
+  --foreground: #0f172a !important;
+  --primary: #4f46e5 !important;
+  --primary-rgb: 79, 70, 229 !important;
+  --sidebar: #f8fafc !important;
+  --surface: #f1f5f9 !important;
+  --border: rgba(0, 0, 0, 0.08) !important;
+  --accent-glow: rgba(79, 70, 229, 0.05) !important;
+}
+
 /* Aggressive Reset */
 html, body {
   background-color: var(--background);

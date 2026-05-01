@@ -109,12 +109,14 @@ export default function RootLayout({ children }) {
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('theme');
+                  const savedTheme = localStorage.getItem('theme');
                   const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const defaultTheme = theme || (supportDarkMode ? 'dark' : 'light');
-                  document.documentElement.dataset.theme = defaultTheme;
-                  document.documentElement.style.colorScheme = defaultTheme;
-                  if (defaultTheme === 'dark') {
+                  const theme = savedTheme || (supportDarkMode ? 'midnight' : 'light');
+                  
+                  document.documentElement.dataset.theme = theme;
+                  document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+                  
+                  if (theme !== 'light') {
                     document.documentElement.classList.add('dark');
                   } else {
                     document.documentElement.classList.remove('dark');
