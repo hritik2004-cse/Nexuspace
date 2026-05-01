@@ -39,7 +39,7 @@ export default function AppearanceSection() {
                 key={key}
                 onClick={() => updateField('theme', key)}
                 className={`
-                  relative group p-6 rounded-[2rem] border-2 transition-all text-left overflow-hidden
+                  relative group p-6 rounded-4xl border-2 transition-all text-left overflow-hidden
                   ${isSelected 
                     ? 'border-primary bg-primary/5 scale-[1.02] shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.2)]' 
                     : 'border-border bg-surface hover:border-primary/20 hover:bg-surface/80 hover:-translate-y-1'
