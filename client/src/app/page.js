@@ -103,12 +103,12 @@ export default function Home() {
           <HeroScene />
           
           {/* Hero Section */}
-          <Section className="min-h-[70vh] md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-32 pb-12 relative z-10">
+          <Section className="min-h-[60vh] md:min-h-[80vh] flex flex-col items-center justify-start md:justify-center pt-12 md:pt-24 pb-12 relative z-10">
             <ParallaxSection speed={-0.5} className="w-full">
               <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
                 <m.div 
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold mb-8 uppercase tracking-widest"
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold mb-4 uppercase tracking-widest"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -121,7 +121,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-[0.9] max-w-5xl"
+                  className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-5xl"
                 >
                   The Operating System for <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 animate-gradient-x">Modern Teams.</span>
                 </m.h1>
@@ -130,7 +130,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-12 leading-relaxed"
+                  className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-8 leading-relaxed"
                 >
                   Unify your communication, tasks, and documentation in a single, lightning-fast workspace.
                 </m.p>
@@ -169,7 +169,7 @@ export default function Home() {
           <StickyScroll />
 
           {/* Featured Dashboard Preview */}
-          <Section padding="py-12 md:py-32 overflow-visible">
+          <Section padding="py-8 md:py-16 overflow-visible">
              <ParallaxSection speed={typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 0.3}>
                 <m.div 
                   style={{ 
@@ -195,7 +195,7 @@ export default function Home() {
           <LivePreview />
 
           {/* Middle CTA */}
-          <Section padding="py-16 md:py-48" className="text-center relative overflow-hidden bg-[#030014]">
+          <Section padding="py-12 md:py-24" className="text-center relative overflow-hidden bg-[#030014]">
             <BackgroundRings />
             
             <m.div 
@@ -228,16 +228,16 @@ export default function Home() {
             </m.div>
           </Section>
 
-          <Section padding="py-12 md:py-16">
+          <Section padding="py-8 md:py-12">
             <HowItWorks />
           </Section>
 
-          <Section padding="py-12 md:py-16">
+          <Section padding="py-8 md:py-12">
             <ComparisonTable />
           </Section>
 
           {/* Infrastructure Grid */}
-          <Section id="infrastructure" stagger background="bg-slate-950/20" padding="py-20 md:py-32">
+          <Section id="infrastructure" stagger background="bg-slate-950/20" padding="py-12 md:py-20">
             <div className="text-center mb-16 px-4">
               <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">Unrivaled Infrastructure.</h2>
               <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">Nexuspace is built on edge-rendered WebSockets and highly available NoSQL layers for sub-millisecond sync.</p>
@@ -285,7 +285,7 @@ export default function Home() {
           </Section>
 
           {/* Final CTA Section */}
-          <Section padding="py-16 md:py-48" className="text-center relative">
+          <Section padding="py-12 md:py-24" className="text-center relative">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.08),transparent_70%)] pointer-events-none" />
             <div className="relative inline-block mb-10">
                <h2 className="text-4xl md:text-8xl font-black text-white leading-none tracking-tighter px-4">

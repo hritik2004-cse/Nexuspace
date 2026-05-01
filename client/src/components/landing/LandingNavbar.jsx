@@ -28,8 +28,8 @@ export default function LandingNavbar({ scrolled }) {
     <>
       <nav className={`fixed top-0 left-0 w-full z-100 transition-all duration-300 border-b ${
         scrolled 
-          ? 'bg-slate-950/80 backdrop-blur-xl border-white/10 py-4 shadow-2xl' 
-          : 'bg-transparent border-transparent py-6'
+          ? 'bg-slate-950/80 backdrop-blur-xl border-white/10 py-3 shadow-2xl' 
+          : 'bg-transparent border-transparent py-4'
       }`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between">

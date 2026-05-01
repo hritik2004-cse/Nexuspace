@@ -9,7 +9,7 @@ export default function Section({
   ariaLabel, 
   stagger = false,
   background = "transparent",
-  padding = "py-12 md:py-20"
+  padding = "py-8 md:py-12"
 }) {
   const containerVariants = {
     hidden: { opacity: 0 },
