@@ -7,86 +7,37 @@ const workspaceService = require('./workspaceService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const generateTokens = (user, sessionId) => {
-  const payload = {
-    id: user._id,
-    sessionVersion: user.sessionVersion || 0,
-    sessionId,
-  };
+/**
+ * Helpers
+ */
 
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '15m',
-  });
-
-  const refreshToken = crypto.randomBytes(40).toString('hex');
-  return { accessToken, refreshToken };
-};
-
-const storeSession = async (userId, sessionId, refreshToken, ip, userAgent) => {
-  const refreshTokenHash = Session.hashToken(refreshToken);
-  const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); // 15 days
-
-  await Session.findOneAndUpdate(
-    { sessionId },
-    {
-      userId,
-      sessionId,
-      refreshTokenHash,
-      ip,
-      userAgent,
-      expiresAt,
-    },
-    { upsert: true, new: true }
-  );
-};
-
-const revokeSession = async (token) => {
-  // We don't strictly know the sessionId from just the token unless we look it up by hash.
-  // Actually, wait, we pass the token from the cookie.
-  // We can just iterate sessions and verify? No, that's O(N).
-  // This is why usually the cookie is sessionId:token. But we have a grace period logic.
-  // Wait, if it's just a logout, we can just delete from cookies and rely on TTL?
-  // Let's implement globalLogout instead.
-};
-
-const globalLogout = async (userId) => {
-  await User.findByIdAndUpdate(userId, { $inc: { sessionVersion: 1 } });
-  await Session.deleteMany({ userId });
-};
-
-// Grace window cache: sessionId -> { newRefreshTokenHash, expires }
-const refreshGraceCache = new Map();
-
-const refreshTokenService = async (oldRefreshToken, ip, userAgent) => {
-  // To verify oldRefreshToken, we don't have sessionId.
-  // But we have the token. To find it, we need an index on the token? But we hash it!
-  throw new Error("Architecture flaw in previous block: we must know the sessionId to lookup the hash.");
-};
-
-// Architecture fix: refreshToken should be `${sessionId}.${randomToken}`
 const extractSessionId = (token) => {
   if (!token || !token.includes('.')) return null;
-  return token.split('.')[0];
+  const parts = token.split('.');
+  if (parts.length !== 3) return null; // sessionId.jti.random
+  return parts[0];
 };
 
 const generateTokensWithSession = (user, sessionId) => {
+  const jti = crypto.randomBytes(16).toString('hex');
   const payload = {
     id: user._id,
     sessionVersion: user.sessionVersion || 0,
     sessionId,
+    jti
   };
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '15m',
   });
 
-  const randomStr = crypto.randomBytes(40).toString('hex');
-  const refreshToken = `${sessionId}.${randomStr}`;
-  return { accessToken, refreshToken, randomStr };
+  const randomStr = crypto.randomBytes(32).toString('hex');
+  const refreshToken = `${sessionId}.${jti}.${randomStr}`;
+  return { accessToken, refreshToken, jti, randomStr };
 };
 
-const storeSessionFixed = async (userId, sessionId, randomStr, ip, userAgent) => {
-  const refreshTokenHash = Session.hashToken(randomStr);
+const storeSessionFixed = async (userId, sessionId, jti, randomStr, ip, userAgent) => {
+  const currentTokenHash = Session.hashToken(randomStr);
   const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); // 15 days
 
   await Session.findOneAndUpdate(
@@ -94,64 +45,19 @@ const storeSessionFixed = async (userId, sessionId, randomStr, ip, userAgent) =>
     {
       userId,
       sessionId,
-      refreshTokenHash,
+      jti,
+      currentTokenHash,
       ip,
       userAgent,
       expiresAt,
+      revokedAt: null
     },
     { upsert: true, new: true }
   );
 };
 
-const refreshTokenServiceFixed = async (token, ip, userAgent) => {
-  const sessionId = extractSessionId(token);
-  if (!sessionId) throw new Error("Invalid token format");
-
-  const randomStr = token.split('.')[1];
-  const session = await Session.findOne({ sessionId });
-
-  if (!session) {
-    // Session doesn't exist. Maybe revoked. Check grace window?
-    if (refreshGraceCache.has(sessionId)) {
-      const graceData = refreshGraceCache.get(sessionId);
-      if (Date.now() < graceData.expires && Session.verifyToken(randomStr, graceData.oldHash)) {
-         // Race condition allowed! We return the new token they already got? No, we shouldn't return it again without regenerating, but returning a cached valid token is safer for network drops.
-         // Actually, if they retry, we can just throw "Please wait".
-      }
-    }
-    // Token theft! Revoke all.
-    throw new Error("Session revoked or invalid");
-  }
-
-  const isValid = await Session.verifyToken(randomStr, session.refreshTokenHash);
-
-  if (!isValid) {
-    // Token theft! The session exists but the token is wrong. Revoke!
-    await Session.deleteMany({ userId: session.userId });
-    throw new Error("Token reuse detected. All sessions revoked.");
-  }
-
-  // Valid! Rotate.
-  const user = await User.findById(session.userId);
-  if (!user) throw new Error("User not found");
-
-  const tokens = generateTokensWithSession(user, sessionId);
-  
-  // Store old hash in grace cache for 10s
-  refreshGraceCache.set(sessionId, { oldHash: session.refreshTokenHash, expires: Date.now() + 10000 });
-  setTimeout(() => refreshGraceCache.delete(sessionId), 10000);
-
-  await storeSessionFixed(user._id, sessionId, tokens.randomStr, ip, userAgent);
-
-  return { user, tokens: { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }, sessionId };
-};
-
-const revokeSessionFixed = async (token) => {
-  const sessionId = extractSessionId(token);
-  if (sessionId) {
-    await Session.findOneAndDelete({ sessionId });
-  }
-};
+// Grace window cache: key(sessionId + fingerprint) -> { oldJti, lastTokens, expires }
+const refreshGraceCache = new Map();
 
 const generateUniqueUsername = async (baseName) => {
   let username = baseName.toLowerCase().replace(/\s+/g, '_');
@@ -166,11 +72,91 @@ const generateUniqueUsername = async (baseName) => {
   return username;
 };
 
+/**
+ * Services
+ */
+
+const refreshTokenServiceFixed = async (token, ip, userAgent) => {
+  const sessionId = extractSessionId(token);
+  if (!sessionId) throw new Error("Invalid token format");
+
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error("Invalid token structure");
+  const [_, jti, randomStr] = parts;
+  
+  const fingerprint = crypto.createHash('sha256').update(`${ip}${userAgent}`).digest('hex');
+  const graceKey = `${sessionId}:${fingerprint}`;
+
+  const session = await Session.findOne({ sessionId, expiresAt: { $gt: new Date() } });
+
+  // 1. Check if session is explicitly revoked
+  if (session && session.revokedAt) {
+    throw new Error("Session revoked due to security breach");
+  }
+
+  if (!session) {
+    // 2. Check for race condition in grace window
+    const graceData = refreshGraceCache.get(graceKey);
+    if (graceData && Date.now() < graceData.expires && graceData.oldJti === jti) {
+      const user = await User.findById(graceData.userId);
+      if (!user) throw new Error("User not found");
+      return { user, tokens: graceData.lastTokens, sessionId };
+    }
+    throw new Error("Session expired or invalid");
+  }
+
+  // 3. Token Reuse Detection
+  const isCurrentJti = session.jti === jti;
+  const isValidHash = await Session.verifyToken(randomStr, session.currentTokenHash);
+
+  if (!isCurrentJti || !isValidHash) {
+    // SECURITY BREACH: Token reuse detected. 
+    session.revokedAt = new Date();
+    await session.save();
+    console.error(`[AUTH BREACH] Refresh token reuse detected. Session: ${sessionId}, IP: ${ip}`);
+    throw new Error("Security alert: Session terminated due to suspicious activity");
+  }
+
+  // 4. Valid! Rotate.
+  const user = await User.findById(session.userId);
+  if (!user || user.sessionVersion > (jwt.decode(token)?.sessionVersion || 0)) {
+     throw new Error("Session version mismatch. Please login again.");
+  }
+
+  const tokens = generateTokensWithSession(user, sessionId);
+  const finalTokens = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+
+  // Store in grace cache for 10s
+  refreshGraceCache.set(graceKey, { 
+    oldJti: jti, 
+    userId: user._id,
+    lastTokens: finalTokens,
+    expires: Date.now() + 10000 
+  });
+  
+  setTimeout(() => refreshGraceCache.delete(graceKey), 12000);
+
+  await storeSessionFixed(user._id, sessionId, tokens.jti, tokens.randomStr, ip, userAgent);
+
+  return { user, tokens: finalTokens, sessionId };
+};
+
+const revokeSessionFixed = async (token) => {
+  const sessionId = extractSessionId(token);
+  if (sessionId) {
+    await Session.findOneAndDelete({ sessionId });
+  }
+};
+
+const globalLogout = async (userId) => {
+  await User.findByIdAndUpdate(userId, { $inc: { sessionVersion: 1 } });
+  await Session.deleteMany({ userId });
+};
+
 const googleLoginService = async (credential, sessionId, ip, userAgent) => {
   let sub, email, name, picture;
 
   try {
-    // Try verifying as ID token first (for legacy compatibility)
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -181,7 +167,6 @@ const googleLoginService = async (credential, sessionId, ip, userAgent) => {
     name = payload.name;
     picture = payload.picture;
   } catch (err) {
-    // If it fails, assume it's an access token from useGoogleLogin implicit flow
     const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${credential}` }
     });
@@ -214,7 +199,7 @@ const googleLoginService = async (credential, sessionId, ip, userAgent) => {
   }
 
   const tokens = generateTokensWithSession(user, sessionId);
-  await storeSessionFixed(user._id, sessionId, tokens.randomStr, ip, userAgent);
+  await storeSessionFixed(user._id, sessionId, tokens.jti, tokens.randomStr, ip, userAgent);
 
   return { user, tokens: { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken } };
 };
@@ -235,69 +220,63 @@ const registerLocalService = async ({ name, email, password, sessionId, ip, user
   await workspaceService.createWorkspaceService(`${newUser.name}'s Workspace`, newUser._id);
 
   const tokens = generateTokensWithSession(newUser, sessionId);
-  await storeSessionFixed(newUser._id, sessionId, tokens.randomStr, ip, userAgent);
+  await storeSessionFixed(newUser._id, sessionId, tokens.jti, tokens.randomStr, ip, userAgent);
 
   return { user: newUser, tokens: { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken } };
 };
 
 const loginLocalService = async ({ email, password, sessionId, ip, userAgent }) => {
   const isAdminCredentials = email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase() && password === process.env.ADMIN_PASSWORD;
-
   
   let user = await User.findOne({ email });
 
-    if (isAdminCredentials) {
-      if (!user) {
-        const username = await generateUniqueUsername('Global Admin');
-        user = await User.create({
-          name: 'Global Admin',
-          email,
-          password, // This will be hashed by pre-save hook
-          username,
-          role: 'Admin',
-          provider: 'local',
-        });
-        
-        const Workspace = require('../models/Workspace');
-        const workspace = await Workspace.create({
-          name: `Admin Workspace`,
-          owner: user._id,
-          members: [user._id]
-        });
-
-        // Add workspace ID to user channels or logic? 
-        // Actually, let's create the #general channel for this workspace
-        const Channel = require('../models/Channel');
-        const generalChannel = await Channel.create({
-          name: 'general',
-          workspaceId: workspace._id,
-          creator: user._id,
-          owner: user._id,
-          members: [{ user: user._id, role: 'owner' }]
-        });
-        
-        user.channels.push(generalChannel._id);
-        await user.save();
-      } else if (user.role !== 'Admin') {
-        user.role = 'Admin';
-        await user.save();
-      }
+  if (isAdminCredentials) {
+    if (!user) {
+      const username = await generateUniqueUsername('Global Admin');
+      user = await User.create({
+        name: 'Global Admin',
+        email,
+        password,
+        username,
+        role: 'Admin',
+        provider: 'local',
+      });
       
-      // For this specific admin, we require 2FA
-      return { user, require2FA: true };
-    }
+      const Workspace = require('../models/Workspace');
+      const workspace = await Workspace.create({
+        name: `Admin Workspace`,
+        owner: user._id,
+        members: [user._id]
+      });
 
+      const Channel = require('../models/Channel');
+      const generalChannel = await Channel.create({
+        name: 'general',
+        workspaceId: workspace._id,
+        creator: user._id,
+        owner: user._id,
+        members: [{ user: user._id, role: 'owner' }]
+      });
+      
+      user.channels.push(generalChannel._id);
+      await user.save();
+    } else if (user.role !== 'Admin') {
+      user.role = 'Admin';
+      await user.save();
+    }
+    
+    return { user, require2FA: true };
+  }
 
   if (!user || !(await user.matchPassword(password))) {
     throw new Error('Invalid email or password');
   }
 
   const tokens = generateTokensWithSession(user, sessionId);
-  await storeSessionFixed(user._id, sessionId, tokens.randomStr, ip, userAgent);
+  await storeSessionFixed(user._id, sessionId, tokens.jti, tokens.randomStr, ip, userAgent);
 
   return { user, tokens: { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken } };
 };
-
 
 module.exports = {
   googleLoginService,

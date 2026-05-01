@@ -102,8 +102,30 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
-      <body className={`${poppins.variable} font-sans antialiased bg-[#030014] text-white`} id="main-content">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const defaultTheme = theme || (supportDarkMode ? 'dark' : 'light');
+                  document.documentElement.dataset.theme = defaultTheme;
+                  document.documentElement.style.colorScheme = defaultTheme;
+                  if (defaultTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${poppins.variable} font-sans antialiased bg-background text-foreground transition-colors duration-150`} id="main-content">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-indigo-600 focus:text-white">
           Skip to main content
         </a>

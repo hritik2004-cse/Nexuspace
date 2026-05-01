@@ -11,8 +11,13 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true
   },
-  refreshTokenHash: {
+  jti: {
+    type: String, // current token ID
+    required: true
+  },
+  currentTokenHash: {
     type: String,
     required: true,
   },
@@ -21,6 +26,10 @@ const sessionSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
+    index: true
+  },
+  revokedAt: {
+    type: Date
   },
   isAdmin2FAVerified: {
     type: Boolean,

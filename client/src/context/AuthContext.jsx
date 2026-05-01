@@ -158,7 +158,13 @@ export function AuthProvider({ children }) {
     try {
       await api.post('/auth/logout');
     } catch(err) {
+      console.error('Logout API failure:', err);
     }
+    
+    // Emit monotonic logout event for multi-tab sync
+    const ts = Date.now();
+    localStorage.setItem('logout_event', JSON.stringify({ ts }));
+    localStorage.setItem('last_logout_ts', ts);
     
     setUser(null);
     localStorage.removeItem("nexuspace_user");

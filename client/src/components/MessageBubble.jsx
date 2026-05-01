@@ -72,6 +72,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       className={`flex w-full mb-6 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+      style={{ touchAction: 'pan-y' }}
     >
       <div className={`flex max-w-[85%] md:max-w-[75%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} gap-3 group relative`}>
         {/* Avatar */}
@@ -144,7 +145,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
 
             {/* Bubble */}
             <div 
-              className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap break-words min-w-0 ${
+              className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap wrap-break-word min-w-0 ${
                 isOwnMessage 
                   ? 'bg-primary text-white rounded-tr-sm bg-linear-to-br from-primary to-primary/80 border border-white/10 shadow-[0_4px_15px_rgba(var(--primary-rgb),0.3)]' 
                   : 'bg-white/5 text-slate-100 rounded-tl-sm border border-white/5'

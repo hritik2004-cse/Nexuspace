@@ -52,15 +52,18 @@ const requestLogger = (req, res, next) => {
   res.on('finish', () => {
     // Only log successful requests here (errors logged in errorHandler)
     if (res.statusCode >= 200 && res.statusCode < 400) {
-      console.log('[INFO]', {
-        requestId: req.requestId || 'unknown',
-        userId: req.user ? req.user._id : 'unauthenticated',
-        method: req.method,
-        route: req.originalUrl,
-        statusCode: res.statusCode,
-        latencyMs: Date.now() - req.startTime,
-        outcome: 'success'
-      });
+      // God Mode: Sample 5% of success logs to reduce noise/cost
+      if (Math.random() < 0.05) {
+        console.log('[INFO]', {
+          requestId: req.requestId || 'unknown',
+          userId: req.user ? req.user._id : 'unauthenticated',
+          method: req.method,
+          route: req.originalUrl,
+          statusCode: res.statusCode,
+          latencyMs: Date.now() - req.startTime,
+          outcome: 'success'
+        });
+      }
     }
   });
   

@@ -29,6 +29,8 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [resendTarget, setResendTarget] = useState(0);
+  const [lastResync, setLastResync] = useState(0);
 
   // 2FA State
   const [is2FAOpen, setIs2FAOpen] = useState(false);
@@ -43,13 +45,33 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Resend Timer Logic with Visibility Re-sync
   useEffect(() => {
     let interval;
     if (resendTimer > 0) {
-      interval = setInterval(() => setResendTimer(t => t - 1), 1000);
+      interval = setInterval(() => {
+        setResendTimer(prev => Math.max(0, prev - 1));
+      }, 1000);
     }
-    return () => clearInterval(interval);
-  }, [resendTimer]);
+ 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && resendTarget > 0) {
+        const now = Date.now();
+        // Guard: throttle re-sync to avoid excessive calculations
+        if (now - lastResync > 30000) { 
+          const remaining = Math.max(0, Math.ceil((resendTarget - now) / 1000));
+          setResendTimer(remaining);
+          setLastResync(now);
+        }
+      }
+    };
+ 
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [resendTimer, resendTarget, lastResync]);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
@@ -121,7 +143,9 @@ export default function LoginPage() {
     try {
       await api.post("/auth/forgot-password", { email: forgotEmail });
       toast.success("If that email is in our system, we've sent you a reset code!");
-      setResendTimer(60);
+      const duration = 60;
+      setResendTimer(duration);
+      setResendTarget(Date.now() + duration * 1000);
       setForgotStep(2);
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
