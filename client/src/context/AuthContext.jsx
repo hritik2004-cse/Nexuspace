@@ -96,12 +96,14 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = async (credentialResponse) => {
     try {
-      if (!credentialResponse || !credentialResponse.credential) {
+      const token = credentialResponse?.credential || credentialResponse?.access_token;
+      
+      if (!token) {
         throw new Error("No Google token received");
       }
 
       const res = await api.post(API_ENDPOINTS.auth.google, {
-        credential: credentialResponse.credential,
+        credential: token,
       });
 
       const data = res.data;

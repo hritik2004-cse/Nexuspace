@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/services/api";
 import { toast } from "react-toastify";
-import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
@@ -294,22 +294,14 @@ export default function LoginPage() {
           </div>
 
           <div className="flex justify-center">
-            <div className="w-full">
-              {/* Using official GoogleLogin component to resolve COOP/POPUP issues in production */}
-              <div className="w-full flex justify-center [&>div]:w-full! [&>div>div]:w-full! [&>div>div>iframe]:w-full!">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => {
-                    setError("Google Login failed. Please try again.");
-                    toast.error("Google Login failed.");
-                  }}
-                  theme="filled_black"
-                  shape="pill"
-                  width="100%"
-                  useOneTap
-                />
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => loginWithGoogleFlow()}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white/5 border border-white/10 rounded-lg text-white font-bold hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group/google shadow-lg active:scale-[0.98]"
+            >
+              <FcGoogle className="w-5 h-5 group-hover/google:scale-110 transition-transform" />
+              <span>Continue with Google</span>
+            </button>
           </div>
 
           <p className="text-center text-xs text-slate-500 mt-3 leading-relaxed">
