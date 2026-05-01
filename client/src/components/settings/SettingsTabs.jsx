@@ -1,6 +1,7 @@
 "use client";
 
 import { useSettings, SETTINGS_CONFIG } from '@/context/SettingsContext';
+import { useTheme } from '@/context/ThemeContext';
 import { FiUser, FiLock, FiLayout, FiLogOut } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
@@ -12,6 +13,8 @@ const TAB_ICONS = {
 
 export default function SettingsTabs() {
   const { currentTab, setTab, dirtyFields, user } = useSettings();
+  const { currentTheme } = useTheme();
+  const isLight = currentTheme === 'light';
 
   const handleKeyDown = (e, tabId, index) => {
     const tabs = Object.keys(SETTINGS_CONFIG);
@@ -30,7 +33,7 @@ export default function SettingsTabs() {
     <div 
       role="tablist" 
       aria-label="Settings Sections"
-      className="w-full md:w-64 flex md:flex-col overflow-x-auto md:overflow-visible no-scrollbar gap-2 bg-background md:bg-[#F1F5F9] backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border shrink-0 sticky top-0 md:relative z-20"
+      className={`w-full md:w-64 flex md:flex-col overflow-x-auto md:overflow-visible no-scrollbar gap-2 ${isLight ? 'bg-[#F1F5F9]' : 'bg-sidebar/30'} backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border shrink-0 sticky top-0 md:relative z-20`}
     >
       {Object.entries(SETTINGS_CONFIG).map(([id, config], index) => {
         const isActive = currentTab === id;
@@ -50,8 +53,8 @@ export default function SettingsTabs() {
             className={`
               relative flex-none md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-3 px-5 md:px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-sm font-black transition-all whitespace-nowrap
               ${isActive 
-                ? 'bg-white text-primary shadow-sm border border-border' 
-                : 'text-slate-500 hover:bg-white/50 hover:text-primary'
+                ? (isLight ? 'bg-white text-primary shadow-sm border border-border' : 'bg-primary text-white shadow-lg')
+                : (isLight ? 'text-slate-500 hover:bg-white/50 hover:text-primary' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300')
               }
               group/tab
             `}

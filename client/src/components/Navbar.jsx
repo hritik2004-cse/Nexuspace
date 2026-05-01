@@ -4,6 +4,7 @@ import { FiSearch, FiHelpCircle, FiInbox, FiUserPlus, FiCheck, FiMenu, FiUsers }
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { useTheme } from '@/context/ThemeContext';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,8 @@ export default function Navbar({ onMenuClick }) {
   const searchParams = useSearchParams();
   const currentChannel = searchParams.get('channel') || 'general';
   const { activeWorkspace, onlineCount, isMemberListOpen, setIsMemberListOpen } = useWorkspace();
+  const { currentTheme } = useTheme();
+  const isLight = currentTheme === 'light';
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -88,7 +91,7 @@ export default function Navbar({ onMenuClick }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="w-full bg-[#F8FAFC] border border-border text-xs text-foreground rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-500"
+            className={`w-full ${isLight ? 'bg-[#F8FAFC] border-border' : 'bg-background/50 border-border'} border text-xs text-foreground rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-500`}
           />
         </div>
       </div>
