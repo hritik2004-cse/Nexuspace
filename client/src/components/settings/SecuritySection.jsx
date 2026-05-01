@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSettings } from '@/context/SettingsContext';
 import SectionWrapper from './SectionWrapper';
 import StickySaveBar from './StickySaveBar';
-import { FiLock, FiShield, FiAlertTriangle } from 'react-icons/fi';
+import { FiLock, FiShield, FiAlertTriangle, FiX } from 'react-icons/fi';
 
 export default function SecuritySection() {
   const { saveManualSection } = useSettings();
@@ -14,6 +14,7 @@ export default function SecuritySection() {
     confirm: ''
   });
   const [errors, setErrors] = useState({});
+  const [showTip, setShowTip] = useState(true);
 
   const validate = () => {
     const newErrors = {};
@@ -47,15 +48,24 @@ export default function SecuritySection() {
         description="Update your password and manage your account security."
       >
         <div className="space-y-8 max-w-xl">
-          <div className="bg-[#FEF3C7] border border-[#FDE68A] p-5 rounded-2xl flex gap-4">
-            <FiAlertTriangle className="text-[#92400E] text-xl shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="text-sm font-black text-[#92400E] uppercase tracking-tight">Security Tip</p>
-              <p className="text-xs text-[#92400E]/80 font-medium leading-relaxed">
-                Use a strong, unique password with a mix of letters, numbers, and symbols to protect your account.
-              </p>
+          {showTip && (
+            <div className="bg-[#FFFBEB] border border-amber-100 p-5 rounded-2xl flex gap-4 relative group/tip animate-in fade-in slide-in-from-top-2 duration-300">
+              <FiAlertTriangle className="text-amber-600/80 text-xl shrink-0 mt-0.5" />
+              <div className="space-y-1 pr-8">
+                <p className="text-sm font-black text-amber-900 uppercase tracking-tight">Security Tip</p>
+                <p className="text-xs text-amber-900/60 font-medium leading-relaxed">
+                  Use a strong, unique password with a mix of letters, numbers, and symbols to protect your account.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowTip(false)}
+                className="absolute top-4 right-4 text-amber-900/30 hover:text-amber-900/60 transition-all p-1"
+                aria-label="Dismiss Tip"
+              >
+                <FiX className="w-4 h-4" />
+              </button>
             </div>
-          </div>
+          )}
 
           <div className="space-y-6">
             <div className="space-y-2">
