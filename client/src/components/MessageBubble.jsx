@@ -106,7 +106,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                 <span className="text-[10px] font-black text-primary uppercase tracking-tighter">
                   {message.replyTo.sender?.name || message.replyTo.sender?.username}
                 </span>
-                <span className="text-[11px] text-slate-400 truncate leading-tight">
+                <span className="text-[11px] text-slate-500 truncate leading-tight">
                   {message.replyTo.content}
                 </span>
               </div>
@@ -116,18 +116,18 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           <div className={`flex items-baseline gap-2 mb-1 px-1 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} max-w-full`}>
             <span 
               onClick={() => setIsProfileOpen(true)}
-              className="text-sm font-semibold text-foreground flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate"
+              className="text-sm font-bold text-[#0F172A] flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate"
             >
               {message.sender}
               {(isOwnMessage ? (user?.role === 'Admin' || user?.role === 'Owner') : (message.senderDetails?.role === 'Admin' || message.senderDetails?.role === 'Owner')) && (
                 <FiShield className="w-3 h-3 text-primary shrink-0" title="Admin" />
               )}
-              <span className="bg-primary/20 text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase border border-primary/30 shrink-0">
+              <span className="bg-primary/20 text-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase border border-primary/30 shrink-0">
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
               </span>
             </span>
             {timeString && (
-              <span className="text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 shrink-0">
+              <span className="text-xs text-[#64748B] font-medium opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 shrink-0">
                 {timeString}
               </span>
             )}
@@ -145,10 +145,10 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
 
             {/* Bubble */}
             <div 
-              className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed relative whitespace-pre-wrap wrap-break-word min-w-0 ${
+              className={`px-4 py-2.5 rounded-2xl shadow-sm border border-white/5 text-[15px] leading-relaxed relative whitespace-pre-wrap wrap-break-word min-w-0 ${
                 isOwnMessage 
-                  ? 'bg-primary text-white rounded-tr-sm bg-linear-to-br from-primary to-primary/80 border border-white/10 shadow-[0_4px_15px_rgba(var(--primary-rgb),0.3)]' 
-                  : 'bg-surface text-foreground rounded-tl-sm border border-border'
+                  ? 'bg-primary text-white rounded-tr-sm shadow-sm' 
+                  : 'bg-[#F1F5F9] text-[#0F172A] rounded-tl-sm shadow-sm'
               }`}
             >
               {message.attachment && (
@@ -183,7 +183,9 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
                 </div>
               ) : (
                 <>
-                  {message.content}
+                  <p className={`text-sm ${isOwnMessage ? 'text-white/90' : 'text-[#0F172A]'}`}>
+                    {message.content}
+                  </p>
                   {message.isEdited && (
                     <span className="text-[10px] text-foreground/60 ml-2 italic">(edited)</span>
                   )}

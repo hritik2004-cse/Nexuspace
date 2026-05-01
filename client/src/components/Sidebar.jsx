@@ -432,10 +432,10 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => router.push(`/workspace?workspace=${activeWorkspace._id}&channel=${channelObj.name}`)}
-                        className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 rounded-xl w-full'} text-sm font-bold transition-all relative ${currentChannel === channelObj.name ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                        className={`flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'px-4 py-2.5 w-full'} text-sm font-bold transition-all relative ${currentChannel === channelObj.name ? 'bg-linear-to-r from-primary/10 to-transparent border-l-2 border-primary rounded-none text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-white rounded-xl'}`}
                       >
-                        <FiHash className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} ${currentChannel === channelObj.name ? 'text-white' : 'text-slate-600 group-hover/channel:text-primary'} transition-colors`} />
-                        {!isCollapsed && <span className="truncate text-white/90">{channelObj.name}</span>}
+                        <FiHash className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-600 group-hover/channel:text-primary'} transition-colors`} />
+                        {!isCollapsed && <span className={`truncate ${currentChannel === channelObj.name ? 'text-white' : 'text-white/90'}`}>{channelObj.name}</span>}
                         
                         {/* Unread Badge */}
                         {channelObj.unreadCount > 0 && (

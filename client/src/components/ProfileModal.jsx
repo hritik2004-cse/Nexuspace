@@ -150,7 +150,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                       type="text" 
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
+                      className="w-full bg-[#F8FAFC] border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white shadow-inner"
                     />
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                       onChange={(e) => setCustomTitle(e.target.value)}
                       maxLength={50}
                       placeholder="e.g. Designer, Developer..."
-                      className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
+                      className="w-full bg-[#F8FAFC] border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white shadow-inner"
                     />
                   </div>
                 </div>
@@ -177,7 +177,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Briefly describe yourself..."
                     rows={3}
-                    className="w-full bg-background/50 border border-border text-foreground rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium resize-none placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
+                    className="w-full bg-[#F8FAFC] border border-border text-foreground rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium resize-none placeholder:text-slate-600 lg:hover:bg-white shadow-inner"
                   />
                 </div>
 
@@ -196,7 +196,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                           if (e.target.value !== profileData.phoneNumber) setIsOtpSent(false);
                         }}
                         placeholder="+1 234..."
-                        className="w-full bg-background/50 border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-background/80 shadow-inner"
+                        className="w-full bg-[#F8FAFC] border border-border text-foreground rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium placeholder:text-slate-600 lg:hover:bg-white shadow-inner"
                       />
                     </div>
                     {!profileData.isPhoneVerified && phoneNumber && !isOtpSent && (

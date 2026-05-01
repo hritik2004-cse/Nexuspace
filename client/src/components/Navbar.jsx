@@ -88,7 +88,7 @@ export default function Navbar({ onMenuClick }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="w-full bg-background/50 border border-border text-xs text-foreground rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-600"
+            className="w-full bg-[#F8FAFC] border border-border text-xs text-foreground rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 transition-all shadow-inner placeholder:text-slate-500"
           />
         </div>
       </div>

@@ -30,7 +30,7 @@ export default function SettingsTabs() {
     <div 
       role="tablist" 
       aria-label="Settings Sections"
-      className="w-full md:w-64 flex md:flex-col overflow-x-auto md:overflow-visible no-scrollbar gap-2 bg-sidebar/30 backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border/50 shrink-0 sticky top-0 md:relative z-20"
+      className="w-full md:w-64 flex md:flex-col overflow-x-auto md:overflow-visible no-scrollbar gap-2 bg-background md:bg-[#F1F5F9] backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border shrink-0 sticky top-0 md:relative z-20"
     >
       {Object.entries(SETTINGS_CONFIG).map(([id, config], index) => {
         const isActive = currentTab === id;
@@ -50,8 +50,8 @@ export default function SettingsTabs() {
             className={`
               relative flex-none md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-3 px-5 md:px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-sm font-black transition-all whitespace-nowrap
               ${isActive 
-                ? 'bg-primary text-white shadow-[0_10px_20px_-5px_rgba(var(--primary-rgb),0.3)]' 
-                : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                ? 'bg-white text-primary shadow-sm border border-border' 
+                : 'text-slate-500 hover:bg-white/50 hover:text-primary'
               }
               group/tab
             `}

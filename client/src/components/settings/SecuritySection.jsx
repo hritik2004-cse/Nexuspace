@@ -47,11 +47,11 @@ export default function SecuritySection() {
         description="Update your password and manage your account security."
       >
         <div className="space-y-8 max-w-xl">
-          <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex gap-4">
-            <FiAlertTriangle className="text-amber-500 text-xl shrink-0 mt-0.5" />
+          <div className="bg-[#FEF3C7] border border-[#FDE68A] p-5 rounded-2xl flex gap-4">
+            <FiAlertTriangle className="text-[#92400E] text-xl shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-sm font-black text-amber-500 uppercase tracking-tight">Security Tip</p>
-              <p className="text-xs text-amber-500/80 font-medium leading-relaxed">
+              <p className="text-sm font-black text-[#92400E] uppercase tracking-tight">Security Tip</p>
+              <p className="text-xs text-[#92400E]/80 font-medium leading-relaxed">
                 Use a strong, unique password with a mix of letters, numbers, and symbols to protect your account.
               </p>
             </div>
