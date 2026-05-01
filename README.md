@@ -13,9 +13,10 @@ Nexuspace represents a fundamental evolution in software workspace dynamics. By 
 ## ⚡ Core Architecture
 
 - **Real-Time Engine (`Socket.io`)**: Built over WebSocket meshes to instantly synchronize Canvas updates, Chat Messages, Emoji Reactions, Mentions, and Typing Indicators globally underneath 50ms latency margins.
+- **Multi-Theme Engine (Absolute God Mode)**: A first-class CSS variable architecture supporting instant switching between high-fidelity themes: *Emerald, Rose, Amber, Aura (Dark), and Light mode*.
+- **Integrated Kanban Board**: Real-time project management synchronized via WebSockets with support for drag-and-drop task movement, editing, and immediate global state updates.
 - **Advanced Channel Architecture**: Native support for Private Channels (via AES-256 hashed PINs & Redis access keys), real-time presence indicators, and intelligent channel invitation links.
 - **Persistent Mention Inbox**: Real-time `@mention` listener tracking system built into the Sidebar, routing mentions to a centralized, persistent inbox interface.
-- **Smart Task Linking**: Deep organic integration allowing Kanban tickets to route variables and payloads cleanly into designated communication channels without manual data entry.
 - **Absolute Sandbox Isolation**: Workspaces spin up as mathematically completely siloed datasets with Redis-backed authentication checks ensuring unparalleled data security.
 
 ## 🏗️ Repository Structure

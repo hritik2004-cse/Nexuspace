@@ -7,6 +7,7 @@ This is the highly optimized Single Page Application logic driving Nexuspace. Re
 Nexuspace explicitly targets a "Vercel / Linear" UI aesthetic. We prioritize:
 - **Spatial Storytelling:** Deep integration of `Position: Sticky` CSS loops combined with `useMotionValueEvent` and `useScroll` framer physics to create interactive narratives without polluting vertical layouts.
 - **Micro-Interactions:** Subtle DOM feedback (ghosting outlines, fast `0.2s` interpolations, tracking cursors) over huge neon gradients.
+- **Absolute God Mode (Theme Engine):** A robust CSS variable-based architecture allowing instant application-wide theme switching (Emerald, Rose, Amber, Aura, Light).
 - **SSR Fallbacks:** Implementing `next/dynamic` rendering over heavy animated abstractions like `<LivePreview />` ensuring initial hydration operates at breakneck TTFB (Time-to-First-Byte).
 
 ## 📂 Component Ecosystem (`/src`)
