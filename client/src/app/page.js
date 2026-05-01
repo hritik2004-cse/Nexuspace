@@ -103,7 +103,7 @@ export default function Home() {
           <HeroScene />
           
           {/* Hero Section */}
-          <Section className="min-h-[50vh] md:min-h-[70vh] flex flex-col items-center justify-start pt-8 md:pt-16 pb-8 relative z-10">
+          <Section className="min-h-[60vh] md:min-h-[75vh] flex flex-col items-center justify-start md:justify-center pt-20 md:pt-28 pb-16 relative z-10">
             <ParallaxSection speed={-0.5} className="w-full">
               <m.div style={{ opacity: heroOpacity, scale: heroScale }} className="w-full flex flex-col items-center text-center">
                 <m.div 
@@ -132,7 +132,7 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="text-base md:text-2xl text-slate-400 max-w-2xl font-light mb-8 leading-relaxed"
                 >
-                  Unify your communication, tasks, and documentation in a single, lightning-fast workspace. (Live Update)
+                  Unify your communication, tasks, and documentation in a single, lightning-fast workspace.
                 </m.p>
 
                 <m.div 

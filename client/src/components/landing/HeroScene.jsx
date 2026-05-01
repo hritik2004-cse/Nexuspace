@@ -108,7 +108,7 @@ export default function HeroScene() {
       <div className="absolute inset-0 bg-[#030014]/40" />
       
       {/* Bottom fade for seamless scrolling */}
-      <div className="absolute inset-x-0 bottom-0 h-96 bg-linear-to-t from-[#030014] via-[#030014]/80 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-linear-to-t from-[#030014] via-[#030014]/80 to-transparent" />
     </div>
   );
 }
