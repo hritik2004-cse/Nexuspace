@@ -59,7 +59,7 @@ export default function SettingsTabs() {
             <span className={`text-base md:text-lg ${isActive ? 'text-white' : 'text-primary/70 group-hover/tab:text-primary'}`}>
               {TAB_ICONS[id]}
             </span>
-            <span className="uppercase tracking-[0.1em] md:tracking-widest">{config.label}</span>
+            <span className="uppercase tracking-widest">{config.label}</span>
             
             {hasDirty && !isActive && (
               <span className="absolute top-1 right-1 md:top-2 md:right-2 w-1.5 md:h-2 h-1.5 md:w-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]"></span>
