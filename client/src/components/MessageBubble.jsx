@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiEdit2, FiTrash2, FiSmile, FiX, FiCheck, FiBookmark, FiCornerUpLeft, FiShield, FiAlertTriangle } from 'react-icons/fi';
+import { useTheme } from '@/context/ThemeContext';
 import ProfileModal from './ProfileModal';
 import {
   Tooltip,
@@ -21,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit, onReact, onPin, onReply, currentUser }) {
+  const { currentTheme } = useTheme();
+  const isLight = currentTheme === 'light';
   const [mounted, setMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
@@ -116,7 +119,7 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
           <div className={`flex items-baseline gap-2 mb-1 px-1 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} max-w-full`}>
             <span 
               onClick={() => setIsProfileOpen(true)}
-              className="text-sm font-bold text-[#0F172A] flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate"
+              className={`text-sm font-bold ${isLight ? 'text-[#0F172A]' : 'text-foreground'} flex items-center justify-center gap-1.5 lg:hover:underline decoration-slate-500 underline-offset-2 cursor-pointer truncate`}
             >
               {message.sender}
               {(isOwnMessage ? (user?.role === 'Admin' || user?.role === 'Owner') : (message.senderDetails?.role === 'Admin' || message.senderDetails?.role === 'Owner')) && (
@@ -127,9 +130,9 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
               </span>
             </span>
             {timeString && (
-              <span className="text-xs text-[#64748B] font-medium opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 shrink-0">
-                {timeString}
-              </span>
+                <span className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-slate-500'} font-medium opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 shrink-0`}>
+                  {timeString}
+                </span>
             )}
           </div>
           
