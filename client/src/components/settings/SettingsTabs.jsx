@@ -30,7 +30,7 @@ export default function SettingsTabs() {
     <div 
       role="tablist" 
       aria-label="Settings Sections"
-      className="w-full md:w-64 flex md:flex-col flex-wrap md:flex-nowrap gap-2 bg-sidebar/30 backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border/50 shrink-0"
+      className="w-full md:w-64 flex md:flex-col overflow-x-auto md:overflow-visible no-scrollbar gap-2 bg-sidebar/30 backdrop-blur-3xl p-4 border-b md:border-b-0 md:border-r border-border/50 shrink-0 sticky top-0 md:relative z-20"
     >
       {Object.entries(SETTINGS_CONFIG).map(([id, config], index) => {
         const isActive = currentTab === id;
@@ -48,7 +48,7 @@ export default function SettingsTabs() {
             onClick={() => setTab(id)}
             onKeyDown={(e) => handleKeyDown(e, id, index)}
             className={`
-              relative flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-3 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-sm font-black transition-all
+              relative flex-none md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-3 px-5 md:px-4 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-sm font-black transition-all whitespace-nowrap
               ${isActive 
                 ? 'bg-primary text-white shadow-[0_10px_20px_-5px_rgba(var(--primary-rgb),0.3)]' 
                 : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
@@ -59,8 +59,7 @@ export default function SettingsTabs() {
             <span className={`text-base md:text-lg ${isActive ? 'text-white' : 'text-primary/70 group-hover/tab:text-primary'}`}>
               {TAB_ICONS[id]}
             </span>
-            <span className="uppercase tracking-[0.1em] md:tracking-widest hidden xs:inline md:inline">{config.label}</span>
-            <span className="uppercase tracking-[0.1em] xs:hidden">{config.label.charAt(0)}</span>
+            <span className="uppercase tracking-[0.1em] md:tracking-widest">{config.label}</span>
             
             {hasDirty && !isActive && (
               <span className="absolute top-1 right-1 md:top-2 md:right-2 w-1.5 md:h-2 h-1.5 md:w-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]"></span>
