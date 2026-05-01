@@ -102,7 +102,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
             <h3 className="text-3xl font-black text-foreground tracking-tight leading-tight">{profileData.name}</h3>
             <p className="text-primary font-bold tracking-wide mt-1 underline decoration-primary/30 underline-offset-4">@{profileData.username || profileData.name?.toLowerCase()}</p>
             <div className="flex justify-center mt-4">
-              <span className="bg-primary text-primary-foreground text-[11px] font-black px-4 py-1.5 rounded-xl shadow-lg tracking-[0.1em] uppercase flex items-center gap-2 border border-white/10">
+              <span className="bg-primary text-primary-foreground text-[11px] font-black px-4 py-1.5 rounded-xl shadow-lg tracking-widest uppercase flex items-center gap-2 border border-white/10">
                 <FiTag className="w-3.5 h-3.5" /> {profileData.customTitle || 'Member'}
               </span>
             </div>
@@ -119,7 +119,7 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   {profileData.email && (
-                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 transition-all lg:hover:bg-white/[0.08]">
+                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 transition-all lg:hover:bg-white/8">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><FiMail /></div>
                       <div className="flex-1 overflow-hidden">
                         <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500">Email</label>
@@ -128,10 +128,10 @@ export default function ProfileModal({ isOpen, onClose, viewUser = null }) {
                     </div>
                   )}
                   {profileData.phoneNumber && (
-                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 transition-all lg:hover:bg-white/[0.08]">
+                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 transition-all lg:hover:bg-white/8">
                       <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400"><FiPhone /></div>
                       <div className="flex-1">
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
                           Phone {profileData.isPhoneVerified && <FiCheck className="text-emerald-400 w-3 h-3" />}
                         </label>
                         <p className="text-foreground text-sm">{profileData.phoneNumber}</p>

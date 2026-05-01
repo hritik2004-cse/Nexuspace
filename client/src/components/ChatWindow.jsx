@@ -466,11 +466,11 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
 
       {/* Rename Dialog */}
       <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
-        <DialogContent className="bg-surface border-white/10 sm:max-w-[420px] rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.3)]">
+        <DialogContent className="bg-surface border-white/10 sm:max-w-[420px] rounded-4xl overflow-hidden shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.3)]">
           <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50"></div>
           
           <DialogHeader className="pt-6 px-6">
-            <DialogTitle className="text-foreground font-black uppercase tracking-[0.2em] text-xl flex items-center gap-3">
+            <DialogTitle className="text-foreground font-black uppercase tracking-widest text-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <FiEdit3 className="w-5 h-5 text-primary" />
               </div>
