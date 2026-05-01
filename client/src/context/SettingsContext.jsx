@@ -95,9 +95,9 @@ export function SettingsProvider({ children }) {
       abortControllerRef.current = new AbortController();
 
       try {
-        await api.put('/auth/profile', { [field]: value }, {
-          signal: abortControllerRef.current.signal
-        });
+        // Use updateProfile from AuthContext to keep global state in sync
+        await updateProfile({ [field]: value });
+        
         setInitialData(prev => ({ ...prev, [field]: value }));
         setDirtyFields(prev => ({ ...prev, [field]: false }));
         setLastSaved(new Date());
@@ -118,7 +118,7 @@ export function SettingsProvider({ children }) {
       if (sectionId === 'password') {
         await api.put('/auth/change-password', payload);
       } else {
-        await api.put('/auth/profile', payload);
+        await updateProfile(payload);
       }
       
       // Update local state for non-password fields
