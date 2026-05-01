@@ -34,7 +34,10 @@ const userLimiter = rateLimit({
   }),
   windowMs: 60 * 1000,
   max: 5,
-  keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+  keyGenerator: (req) => {
+    return req.user?._id?.toString() || req.ip;
+  },
+  validate: { ip: false, xForwardedForHeader: false }, 
   message: { 
     success: false, 
     code: 'TOO_MANY_REQUESTS_USER', 

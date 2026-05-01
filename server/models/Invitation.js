@@ -25,7 +25,6 @@ const invitationSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: true
   },
   status: {
     type: String,
