@@ -23,10 +23,9 @@ const SOCKET_URL = getSocketUrl();
 export const socket = io(SOCKET_URL, {
   autoConnect: false, // Wait until user is authenticated/workspace is loaded
   withCredentials: true,
-  auth: (cb) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("nexuspace_token") : null;
-    cb({ token });
-  }
+  // NOTE: We intentionally do NOT pass a token from localStorage here.
+  // The server socket middleware reads the access_token httpOnly cookie directly.
+  // Storing/sending the token from localStorage creates an XSS exposure (V11 fix).
 });
 
 export const connectSocket = () => {

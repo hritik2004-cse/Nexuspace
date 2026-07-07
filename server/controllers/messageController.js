@@ -1,5 +1,8 @@
 const Message = require('../models/Message');
 
+/** Maximum character length for a chat message (V4/V12 fix) */
+const MAX_CONTENT_LENGTH = 4000;
+
 // @desc    Get all messages in a channel
 // @route   GET /api/messages/:channelId
 // @access  Private
@@ -37,7 +40,25 @@ const getMessages = async (req, res) => {
 // @access  Private
 const createMessage = async (req, res) => {
   try {
-    const { content, channelId, attachments, replyTo, type } = req.body;
+    const { content, channelId, attachments, replyTo, type, clientId } = req.body;
+
+    // V4/V12: Validate content length before any processing
+    if (!content && !attachments?.length) {
+      return res.status(400).json({ message: 'Message content or attachment is required' });
+    }
+    if (content && content.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ message: `Message exceeds maximum length of ${MAX_CONTENT_LENGTH} characters` });
+    }
+
+    // clientId deduplication: if client sends a stable UUID, check for duplicate
+    if (clientId) {
+      const existing = await Message.findOne({ clientId, sender: req.user._id });
+      if (existing) {
+        // Idempotent: return the already-created message without re-inserting
+        const populated = await existing.populate('sender', 'name avatar role username');
+        return res.status(200).json(populated);
+      }
+    }
 
     const message = await Message.create({
       content,
@@ -45,7 +66,8 @@ const createMessage = async (req, res) => {
       channelId,
       attachments: attachments || [],
       replyTo: replyTo || null,
-      type: type || 'text'
+      type: type || 'text',
+      ...(clientId ? { clientId } : {})
     });
 
     let populatedMessage = await message.populate('sender', 'name avatar role username');
@@ -70,7 +92,8 @@ const createMessage = async (req, res) => {
     req.io.to(room).emit('receive_message', socketPayload);
 
     // Advanced Backend Mention & Reply Notifier logic
-    if (content) {
+    // V12: Only run mention regex after confirming content is within safe length
+    if (content && content.length <= MAX_CONTENT_LENGTH) {
       const User = require('../models/User');
       const Notification = require('../models/Notification');
 

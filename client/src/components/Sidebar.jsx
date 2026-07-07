@@ -8,6 +8,9 @@ import InboxModal from './InboxModal';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +25,7 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog"
+
 
 import api from '@/services/api';
 import { useWorkspace } from '@/context/WorkspaceContext';
@@ -421,10 +425,24 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
           </div>
           <div className="space-y-1 px-3">
             {isLoadingChannels ? (
-              // Loading Skeleton
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className={`h-10 rounded-xl bg-white/5 animate-pulse mb-1 ${isCollapsed ? 'w-12 mx-auto' : 'w-full'}`} />
-              ))
+              // Proper shadcn Skeleton loading state
+              <div className="space-y-1.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className={`flex items-center gap-3 px-4 py-2 ${isCollapsed ? 'justify-center' : ''}`}>
+                    {isCollapsed ? (
+                      <Skeleton className="w-10 h-10 rounded-2xl bg-white/8" />
+                    ) : (
+                      <>
+                        <Skeleton className="w-4 h-4 rounded-md bg-white/8 shrink-0" />
+                        <Skeleton
+                          className="h-3.5 rounded-full bg-white/8"
+                          style={{ width: `${45 + (i * 13) % 35}%` }}
+                        />
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
               channels.map((channelObj) => (
                 <div key={channelObj._id} className="relative group/channel">
@@ -437,11 +455,14 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                         <FiHash className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'} ${currentChannel === channelObj.name ? 'text-primary' : 'text-slate-600 group-hover/channel:text-primary'} transition-colors`} />
                         {!isCollapsed && <span className={`truncate ${currentChannel === channelObj.name ? 'text-white' : 'text-white/90'}`}>{channelObj.name}</span>}
                         
-                        {/* Unread Badge */}
+                        {/* Unread Badge — shadcn Badge */}
                         {channelObj.unreadCount > 0 && (
-                          <span className={`absolute ${isCollapsed ? '-top-1 -right-1' : 'right-4'} min-w-5 h-5 px-1 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-sidebar shadow-lg`}>
+                          <Badge
+                            variant="default"
+                            className={`absolute ${isCollapsed ? '-top-1 -right-1 w-5 h-5 p-0 justify-center' : 'right-3'} bg-primary text-white text-[10px] font-black border-2 border-sidebar shadow-lg min-w-5 h-5 px-1`}
+                          >
                             {channelObj.unreadCount > 99 ? '99+' : channelObj.unreadCount}
-                          </span>
+                          </Badge>
                         )}
                       </button>
                     </TooltipTrigger>
@@ -455,51 +476,71 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       </nav>
 
       {/* User Footer */}
-      <div className={`mt-auto p-3 border-t border-border bg-white/5 relative overflow-hidden group/footer transition-all duration-300`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-2'}`}>
-          <div 
-            onClick={() => router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`)}
-            className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} cursor-pointer transition-all min-w-0 flex-1`}
-          >
-            <div className="relative shrink-0">
-              {user?.avatar || user?.profileImage ? (
-                <img 
-                  src={user.avatar || user.profileImage} 
-                  alt="Profile" 
-                  className={`w-9 h-9 rounded-xl object-cover shadow-2xl ring-2 ring-transparent group-hover/footer:ring-primary/50 transition-all`}
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-primary to-primary/60 flex items-center justify-center text-white font-black text-lg shadow-2xl">
-                  {user?.name?.charAt(0).toUpperCase() || 'A'}
+      <div className={`mt-auto border-t border-border bg-white/5 relative overflow-hidden group/footer transition-all duration-300`}>
+        <Separator className="opacity-0" />
+        <div className={`flex items-center p-3 ${isCollapsed ? 'justify-center' : 'justify-between gap-2'}`}>
+          {!user ? (
+            // Skeleton while user data loads
+            <div className="flex items-center gap-3 w-full">
+              <Skeleton className="w-9 h-9 rounded-xl bg-white/8 shrink-0" />
+              {!isCollapsed && (
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-3/4 rounded-full bg-white/8" />
+                  <Skeleton className="h-2.5 w-1/2 rounded-full bg-white/8" />
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-sidebar rounded-full shadow-lg"></div>
             </div>
-            {!isCollapsed && (
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-black text-white truncate leading-tight">{user?.name || 'User'}</p>
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter truncate">@{user?.username || 'user'}</p>
-              </div>
-            )}
-          </div>
-          
-          {!isCollapsed && (
-            <div className="flex items-center gap-0.5 shrink-0">
-              <button aria-label="Notifications" onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5 relative group/notif">
-                <FiBell className="w-4 h-4" />
-                {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-sidebar shadow-lg"></span>}
-              </button>
-              <button 
-                aria-label="Settings" 
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`); 
-                }} 
-                className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5"
+          ) : (
+            <>
+              <div
+                onClick={() => router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`)}
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} cursor-pointer transition-all min-w-0 flex-1`}
               >
-                <FiSettings className="w-4 h-4" />
-              </button>
-            </div>
+                <div className="relative shrink-0">
+                  {user?.avatar || user?.profileImage ? (
+                    <img
+                      src={user.avatar || user.profileImage}
+                      alt="Profile"
+                      className={`w-9 h-9 rounded-xl object-cover shadow-2xl ring-2 ring-transparent group-hover/footer:ring-primary/50 transition-all`}
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-primary to-primary/60 flex items-center justify-center text-white font-black text-lg shadow-2xl">
+                      {user?.name?.charAt(0).toUpperCase() || 'A'}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-sidebar rounded-full shadow-lg" />
+                </div>
+                {!isCollapsed && (
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-black text-white truncate leading-tight">{user?.name || 'User'}</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter truncate">@{user?.username || 'user'}</p>
+                  </div>
+                )}
+              </div>
+
+              {!isCollapsed && (
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button aria-label="Notifications" onClick={(e) => { e.stopPropagation(); setIsInboxOpen(true); }} className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5 relative group/notif">
+                    <FiBell className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-0.5 -right-0.5 w-4 h-4 p-0 flex items-center justify-center bg-red-500 border-2 border-sidebar text-[9px] font-black">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Badge>
+                    )}
+                  </button>
+                  <button
+                    aria-label="Settings"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/workspace/settings${activeWorkspace ? `?workspace=${activeWorkspace._id}` : ''}`);
+                    }}
+                    className="text-slate-500 hover:text-primary transition-all p-2 rounded-lg hover:bg-white/5"
+                  >
+                    <FiSettings className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

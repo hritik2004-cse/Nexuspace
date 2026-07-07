@@ -57,17 +57,35 @@ const storeSessionFixed = async (userId, sessionId, jti, randomStr, ip, userAgen
 };
 
 // Grace window cache: key(sessionId + fingerprint) -> { oldJti, lastTokens, expires }
+// Capped at 1000 entries to prevent unbounded memory growth (V8 fix)
+const GRACE_CACHE_MAX_SIZE = 1000;
 const refreshGraceCache = new Map();
+
+const graceSet = (key, value) => {
+  if (refreshGraceCache.size >= GRACE_CACHE_MAX_SIZE) {
+    // Evict the oldest entry (first inserted)
+    const firstKey = refreshGraceCache.keys().next().value;
+    refreshGraceCache.delete(firstKey);
+  }
+  refreshGraceCache.set(key, value);
+};
 
 const generateUniqueUsername = async (baseName) => {
   let username = baseName.toLowerCase().replace(/\s+/g, '_');
   let exists = await User.findOne({ username });
   if (!exists) return username;
 
-  while (exists) {
+  const MAX_RETRIES = 10;
+  let attempts = 0;
+  while (exists && attempts < MAX_RETRIES) {
     const suffix = Math.random().toString(36).substring(2, 6);
     username = `${baseName.toLowerCase().replace(/\s+/g, '_')}_${suffix}`;
     exists = await User.findOne({ username });
+    attempts++;
+  }
+  if (exists) {
+    // Fallback: use timestamp-based suffix for guaranteed uniqueness
+    username = `${baseName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
   }
   return username;
 };
@@ -127,7 +145,7 @@ const refreshTokenServiceFixed = async (token, ip, userAgent) => {
   const finalTokens = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
 
   // Store in grace cache for 10s
-  refreshGraceCache.set(graceKey, { 
+  graceSet(graceKey, { 
     oldJti: jti, 
     userId: user._id,
     lastTokens: finalTokens,
@@ -167,19 +185,10 @@ const googleLoginService = async (credential, sessionId, ip, userAgent) => {
     name = payload.name;
     picture = payload.picture;
   } catch (err) {
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${credential}` }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to verify Google access token');
-    }
-    
-    const data = await response.json();
-    sub = data.sub;
-    email = data.email;
-    name = data.name;
-    picture = data.picture;
+    // Do NOT fall back to using credential as a Bearer token —
+    // that would allow any Google access token (or stolen token) to authenticate.
+    console.error('[Google Auth] ID token verification failed:', err.message);
+    throw new Error('Failed to verify Google credential. Please sign in again.');
   }
 
   let user = await User.findOne({ email });
@@ -226,7 +235,21 @@ const registerLocalService = async ({ name, email, password, sessionId, ip, user
 };
 
 const loginLocalService = async ({ email, password, sessionId, ip, userAgent }) => {
-  const isAdminCredentials = email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase() && password === process.env.ADMIN_PASSWORD;
+  // V3 fix: Use timingSafeEqual to prevent timing side-channel attacks on admin credentials
+  const adminEmail = process.env.ADMIN_EMAIL || '';
+  const adminPassword = process.env.ADMIN_PASSWORD || '';
+  const emailMatch = email.toLowerCase() === adminEmail.toLowerCase();
+  let passwordMatch = false;
+  try {
+    passwordMatch = crypto.timingSafeEqual(
+      Buffer.from(password),
+      Buffer.from(adminPassword)
+    );
+  } catch {
+    passwordMatch = false; // Buffer length mismatch means no match
+  }
+  const isAdminCredentials = emailMatch && passwordMatch;
+
   
   let user = await User.findOne({ email });
 

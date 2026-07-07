@@ -47,8 +47,6 @@ export default function WorkloadsPreview() {
     <motion.div 
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
       className="w-full h-full rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-3xl shadow-2xl overflow-hidden flex relative group text-left"
     >
       <div 

@@ -15,6 +15,26 @@ const getSocketSets = (map, key) => {
   return map.get(key);
 };
 
+/**
+ * Lightweight per-socket event rate limiter (V9 fix).
+ * Returns true if the event should be DROPPED (rate limit exceeded).
+ */
+const socketRateLimits = new Map(); // socketId -> { eventName -> { count, resetAt } }
+
+const isSocketRateLimited = (socketId, event, maxCalls, windowMs) => {
+  if (!socketRateLimits.has(socketId)) socketRateLimits.set(socketId, {});
+  const limits = socketRateLimits.get(socketId);
+  const now = Date.now();
+
+  if (!limits[event] || now > limits[event].resetAt) {
+    limits[event] = { count: 1, resetAt: now + windowMs };
+    return false;
+  }
+
+  limits[event].count++;
+  return limits[event].count > maxCalls;
+};
+
 const workspaceSocket = (io) => {
 
   // Middleware: Manual Cookie Auth
@@ -66,6 +86,10 @@ const workspaceSocket = (io) => {
     });
 
     socket.on('join_channel', async (rawChannelId) => {
+      // V9: limit to 10 join_channel calls per 10 seconds per socket
+      if (isSocketRateLimited(socketId, 'join_channel', 10, 10000)) {
+        return socket.emit('channel_error', { message: 'Too many join requests. Please slow down.' });
+      }
       const channelId = String(rawChannelId).trim();
       console.log(`[Socket] User ${user.username || user.name} joining channel: "${channelId}"`);
       try {
@@ -101,12 +125,16 @@ const workspaceSocket = (io) => {
     });
 
     socket.on('update_reaction', (data) => {
+      // V9: limit to 30 reactions per 10 seconds per socket
+      if (isSocketRateLimited(socketId, 'update_reaction', 30, 10000)) return;
       const { messageId, reactions, channelId } = data;
       // Broadcast to everyone in the channel except the sender
       socket.to(String(channelId).trim()).emit('reaction_updated', { messageId, reactions });
     });
 
     socket.on('pin_message', (data) => {
+      // V9: limit to 10 pin operations per 10 seconds per socket
+      if (isSocketRateLimited(socketId, 'pin_message', 10, 10000)) return;
       const { messageId, isPinned, channelId } = data;
       // Broadcast to everyone in the channel except the sender
       socket.to(String(channelId).trim()).emit('message_pinned', { messageId, isPinned });
@@ -122,6 +150,9 @@ const workspaceSocket = (io) => {
     });
 
     socket.on('disconnect', () => {
+      // V9: Clean up rate limit tracking on disconnect
+      socketRateLimits.delete(socketId);
+
       const mapping = socketIdToUserSession.get(socketId);
       if (mapping) {
         const { userId, sessionId: sId } = mapping;

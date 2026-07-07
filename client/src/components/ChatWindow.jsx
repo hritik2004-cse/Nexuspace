@@ -5,7 +5,7 @@ import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import { useSocket } from '@/context/SocketContext';
 import { FiUsers, FiX, FiMoreVertical, FiTrash2, FiLogOut, FiEdit3 } from 'react-icons/fi';
-import { Crown, ShieldCheck, UserMinus, ArrowUp, ArrowDown, RefreshCw, AlertTriangle, Edit3 } from 'lucide-react';
+import { Crown, ShieldCheck, UserMinus, ArrowUp, ArrowDown, RefreshCw, AlertTriangle } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +18,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import api from '@/services/api';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { toast } from 'react-toastify';
@@ -31,6 +34,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 
+
 export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, onEditMessage, onReactToMessage, onPinMessage, currentUser, socket, channelId, channelName }) {
   const { isMemberListOpen, setIsMemberListOpen, onlineCount, activeWorkspace } = useWorkspace();
   const router = useRouter();
@@ -38,6 +42,7 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
   const [latestAnnouncement, setLatestAnnouncement] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [members, setMembers] = useState([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
   // Deduplication helper to ensure we don't have duplicate member entries
   const deduplicateMembers = (membersList) => {
@@ -59,10 +64,13 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
   // Fetch channel members
   const fetchMembers = async () => {
     if (channelId) {
+      setIsLoadingMembers(true);
       try {
         const res = await api.get(`/channels/${channelId}/members`);
         setMembers(deduplicateMembers(res.data));
       } catch (err) {
+      } finally {
+        setIsLoadingMembers(false);
       }
     }
   };
@@ -336,63 +344,93 @@ export default function ChatWindow({ messages, onSendMessage, onDeleteMessage, o
           <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-surface/50">
             <div className="flex items-center gap-2 text-slate-200">
               <FiUsers className="w-4 h-4 text-primary" />
-              <span className="font-black text-xs uppercase tracking-widest">Members — {members.length}</span>
+              <span className="font-black text-xs uppercase tracking-widest">Members</span>
+              <Badge variant="secondary" className="ml-1 text-[10px] font-black px-1.5 py-0 h-5">
+                {members.length}
+              </Badge>
             </div>
             <button onClick={() => setIsMemberListOpen(false)} className="text-slate-400 hover:text-white transition-colors">
               <FiX className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            {owners.length > 0 && (
-              <div>
-                <h4 className="text-[10px] font-black text-amber-500/80 uppercase tracking-[0.2em] mb-3 px-2">Owner</h4>
-                {owners.map(m => (
-                  <MemberItem 
-                    key={`owner-${m._id}`} 
-                    member={m} 
-                    currentUser={currentUser} 
-                    currentUserChannelRole={currentUserChannelRole}
-                    channelName={channelName}
-                    handleUpdateRole={handleUpdateRole}
-                    handleTransferOwnership={handleTransferOwnership}
-                    handleRemoveMember={handleRemoveMember}
-                  />
+          <div className="flex-1 overflow-y-auto p-4 space-y-5">
+            {isLoadingMembers ? (
+              // Skeleton rows while members load
+              <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 px-2 py-2">
+                    <Skeleton className="w-8 h-8 rounded-full bg-white/8 shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 rounded-full bg-white/8" style={{ width: `${50 + (i * 19) % 40}%` }} />
+                      <Skeleton className="h-2.5 rounded-full bg-white/8" style={{ width: `${30 + (i * 13) % 30}%` }} />
+                    </div>
+                  </div>
                 ))}
               </div>
-            )}
-            {admins.length > 0 && (
-              <div>
-                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3 px-2">Admins</h4>
-                {admins.map(m => (
-                  <MemberItem 
-                    key={`admin-${m._id}`} 
-                    member={m} 
-                    currentUser={currentUser} 
-                    currentUserChannelRole={currentUserChannelRole}
-                    channelName={channelName}
-                    handleUpdateRole={handleUpdateRole}
-                    handleTransferOwnership={handleTransferOwnership}
-                    handleRemoveMember={handleRemoveMember}
-                  />
-                ))}
-              </div>
-            )}
-            {regularMembers.length > 0 && (
-              <div>
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 px-2">Members</h4>
-                {regularMembers.map(m => (
-                  <MemberItem 
-                    key={`member-${m._id}`} 
-                    member={m} 
-                    currentUser={currentUser} 
-                    currentUserChannelRole={currentUserChannelRole}
-                    channelName={channelName}
-                    handleUpdateRole={handleUpdateRole}
-                    handleTransferOwnership={handleTransferOwnership}
-                    handleRemoveMember={handleRemoveMember}
-                  />
-                ))}
-              </div>
+            ) : (
+              <>
+                {owners.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-black text-amber-500/80 uppercase tracking-[0.2em] mb-3 px-2 flex items-center gap-2">
+                      <Crown className="w-3 h-3" /> Owner
+                    </h4>
+                    {owners.map(m => (
+                      <MemberItem
+                        key={`owner-${m._id}`}
+                        member={m}
+                        currentUser={currentUser}
+                        currentUserChannelRole={currentUserChannelRole}
+                        channelName={channelName}
+                        handleUpdateRole={handleUpdateRole}
+                        handleTransferOwnership={handleTransferOwnership}
+                        handleRemoveMember={handleRemoveMember}
+                      />
+                    ))}
+                  </div>
+                )}
+                {admins.length > 0 && (
+                  <div>
+                    {owners.length > 0 && <Separator className="mb-4 opacity-20" />}
+                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3 px-2 flex items-center gap-2">
+                      <ShieldCheck className="w-3 h-3" /> Admins
+                      <Badge variant="outline" className="text-[9px] font-black px-1 h-4 ml-auto border-primary/30 text-primary">{admins.length}</Badge>
+                    </h4>
+                    {admins.map(m => (
+                      <MemberItem
+                        key={`admin-${m._id}`}
+                        member={m}
+                        currentUser={currentUser}
+                        currentUserChannelRole={currentUserChannelRole}
+                        channelName={channelName}
+                        handleUpdateRole={handleUpdateRole}
+                        handleTransferOwnership={handleTransferOwnership}
+                        handleRemoveMember={handleRemoveMember}
+                      />
+                    ))}
+                  </div>
+                )}
+                {regularMembers.length > 0 && (
+                  <div>
+                    {(owners.length > 0 || admins.length > 0) && <Separator className="mb-4 opacity-20" />}
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 px-2 flex items-center gap-2">
+                      Members
+                      <Badge variant="outline" className="text-[9px] font-black px-1 h-4 ml-auto border-white/10 text-slate-500">{regularMembers.length}</Badge>
+                    </h4>
+                    {regularMembers.map(m => (
+                      <MemberItem
+                        key={`member-${m._id}`}
+                        member={m}
+                        currentUser={currentUser}
+                        currentUserChannelRole={currentUserChannelRole}
+                        channelName={channelName}
+                        handleUpdateRole={handleUpdateRole}
+                        handleTransferOwnership={handleTransferOwnership}
+                        handleRemoveMember={handleRemoveMember}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
 
             {/* Channel Actions moved to bottom */}

@@ -22,15 +22,16 @@ const envOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const EXPLICIT_ORIGINS = [
+  "http://localhost:3000",
+  "https://project-nexuspace.vercel.app",
+];
+
 const allowedOrigins = (origin, callback) => {
   if (!origin) return callback(null, true);
-  
-  if (
-    origin === "http://localhost:3000" ||
-    origin === "https://project-nexuspace.vercel.app" ||
-    origin.includes("vercel.app") || // Allow any Vercel subdomain
-    envOrigins.includes(origin)
-  ) {
+
+  const permitted = [...EXPLICIT_ORIGINS, ...envOrigins];
+  if (permitted.includes(origin)) {
     callback(null, true);
   } else {
     console.warn(`[CORS] Rejected Origin: ${origin}`);

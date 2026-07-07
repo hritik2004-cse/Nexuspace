@@ -3,10 +3,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiSend, FiPaperclip, FiSmile, FiX, FiFile } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
-
 import { toast } from 'react-toastify';
+import { useOfflineQueue } from '@/lib/useOfflineQueue';
+import OfflineQueueStatus from './OfflineQueueStatus';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function MessageInput({ onSendMessage, socket, channelId, channelName, currentUser, replyingTo, onCancelReply }) {
+export default function MessageInput({
+  onSendMessage,
+  socket,
+  channelId,
+  channelName,
+  currentUser,
+  replyingTo,
+  onCancelReply,
+}) {
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
@@ -15,27 +26,60 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
   const typingTimeoutRef = useRef(null);
   const [pickerHeight, setPickerHeight] = useState(400);
 
+  // ── Offline queue integration ──────────────────────────────────────────────
+  const handleMessageDelivered = (serverMsg) => {
+    // Notify the parent (Sidebar/ChatWindow) so the message appears in the UI
+    // after a queued message is delivered. onSendMessage is the parent's handler.
+    // We pass it as a "queued delivery" signal with the server payload.
+    if (onSendMessage && serverMsg) {
+      onSendMessage(null, null, null, serverMsg); // 4th arg = pre-built server payload
+    }
+  };
+
+  const { queueMessage, drainQueue, status: queueStatus } = useOfflineQueue(handleMessageDelivered);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPickerHeight(window.innerWidth < 640 ? 300 : 400);
     }
   }, []);
 
-  // Mocked channel members for mentions
-  const members = ['gaurav', 'lavkesh', 'ash', 'hritik'];
+  // Only hritik in the @mentions list
+  const members = ['hritik'];
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (text.trim() || attachment) {
-      onSendMessage(text, attachment, replyingTo?._id);
-      setText('');
-      setAttachment(null);
-      setShowEmoji(false);
-      if (onCancelReply) onCancelReply();
-      
-      if (socket && channelId) {
-        socket.emit('stop_typing', { channelId });
-      }
+    if (!text.trim() && !attachment) return;
+
+    const msgContent = text.trim();
+    const msgAttachment = attachment;
+    const msgReplyTo = replyingTo?._id || null;
+
+    // Clear input immediately for a snappy UX
+    setText('');
+    setAttachment(null);
+    setShowEmoji(false);
+    if (onCancelReply) onCancelReply();
+
+    if (socket && channelId) {
+      socket.emit('stop_typing', { channelId });
+    }
+
+    // Route through the offline-aware queue
+    const result = await queueMessage({
+      content: msgContent,
+      channelId,
+      attachments: msgAttachment ? [msgAttachment] : [],
+      replyTo: msgReplyTo,
+      type: 'text',
+    });
+
+    if (result?.queued) {
+      toast.info('📥 Message queued — will be delivered when you reconnect.', {
+        toastId: 'offline-queued',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -43,11 +87,12 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size exceeds 2MB limit. Please attach a smaller file.");
+        toast.error('File size exceeds 2MB limit. Please attach a smaller file.');
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => setAttachment({ name: file.name, url: reader.result, type: file.type });
+      reader.onloadend = () =>
+        setAttachment({ name: file.name, url: reader.result, type: file.type });
       reader.readAsDataURL(file);
     }
   };
@@ -67,10 +112,13 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
   const handleChange = (e) => {
     const val = e.target.value;
     setText(val);
-    
+
     if (socket && channelId) {
-      socket.emit('typing', { channelId, username: currentUser?.username || currentUser?.name || 'Unknown' });
-      
+      socket.emit('typing', {
+        channelId,
+        username: currentUser?.username || currentUser?.name || 'Unknown',
+      });
+
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
         socket.emit('stop_typing', { channelId });
@@ -92,12 +140,15 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
 
   return (
     <div className="p-4 bg-transparent relative z-20">
+      {/* Offline / Sync Status Banner */}
+      <OfflineQueueStatus status={queueStatus} onRetry={drainQueue} />
+
       {/* Mentions Popover */}
       {showMentions && (
         <div className="absolute bottom-full left-4 mb-2 w-48 bg-sidebar/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl py-2 z-50">
           <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase">Members</div>
-          {members.map(member => (
-            <button 
+          {members.map((member) => (
+            <button
               key={member}
               type="button"
               onClick={() => handleMention(member)}
@@ -112,7 +163,13 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
       {/* Emoji Picker Popover */}
       {showEmoji && (
         <div className="absolute bottom-full right-2 sm:right-4 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-border/50 max-w-[90vw]">
-          <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" lazyLoadEmojis={true} height={pickerHeight} width="100%" />
+          <EmojiPicker
+            onEmojiClick={onEmojiClick}
+            theme="dark"
+            lazyLoadEmojis={true}
+            height={pickerHeight}
+            width="100%"
+          />
         </div>
       )}
 
@@ -122,11 +179,13 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-1 bg-primary h-8 rounded-full shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Replying to {replyingTo.sender}</span>
+              <span className="text-[10px] font-black text-primary uppercase tracking-tighter">
+                Replying to {replyingTo.sender}
+              </span>
               <p className="text-xs text-slate-300 truncate">{replyingTo.content}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onCancelReply}
             className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-all"
           >
@@ -146,9 +205,9 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
             </div>
           )}
           <div className="text-sm text-slate-300 font-medium">{attachment.name}</div>
-          <button 
-            type="button" 
-            onClick={() => setAttachment(null)} 
+          <button
+            type="button"
+            onClick={() => setAttachment(null)}
             className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-400 opacity-0 group-hover:opacity-100 transition-opacity z-10"
           >
             <FiX className="w-3 h-3" />
@@ -156,53 +215,61 @@ export default function MessageInput({ onSendMessage, socket, channelId, channel
         </div>
       )}
 
-      <form 
+      <form
         onSubmit={handleSubmit}
         className="flex flex-row items-end bg-white/5 backdrop-blur-md rounded-xl border border-border p-1 md:p-1.5 transition-all shadow-lg"
       >
         <div className="flex shrink-0 px-2 pb-1.5 gap-2 text-slate-400">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            className="hidden" 
-          />
-          <button 
-            type="button" 
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+          <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
             className="hover:text-primary transition-colors p-1 rounded-md hover:bg-white/5"
           >
-            <FiPaperclip className="w-5 h-5"/>
+            <FiPaperclip className="w-5 h-5" />
           </button>
         </div>
         <textarea
           value={text}
           onChange={handleChange}
-          placeholder={`Message #${channelName || 'general'}`}
+          placeholder={
+            queueStatus.isOnline
+              ? `Message #${channelName || 'general'}`
+              : `Offline — message will be queued`
+          }
           className="flex-1 bg-transparent text-foreground placeholder:text-slate-500 max-h-32 min-h-[40px] px-2 py-2 resize-none outline-none ring-0 focus:outline-none focus:ring-0 leading-relaxed font-sans w-full border-none shadow-none"
           rows={1}
           onKeyDown={handleKeyDown}
         />
         <div className="flex shrink-0 items-center px-1 pb-1 gap-1">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setShowEmoji(!showEmoji)}
             className={`text-slate-400 hover:text-primary transition-colors p-1 ${showEmoji ? 'text-primary' : ''}`}
           >
             <FiSmile className="w-5 h-5" />
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!text.trim() && !attachment}
             className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary hover:opacity-90 disabled:bg-white/5 disabled:text-slate-600 text-white transition-all shadow-md group relative overflow-hidden"
+            title={queueStatus.isOnline ? 'Send message' : 'Queue for offline delivery'}
           >
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <FiSend className="w-4 h-4 relative z-10 -ml-0.5 mt-0.5" />
           </button>
         </div>
       </form>
       <div className="px-4 py-2 hidden sm:flex justify-between">
-        <p className="text-[11px] text-slate-500 font-medium tracking-tight"><strong>Shift + Enter</strong> to add a new line</p>
+        <p className="text-[11px] text-slate-500 font-medium tracking-tight">
+          <strong>Shift + Enter</strong> to add a new line
+        </p>
+        {!queueStatus.isOnline && (
+          <p className="text-[11px] text-amber-400 font-medium tracking-tight flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            Offline mode — messages queued
+          </p>
+        )}
       </div>
     </div>
   );

@@ -3,6 +3,21 @@ const authService = require('../services/authService');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
+/**
+ * Strips sensitive server-only fields before sending user data to the client.
+ * Prevents leaking admin2faCode, OTP hashes, reset tokens, etc. (V5 fix)
+ */
+const scrubSensitiveFields = (userObj) => {
+  const safe = { ...userObj };
+  const SENSITIVE = [
+    'password', 'admin2faCode', 'admin2faExpire',
+    'phoneOtp', 'phoneOtpExpire',
+    'resetPasswordToken', 'resetPasswordExpire'
+  ];
+  SENSITIVE.forEach(field => delete safe[field]);
+  return safe;
+};
+
 const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.VERCEL;
 const cookieOptions = {
   secure: isProd ? true : false,
@@ -53,7 +68,7 @@ const registerUser = asyncHandler(async (req, res) => {
   try {
     const { user, tokens } = await authService.registerLocalService({ name, email, password, sessionId, ip, userAgent });
     setAuthCookies(res, tokens, sessionId);
-    res.status(201).json({ ...user.toObject(), tokens });
+    res.status(201).json({ ...scrubSensitiveFields(user.toObject()), tokens });
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -115,7 +130,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
     setAuthCookies(res, result.tokens, sessionId);
-    res.status(200).json({ ...result.user.toObject(), tokens: result.tokens });
+    res.status(200).json({ ...scrubSensitiveFields(result.user.toObject()), tokens: result.tokens });
   } catch (error) {
     console.error(`[Login Failure] RequestId: ${req.requestId} - Error: ${error.message}`);
     res.status(401);
@@ -188,7 +203,7 @@ const verifyAdmin2FA = asyncHandler(async (req, res) => {
   setAuthCookies(res, finalTokens, sessionId);
 
   res.status(200).json({ 
-    ...user.toObject(), 
+    ...scrubSensitiveFields(user.toObject()), 
     tokens: finalTokens,
     message: 'Admin features unlocked.'
   });
@@ -209,7 +224,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 
   const { user, tokens } = await authService.googleLoginService(credential, sessionId, ip, userAgent);
   setAuthCookies(res, tokens, sessionId);
-  res.status(200).json({ ...user.toObject(), tokens });
+  res.status(200).json({ ...scrubSensitiveFields(user.toObject()), tokens });
 });
 
 const refreshToken = asyncHandler(async (req, res) => {
@@ -226,7 +241,7 @@ const refreshToken = asyncHandler(async (req, res) => {
     // Service handles token rotation, reuse detection, grace windows, and session locking
     const { user, tokens, sessionId } = await authService.refreshTokenService(token, ip, userAgent);
     setAuthCookies(res, tokens, sessionId);
-    res.status(200).json({ ...user.toObject(), tokens });
+    res.status(200).json({ ...scrubSensitiveFields(user.toObject()), tokens });
   } catch (error) {
     res.status(401);
     throw new Error(error.message);

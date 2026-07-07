@@ -32,19 +32,14 @@ const api = axios.create({
   withCredentials: true, // Crucial for sending/receiving cookies
 });
 
-// Interceptor: Attach CSRF Token and Bearer Token
+// Interceptor: Attach CSRF Token only
+// NOTE: Access token is already sent automatically via httpOnly cookie (withCredentials: true).
+// We deliberately do NOT read from localStorage to avoid XSS exposure (V10 fix).
 api.interceptors.request.use(
   (config) => {
     const csrfToken = getCookie('csrf_token');
     if (csrfToken) {
       config.headers['X-CSRF-Token'] = csrfToken;
-    }
-
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("nexuspace_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
     }
     return config;
   },

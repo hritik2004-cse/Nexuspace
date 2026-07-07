@@ -1,95 +1,104 @@
 "use client";
 
-import { m, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, AnimatePresence, m } from "framer-motion";
 import { useRef, useState } from "react";
 import { MessageSquare, LayoutDashboard, Bell, Activity } from "lucide-react";
 import ChannelsPreview from "./ChannelsPreview";
 import WorkloadsPreview from "./WorkloadsPreview";
 import NotificationsPreview from "./NotificationsPreview";
 
-const content = [
-  {
-    title: "Instant Channels",
-    description: "Launch secure chat threads natively coupled with your codebase. No context switching. Complete encapsulation.",
-    icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-indigo-400" />,
-    preview: <ChannelsPreview />
-  },
-  {
-    title: "Intelligent Workloads",
-    description: "Tasks move dynamically at edge speed. Assign tickets without opening separate applications. Everything is in sync.",
-    icon: <LayoutDashboard className="w-5 h-5 md:w-6 md:h-6 text-fuchsia-400" />,
-    preview: <WorkloadsPreview />
-  },
-  {
-    title: "Unified Notification Mesh",
-    description: "Ping, mention, and alert teams globally. The WebSocket engine resolves your latency bottlenecks.",
-    icon: <Bell className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />,
-    preview: <NotificationsPreview />
-  }
-];
-
 export default function StickyScroll() {
   const targetRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start start", "end end"] });
-  const [activeCard, setActiveCard] = useState(0);
+  const { scrollYProgress } = useScroll({ 
+    target: targetRef, 
+    offset: ["start start", "end end"] 
+  });
 
+  const content = [
+    {
+      title: "Instant Channels",
+      description: "Launch secure chat threads natively coupled with your codebase. No context switching. Complete encapsulation.",
+      icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-indigo-400" />,
+      Preview: ChannelsPreview
+    },
+    {
+      title: "Intelligent Workloads",
+      description: "Tasks move dynamically at edge speed. Assign tickets without opening separate applications. Everything is in sync.",
+      icon: <LayoutDashboard className="w-5 h-5 md:w-6 md:h-6 text-fuchsia-400" />,
+      Preview: WorkloadsPreview
+    },
+    {
+      title: "Unified Notification Mesh",
+      description: "Ping, mention, and alert teams globally. The WebSocket engine resolves your latency bottlenecks.",
+      icon: <Bell className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />,
+      Preview: NotificationsPreview
+    }
+  ];
+
+  const [activeCard, setActiveCard] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const cards = content.length;
-    const breakPoint = 1 / cards;
-    let index = Math.floor(latest / breakPoint);
-    if (index >= cards) index = cards - 1;
-    if (index < 0) index = 0;
-    setActiveCard(index);
+    const index = Math.min(Math.floor(latest * 3), 2);
+    if (index !== activeCard) setActiveCard(index);
   });
 
   return (
-    <div ref={targetRef} className="relative z-10 w-full md:h-[300vh] bg-[#030014]">
+    <div ref={targetRef} className="relative w-full md:h-[400vh] bg-[#030014] z-10">
       {/* Desktop Sticky Version */}
       <div className="hidden md:flex sticky top-0 h-screen w-full items-center overflow-hidden z-20">
-        <div className="max-w-[1400px] mx-auto px-6 w-full flex flex-row gap-16 items-stretch">
-          <div className="w-[35%] flex flex-col justify-center">
-             <div className="flex items-center gap-2 mb-8">
+        <div className="max-w-[1400px] mx-auto px-6 w-full flex flex-row gap-16 items-stretch relative">
+          
+          {/* Left Column: Titles Stack */}
+          <div className="w-[40%] flex flex-col justify-center relative">
+             <div className="flex items-center gap-2 mb-12">
                <Activity className="text-indigo-500 w-5 h-5 animate-pulse" /> 
                <span className="text-sm font-bold uppercase tracking-widest text-slate-400">The Nexuspace Paradigm</span>
              </div>
              
-              <div className="relative min-h-[400px] w-full">
+              <div className="flex flex-col gap-12 relative">
                 {content.map((item, idx) => (
-                  <m.div 
+                  <motion.div 
                     key={idx}
                     initial={false}
                     animate={{ 
-                      opacity: activeCard === idx ? 1 : 0, 
-                      y: activeCard === idx ? 0 : 20,
-                      scale: activeCard === idx ? 1 : 0.95,
-                      filter: activeCard === idx ? "blur(0px)" : "blur(8px)"
+                      opacity: activeCard === idx ? 1 : 0.35,
+                      x: activeCard === idx ? 0 : -8,
+                      scale: activeCard === idx ? 1 : 0.98,
+                      filter: activeCard === idx ? "blur(0px)" : "blur(1px)"
                     }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    className={`absolute top-0 left-0 w-full flex flex-col items-start ${activeCard === idx ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="flex flex-col items-start relative"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 shadow-lg shadow-indigo-500/5">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-6 transition-all duration-500 ${activeCard === idx ? 'bg-indigo-500/20 border-indigo-500/40' : 'bg-white/5 border-white/5'} border`}>
                       {item.icon}
                     </div>
-                    <h2 className="text-5xl font-black text-white mb-6 leading-tight tracking-tighter">{item.title}</h2>
-                    <p className="text-xl text-slate-400 font-light leading-relaxed">{item.description}</p>
-                  </m.div>
+                    <h2 className={`text-4xl font-black mb-4 leading-tight tracking-tighter transition-colors duration-500 ${activeCard === idx ? 'text-white' : 'text-slate-500'}`}>
+                      {item.title}
+                    </h2>
+                    <p className={`text-base font-light leading-relaxed transition-colors duration-500 ${activeCard === idx ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {item.description}
+                    </p>
+                  </motion.div>
                 ))}
               </div>
           </div>
 
-          <div className="w-[65%] flex items-center justify-center relative">
-             <div className="w-full h-[68vh] rounded-4xl overflow-hidden relative group border border-white/10 shadow-2xl shadow-indigo-500/10 transition-all duration-500">
+          {/* Right Column: Sticky Preview */}
+          <div className="w-[60%] flex items-center justify-center relative">
+             <div className="w-full h-[65vh] rounded-3xl overflow-hidden relative border border-white/10 shadow-2xl shadow-indigo-500/10 bg-slate-950/20">
                 <AnimatePresence mode="wait">
-                  <m.div
+                  <motion.div
                     key={activeCard}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full h-full"
+                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 1.02, y: -10 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full h-full relative"
                   >
-                    {content[activeCard].preview}
-                  </m.div>
+                    {(() => {
+                      const ActivePreview = content[activeCard].Preview;
+                      return <ActivePreview key={`preview-${activeCard}`} />;
+                    })()}
+                  </motion.div>
                 </AnimatePresence>
              </div>
           </div>
@@ -97,6 +106,7 @@ export default function StickyScroll() {
       </div>
 
       {/* Mobile Vertical Flow Version */}
+
       <div className="md:hidden w-full px-6 py-10 space-y-16">
         {content.map((item, idx) => (
           <div key={idx} className="space-y-8">

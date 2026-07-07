@@ -18,7 +18,8 @@ const csrfProtection = (req, res, next) => {
     '/api/newsletter/subscribe',  // Public endpoint — no session cookie available
   ];
 
-  if (exemptRoutes.includes(req.originalUrl)) {
+  // Use req.path (strips query strings) to prevent bypass via ?param=... suffixes
+  if (exemptRoutes.includes(req.path)) {
     return next();
   }
 

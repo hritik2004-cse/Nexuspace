@@ -164,7 +164,9 @@ export default function Home() {
 
           <TrustMetrics />
           
-          <StickyScroll />
+          <div className="relative z-10">
+            <StickyScroll />
+          </div>
 
           {/* Featured Dashboard Preview */}
           <Section padding="py-8 md:py-16 overflow-visible">

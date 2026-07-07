@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiEdit2, FiTrash2, FiSmile, FiX, FiCheck, FiBookmark, FiCornerUpLeft, FiShield, FiAlertTriangle } from 'react-icons/fi';
 import { useTheme } from '@/context/ThemeContext';
 import ProfileModal from './ProfileModal';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 
 export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit, onReact, onPin, onReply, currentUser }) {
   const { currentTheme } = useTheme();
@@ -125,9 +128,12 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
               {(isOwnMessage ? (user?.role === 'Admin' || user?.role === 'Owner') : (message.senderDetails?.role === 'Admin' || message.senderDetails?.role === 'Owner')) && (
                 <FiShield className="w-3 h-3 text-primary shrink-0" title="Admin" />
               )}
-              <span className="bg-primary/20 text-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase border border-primary/30 shrink-0">
+              <Badge
+                variant="outline"
+                className="text-[9px] font-black px-1.5 py-0 h-4 border-primary/30 text-primary bg-primary/10 tracking-wider uppercase shrink-0"
+              >
                 {isOwnMessage ? (user?.customTitle || 'Member') : (message.senderDetails?.customTitle || 'Member')}
-              </span>
+              </Badge>
             </span>
             {timeString && (
                 <span className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-slate-500'} font-medium opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 shrink-0`}>
@@ -268,12 +274,24 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
 
           {/* Reactions Display */}
           {message.reactions && Object.keys(message.reactions).length > 0 && (
-            <div className={`flex gap-1 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex flex-wrap gap-1 mt-2 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
               {Object.entries(message.reactions).map(([reaction, users]) => (
-                <div key={reaction} className="bg-surface-hover border border-white/5 rounded-full px-2 py-0.5 text-[11px] flex items-center gap-1 cursor-pointer lg:hover:bg-white/10 transition-colors" onClick={() => onReact(reaction)}>
-                  <span>{reaction}</span>
-                  <span className="text-slate-400 font-medium">{users.length}</span>
-                </div>
+                <Tooltip key={reaction}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => onReact(reaction)}
+                      className="flex items-center gap-1 bg-surface-hover hover:bg-white/10 border border-white/10 rounded-full px-2 py-0.5 text-[12px] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                    >
+                      <span>{reaction}</span>
+                      <Badge variant="secondary" className="text-[10px] font-black px-1 h-4 bg-transparent text-slate-400 border-0 shadow-none">
+                        {users.length}
+                      </Badge>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {users.length === 1 ? '1 reaction' : `${users.length} reactions`}
+                  </TooltipContent>
+                </Tooltip>
               ))}
             </div>
           )}
@@ -296,19 +314,20 @@ export default function MessageBubble({ message, isOwnMessage, onDelete, onEdit,
             <DialogTitle className="text-xl font-black text-white flex items-center gap-2">
               <FiAlertTriangle className="text-red-500" /> Confirm Deletion
             </DialogTitle>
-            <DialogDescription className="text-slate-400 pt-2">
+            <Separator className="my-3 opacity-20" />
+            <DialogDescription className="text-slate-400">
               Are you sure you want to delete this message? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex gap-3 mt-6">
-            <Button 
-              variant="ghost" 
+          <DialogFooter className="flex gap-3 mt-4">
+            <Button
+              variant="ghost"
               onClick={() => setIsDeleteDialogOpen(false)}
               className="flex-1 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => { onDelete(); setIsDeleteDialogOpen(false); }}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl"
             >

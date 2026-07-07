@@ -9,6 +9,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import PinModal from '@/components/PinModal';
 import { toast } from 'react-toastify';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 export default function WorkspacePage() {
   const { socket, isConnected } = useSocket();
@@ -22,6 +25,8 @@ export default function WorkspacePage() {
   
   const [messages, setMessages] = useState([]);
   const [channelId, setChannelId] = useState(null);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+
   
   // Real-time auxiliary states
   const [typingUsers, setTypingUsers] = useState(new Set());
@@ -40,18 +45,16 @@ export default function WorkspacePage() {
   useEffect(() => {
     const fetchChannelData = async () => {
       if (!activeWorkspace) return;
+      setIsLoadingMessages(true);
 
       try {
-        // 1. Get or Create Channel by Name bounded to Active Workspace
         const channelRes = await api.post('/channels/findOrCreate', { 
           name: currentChannel,
           workspaceId: activeWorkspace._id
         });
         setChannelId(channelRes.data._id);
 
-        // 2. Fetch Messages for this Channel
         const msgRes = await api.get(`/messages/${channelRes.data._id}`);
-        // Map backend sender object to string format matching the frontend for now
         const parsedMessages = msgRes.data.map(m => ({
           ...m,
           id: m._id,
@@ -61,18 +64,15 @@ export default function WorkspacePage() {
         }));
         
         setMessages(parsedMessages);
-        if (parsedMessages.length > 0) {
-          toast.success("All caught up! Messages loaded.", { toastId: 'load-success' });
-        }
       } catch (error) {
         if (error.response?.status === 403) {
-          // Channel is private and no active session
           const returnedChannelId = error.response.data.channelId;
           setMessages([]);
           setLockedChannel({ id: returnedChannelId, name: currentChannel }); 
           setIsPinModalOpen(true);
-        } else {
         }
+      } finally {
+        setIsLoadingMessages(false);
       }
     };
 
@@ -181,8 +181,35 @@ export default function WorkspacePage() {
     };
   }, [socket, channelId, isConnected]);
 
-  const handleSendMessage = async (content, attachment = null, replyToId = null) => {
+  /**
+   * handleSendMessage
+   * Called by ChatWindow > MessageInput.
+   * When called from the offline queue drain, `preBuiltPayload` (4th arg)
+   * is already the server response — we just inject it into local state.
+   */
+  const handleSendMessage = async (content, attachment = null, replyToId = null, preBuiltPayload = null) => {
     if (!channelId) return;
+
+    // Offline queue delivers a pre-built server message — inject directly
+    if (preBuiltPayload) {
+      const formatted = {
+        ...preBuiltPayload,
+        id: preBuiltPayload._id,
+        sender: preBuiltPayload.sender?.name || preBuiltPayload.sender?.username || 'Unknown',
+        senderDetails: preBuiltPayload.sender,
+        replyTo: preBuiltPayload.replyTo
+      };
+      setMessages(prev => {
+        if (prev.some(m => m.id === formatted.id || m._id === formatted.id)) return prev;
+        return [...prev, formatted];
+      });
+      return;
+    }
+
+    // Normal online send is now handled inside MessageInput via queueMessage().
+    // This handler is kept for backward-compat but queueMessage already posts.
+    // If content is null (queue drain path), skip.
+    if (!content) return;
 
     try {
       const payload = {
@@ -192,7 +219,6 @@ export default function WorkspacePage() {
         replyTo: replyToId
       };
 
-      // The backend posts it to DB, then socket broadcasts it to others
       const res = await api.post('/messages', payload);
       
       const formatted = {
@@ -203,15 +229,12 @@ export default function WorkspacePage() {
         replyTo: res.data.replyTo
       };
 
-      // Add locally for the sender if the socket hasn't already added it
-      setMessages((prev) => {
-        if (prev.some(m => m.id === formatted.id || m._id === formatted.id)) {
-          return prev;
-        }
+      setMessages(prev => {
+        if (prev.some(m => m.id === formatted.id || m._id === formatted.id)) return prev;
         return [...prev, formatted];
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || "We couldn't send your message. Please try again in a moment.");
+      toast.error(error.response?.data?.message || "We couldn't send your message. Please try again.");
     }
   };
 
@@ -300,25 +323,66 @@ export default function WorkspacePage() {
         </div>
       )}
       
-      {/* Typing Indicator Top Banner */}
+      {/* Typing Indicator */}
       {typingUsers.size > 0 && (
-         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-slate-800/80 backdrop-blur-md text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg animate-pulse">
-           {Array.from(typingUsers)[0]} is typing...
-         </div>
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-slate-800/80 backdrop-blur-md text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg animate-pulse">
+          {Array.from(typingUsers)[0]} is typing...
+        </div>
       )}
 
-      <ChatWindow 
-        messages={channelMessages} 
-        onSendMessage={handleSendMessage} 
-        onDeleteMessage={handleDeleteMessage}
-        onEditMessage={handleEditMessage}
-        onReactToMessage={handleReactToMessage}
-        onPinMessage={handlePinMessage}
-        currentUser={user} 
-        channelId={channelId}
-        channelName={currentChannel}
-        socket={socket}
-      />
+      {/* Full-screen loading skeleton while channel data loads */}
+      {isLoadingMessages ? (
+        <div className="flex flex-col h-full">
+          {/* Header skeleton */}
+          <div className="h-14 border-b border-border px-6 flex items-center gap-3 shrink-0">
+            <Skeleton className="w-4 h-4 rounded bg-white/8" />
+            <Skeleton className="h-4 w-32 rounded-full bg-white/8" />
+            <Separator orientation="vertical" className="h-5 mx-2 opacity-20" />
+            <Skeleton className="h-3 w-20 rounded-full bg-white/8" />
+          </div>
+          {/* Message skeletons */}
+          <div className="flex-1 px-6 py-6 space-y-6 overflow-hidden">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className={`flex gap-3 ${i % 3 === 2 ? 'flex-row-reverse' : 'flex-row'}`}
+              >
+                <Skeleton className="w-9 h-9 rounded-full bg-white/8 shrink-0 mt-1" />
+                <div className={`space-y-2 ${i % 3 === 2 ? 'items-end' : 'items-start'} flex flex-col`}>
+                  <Skeleton className="h-3 w-20 rounded-full bg-white/8" />
+                  <Skeleton
+                    className="h-10 rounded-2xl bg-white/8"
+                    style={{ width: `${120 + (i * 47) % 180}px` }}
+                  />
+                  {i % 2 === 0 && (
+                    <Skeleton
+                      className="h-8 rounded-2xl bg-white/8"
+                      style={{ width: `${80 + (i * 31) % 120}px` }}
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Input skeleton */}
+          <div className="p-4 border-t border-border shrink-0">
+            <Skeleton className="h-12 w-full rounded-xl bg-white/8" />
+          </div>
+        </div>
+      ) : (
+        <ChatWindow 
+          messages={channelMessages} 
+          onSendMessage={handleSendMessage} 
+          onDeleteMessage={handleDeleteMessage}
+          onEditMessage={handleEditMessage}
+          onReactToMessage={handleReactToMessage}
+          onPinMessage={handlePinMessage}
+          currentUser={user} 
+          channelId={channelId}
+          channelName={currentChannel}
+          socket={socket}
+        />
+      )}
       
       <PinModal 
         isOpen={isPinModalOpen} 
@@ -326,13 +390,10 @@ export default function WorkspacePage() {
         channelName={lockedChannel?.name || currentChannel} 
         onSuccess={() => {
           setIsPinModalOpen(false);
-          // Refetch messages to load the channel
-          const event = new Event('submit'); // Dummy event just to trigger effect if we wanted to, but we can just call fetchChannelData logic
-          window.location.reload(); // Simple approach to re-mount and re-fetch properly
+          window.location.reload();
         }} 
         onCancel={() => {
           setIsPinModalOpen(false);
-          // Optionally redirect back to general channel
           window.location.href = `/workspace?workspace=${activeWorkspace._id}&channel=general`;
         }}
       />
