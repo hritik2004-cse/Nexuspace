@@ -42,6 +42,25 @@ const nextConfig = {
       }
     ],
   },
+  async headers() {
+    return [
+      {
+        // Apply to all routes
+        source: '/(.*)',
+        headers: [
+          {
+            // 'same-origin-allow-popups' lets Google OAuth popups (opened by YOUR page)
+            // communicate back via window.closed / postMessage, while still isolating
+            // your page from unrelated cross-origin openers.
+            // 'same-origin' (the Vercel default) breaks this entirely.
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

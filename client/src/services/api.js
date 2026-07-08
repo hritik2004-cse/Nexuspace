@@ -72,7 +72,10 @@ api.interceptors.response.use(
     }
 
     const { status } = error.response;
-    const isAuthRoute = originalRequest.url?.includes("/auth");
+    // Only skip the refresh interceptor for endpoints that CREATE or DESTROY a session.
+    // Do NOT skip /auth/me — a 401 there should trigger a silent token refresh.
+    const AUTH_SKIP_URLS = ['/auth/login', '/auth/register', '/auth/google', '/auth/refresh', '/auth/logout'];
+    const isAuthRoute = AUTH_SKIP_URLS.some(path => originalRequest.url?.includes(path));
 
     // 403 Permission Errors
     if (status === 403) {
